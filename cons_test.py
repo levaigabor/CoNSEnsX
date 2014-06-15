@@ -3,9 +3,9 @@
 import argparse
 
 ###############################################################################
-# usage: cons_test.py [-h] [-l LC_MODEL] [-R] [-O OUTPUT_FORMAT]
-#                   [-o OUTPUT_FILE_NAME] [-T LINE_THICKNESS]
-#                   STR_file PDB_file
+# usage: cons_test.py [-h] STR_file PDB_file
+#        [-l {bic,pf1}] [-R] [-O {txt,html}]
+#        [-o OUTPUT_FILE_NAME] [-T LINE_THICKNESS]
 #
 # CoNSEnsX: assessing the compliance of varios NMR data with a protein
 #           structural ensemble
@@ -14,7 +14,25 @@ import argparse
 ###############################################################################
 
 
-parser = argparse.ArgumentParser()
+class RawUsageHelpFormatter(argparse.HelpFormatter):
+    def _format_usage(self, usage, actions, groups, prefix):
+        # use actions in the order that they are define
+        # no line wrapping
+        if prefix is None:
+            prefix = 'usage: '
+        if usage is not None:
+            usage = usage % dict(prog=self._prog)
+        elif usage is None and not actions:
+            usage = '%(prog)s' % dict(prog=self._prog)
+        elif usage is None:
+            prog = '%(prog)s' % dict(prog=self._prog)
+            format = self._format_actions_usage
+            action_usage = format(actions, groups)
+            usage = ' '.join([s for s in [prog, action_usage] if s])
+        return '%s%s\n\n' % (prefix, usage)
+
+
+parser = argparse.ArgumentParser(formatter_class=RawUsageHelpFormatter)
 parser.add_argument("STR_file", help="restraints file")
 parser.add_argument("PDB_file", help="PDB file (fitted)")
 
