@@ -13,7 +13,7 @@ select RDC sets from topology file into seperate SRTs
 
 #### process2csvs.py
 back calculation of all ensembles with all RDC sets via CoNSEnsX
-(http://himalia.chem.elte.hu/cgi-bin/consensx.cgi)
+     (http://himalia.chem.elte.hu/cgi-bin/consensx.cgi)
 
 ## misc:
 
