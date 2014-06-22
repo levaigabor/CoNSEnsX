@@ -1,14 +1,20 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import argparse
 import time
+import os
+
+import nmrpystar
 
 version = "1.0"
 
 #--------------------  Setting up and parsing arguments   --------------------#
 
+consensx_usage = '%(prog)s -b STR_file -f PDB_file [options]'
+
 parser = argparse.ArgumentParser(add_help = False,
-                                 usage    = '%(prog)s [options]')
+                                 usage    = consensx_usage)
 
 parser.add_argument("-b", "--STR_file", help = "restraints file")
 parser.add_argument("-f", "--PDB_file", help = "PDB file (fitted)")
@@ -84,6 +90,11 @@ if args.help:
     print(help_text)
     raise SystemExit
 
+if not args.STR_file or not args.PDB_file:
+    print("missing file")
+    parser.print_usage()
+    raise SystemExit
+
 
 #-------------------------  Setting up output files   ------------------------#
 date = time.strftime("%a %d. %b %X %Z %Y")
@@ -114,3 +125,130 @@ if "html" in args.output_format:
 
 
 #-------------------------  Making temporary folder   ------------------------#
+if not os.path.exists("temp"):
+    os.makedirs("temp")
+
+#--------------------------  Splitting of PDB file   -------------------------#
+
+def pdb_splitter(PDB_file):
+    try:
+        my_pdb = open(PDB_file)
+    except FileNotFoundError:
+        print(PDB_file + " was not found")
+        raise SystemExit
+
+    model_names = []
+    model_data  = []
+
+    my_name = ""
+    my_data = []
+
+    for line in my_pdb:
+        if line.startswith("MODEL"):
+            my_name = line.strip().split()[1]
+        elif line.startswith("ATOM") or line.startswith("TER"):
+            my_data.append(line.strip())
+        elif line.startswith("ENDMDL"):
+            model_names.append(my_name)
+            model_data.append(my_data)
+            my_name = ""
+            my_data = []
+        else:
+            continue
+
+# if ($_ =~ /^ATOM/){
+#       $resnum = substr($_,22,5); $resnum =~ s/ //g;
+#       $name = substr($_,12,4); $name =~ s/ //g;
+
+#       #if ($name eq "H"){$name="HN"}
+#       $name = 'H' if ( $name eq 'HN' );
+#       # 1HG -> HG1
+#       $name =~ s/([0-9])H([A-Z0-9]+)/H$2$1/;
+#       $name =~ s/([0-9])H/H$1/;
+
+#       $spaces = 3 - length($name);
+#       $name .= " "x$spaces;
+#       $name = " ".$name if ( length($name) == 3 );
+#       substr($_,12,4) = $name;
+#       # lancazonnosíto
+#       substr($_,21,1) = "A";
+#       # pseudo atomok kiszedese
+#       $write = 0 if ($name =~ /Q/);
+#       }
+#     $output .= "$_\n" if $write;
+#     }
+
+
+    for i in range(len(model_names)):
+        file_name = "temp/model_" + model_names[i] + ".pdb"
+        temp_pdb  = open(file_name, 'w')
+        temp_pdb.write("HEADER    MODEL " + model_names[i] + "\n")
+
+        for _ in model_data[i]:
+            temp_pdb.write(_ + "\n")
+
+        temp_pdb.write("END")
+        temp_pdb.close()
+
+pdb_splitter(args.PDB_file)
+
+
+
+
+
+star_file = open("test.str")
+myString = ""
+for line in star_file:
+    myString += line
+
+
+
+parsed = nmrpystar.parse(myString)
+if parsed.status == 'success':
+    print 'it worked!!  ', parsed.value
+else:
+    print 'uh-oh, there was a problem with the string I gave it ... ', parsed
+
+# HAN  72 ARG HA    72 ARG  N   1.710   ? ? . . 0.000
+
+# 'Atom_one_residue_label': 'ARG', 'Atom_one_atom_name': 'HA',
+# 'Atom_one_mol_system_component_name': '?',
+# 'Residual_dipolar_coupling_max_value': '.',
+# 'Residual_dipolar_coupling_value_error': '0.000',
+# 'Atom_two_mol_system_component_name': '?', 'Atom_one_residue_seq_code': '72',
+# 'Atom_two_residue_label': 'ARG', 'Atom_two_residue_seq_code': '72',
+# 'Atom_two_atom_name': 'N', 'Residual_dipolar_coupling_value': '1.710',
+# 'Residual_dipolar_coupling_min_value': '.',
+# 'Residual_dipolar_coupling_ID': 'HAN'}
+
+
+def getChemicalShifts(dataBlock, saveShiftName='RDC_list_1'):
+    saveShifts = dataBlock.saves[saveShiftName]
+    loopShifts = saveShifts.loops[1]
+
+    for ix in range(len(loopShifts.rows)):
+        row = loopShifts.getRowAsDict(ix)
+        print row
+        # print 'chemical shift: ', \
+        #       row['Atom_chem_shift.Seq_ID'], \
+        #       row['Atom_chem_shift.Comp_ID'], \
+        #       row['Atom_chem_shift.Atom_ID'], \
+        #       row['Atom_chem_shift.Val']
+
+
+
+# starting save frame:  RDC_list_1
+#  key: Saveframe_category  value: residual_dipolar_couplings
+
+
+
+def getKeyValuePairs(dataBlock):
+    for (name, save) in dataBlock.saves.items():
+        print 'starting save frame: ', name
+        for (key, val) in save.datums.items():
+            print ' key:', key, ' value:', val
+        print '\n'
+
+
+
+getChemicalShifts(parsed.value)
