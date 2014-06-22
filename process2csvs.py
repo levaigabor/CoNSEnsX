@@ -77,7 +77,7 @@ class Csv_line:
     def __init__(self, pop, exp):
         self.pop  = pop
         self.exp  = exp
-        self.s2  i = {}
+        self.s2   = {}
         self.rdcs = []
 
     def write_line(self):
