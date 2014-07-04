@@ -8,6 +8,7 @@ import os
 import nmrpystar
 
 version = "1.0"
+pales   = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
 
 #--------------------  Setting up and parsing arguments   --------------------#
 
