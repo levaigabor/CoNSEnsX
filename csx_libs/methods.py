@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
 import subprocess
 import os
+import re
 
 
 pales   = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
@@ -110,7 +110,7 @@ def callPalesOn(pdb_files):
         outfile = open("pales.out", 'a')    # open output file with append mode
         DEVNULL = open(os.devnull, 'w')     # open systems /dev/null
 
-        # print("calculating: " + pdb_file)
+        print("calculating: " + pdb_file)
 
         subprocess.call([pales,
                         "-inD", "pales_dummy.txt",  # pales dummy file
@@ -119,4 +119,42 @@ def callPalesOn(pdb_files):
                         "-bestFit"],
                         stdout = outfile,
                         stderr = DEVNULL)
+
+
+def avgPalesRDCs(pales_out):
+    pales_out       = open(pales_out)
+    n_of_structures = 0
+    averageRDC      = {}
+    npair           = 0
+
+
+    for line in pales_out:
+        if re.match("REMARK \d+ couplings", line):
+            n_of_structures += 1 # n_of_structures to divide by
+
+        elif re.match("\s+ \d+", line):
+            resnum1 = int(line.split()[0])
+            resnum2 = int(line.split()[3])
+            atom1   = line.split()[2]
+            atom2   = line.split()[5]
+            D       = float(line.split()[6])
+            RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
+
+            if RDCtype in averageRDC.keys():
+                if resnum1 in averageRDC[RDCtype].keys():
+                    averageRDC[RDCtype][resnum1] += D
+                else:
+                    averageRDC[RDCtype][resnum1] = D
+            else:
+                averageRDC[RDCtype] = {}
+                averageRDC[RDCtype][resnum1] = D
+
+
+
+    for RDCtype in averageRDC.keys():
+        for resnum in averageRDC[RDCtype].keys():
+            averageRDC[RDCtype][resnum] /= n_of_structures
+
+
+    print averageRDC
 

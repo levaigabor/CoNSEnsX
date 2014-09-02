@@ -157,29 +157,6 @@ def pdb_splitter(PDB_file):
         else:
             continue
 
-# if ($_ =~ /^ATOM/){
-#       $resnum = substr($_,22,5); $resnum =~ s/ //g;
-#       $name = substr($_,12,4); $name =~ s/ //g;
-
-#       #if ($name eq "H"){$name="HN"}
-#       $name = 'H' if ( $name eq 'HN' );
-#       # 1HG -> HG1
-#       $name =~ s/([0-9])H([A-Z0-9]+)/H$2$1/;
-#       $name =~ s/([0-9])H/H$1/;
-
-#       $spaces = 3 - length($name);
-#       $name .= " "x$spaces;
-#       $name = " ".$name if ( length($name) == 3 );
-#       substr($_,12,4) = $name;
-#       # lancazonnosíto
-#       substr($_,21,1) = "A";
-#       # pseudo atomok kiszedese
-#       $write = 0 if ($name =~ /Q/);
-#       }
-#     $output .= "$_\n" if $write;
-#     }
-
-
     for i in range(len(model_names)):
         file_name = "temp/model_" + model_names[i] + ".pdb"
         temp_pdb  = open(file_name, 'w')
@@ -194,62 +171,33 @@ def pdb_splitter(PDB_file):
 pdb_splitter(args.PDB_file)
 
 
+#------------------------------  Read STR file   -----------------------------#
 
-
-
-star_file = open("test.str")
+star_file = open(args.STR_file)
 myString = ""
 for line in star_file:
     myString += line
 
+#----------------------  Parse STR file with nmrpystar  ----------------------#
 
-
+print "parsing " + args.STR_file + "..."
 parsed = nmrpystar.parse(myString)
 if parsed.status == 'success':
-    print 'it worked!!  ', parsed.value
+    print 'it worked!!  ' #, parsed.value
 else:
     print 'uh-oh, there was a problem with the string I gave it ... ', parsed
 
-# HAN  72 ARG HA    72 ARG  N   1.710   ? ? . . 0.000
 
-# 'Atom_one_residue_label': 'ARG', 'Atom_one_atom_name': 'HA',
-# 'Atom_one_mol_system_component_name': '?',
-# 'Residual_dipolar_coupling_max_value': '.',
-# 'Residual_dipolar_coupling_value_error': '0.000',
-# 'Atom_two_mol_system_component_name': '?', 'Atom_one_residue_seq_code': '72',
-# 'Atom_two_residue_label': 'ARG', 'Atom_two_residue_seq_code': '72',
-# 'Atom_two_atom_name': 'N', 'Residual_dipolar_coupling_value': '1.710',
-# 'Residual_dipolar_coupling_min_value': '.',
-# 'Residual_dipolar_coupling_ID': 'HAN'}
-
-
-def getChemicalShifts(dataBlock, saveShiftName='RDC_list_1'):
+def get_RDC_list(dataBlock, saveShiftName='RDC_list_1'):
     saveShifts = dataBlock.saves[saveShiftName]
-    loopShifts = saveShifts.loops[1]
-
+    loopShifts = saveShifts.loops[-1]
     for ix in range(len(loopShifts.rows)):
         row = loopShifts.getRowAsDict(ix)
-        print row
-        # print 'chemical shift: ', \
-        #       row['Atom_chem_shift.Seq_ID'], \
-        #       row['Atom_chem_shift.Comp_ID'], \
-        #       row['Atom_chem_shift.Atom_ID'], \
-        #       row['Atom_chem_shift.Val']
+        # print row.keys()
+        # print row.values(), "\n"
 
+get_RDC_list(parsed.value)
 
-
-# starting save frame:  RDC_list_1
-#  key: Saveframe_category  value: residual_dipolar_couplings
-
-
-
-def getKeyValuePairs(dataBlock):
-    for (name, save) in dataBlock.saves.items():
-        print 'starting save frame: ', name
-        for (key, val) in save.datums.items():
-            print ' key:', key, ' value:', val
-        print '\n'
-
-
-
-getChemicalShifts(parsed.value)
+for key in parsed.value.__dict__['saves'].keys():
+    if key.startswith("RDC_list_"):
+        print(key)
