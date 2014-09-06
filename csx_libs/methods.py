@@ -18,13 +18,6 @@ shortcodes = {
 }
 
 
-class AA(object):
-        """Class for storing amino acid data"""
-        def __init__(self, resname, resnum):
-            self.resname = resname
-            self.resnum  = resnum
-
-
 def callPalesOn(pdb_files):
     try:
         os.remove("pales.out")                  # remove output file if present
@@ -44,15 +37,14 @@ def callPalesOn(pdb_files):
         for line in input_pdb:
             if line.startswith("ATOM") and line.split()[2] == "CA":
                 resname = line.split()[3]       # get residue name
-                resnum  = line.split()[5]       # get residue number
-                seg.append(AA(resname, resnum)) # append new objecjt to list
+                seg.append(resname)             # append new segname to list
 
 
         #-----------------------  Write sequence data  -----------------------#
         short_seg = ""
 
-        for aa in seg:
-            short_seg += shortcodes[aa.resname]
+        for i in range(len(seg)):
+            short_seg += shortcodes[seg[i]]
 
         my_line      = "DATA SEQUENCE "
         char_counter = 0
@@ -84,25 +76,25 @@ def callPalesOn(pdb_files):
         "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
         )
 
-        for i, aa in enumerate(seg):
-            if aa.resname == "PRO":         # skip PRO named aa-s
+        for i in range(len(seg)):
+            if seg[i] == "PRO":         # skip PRO named aa-s
                 continue
 
             # print aligned dummy dipole output
             pales_dummy.write(
                 "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', aa.resname, 'H',
-                str(i+1)+'A', aa.resname, 'N',
+                str(i+1)+'A', seg[i], 'H',
+                str(i+1)+'A', seg[i], 'N',
                 0.000, 1.000,  1.00))
             pales_dummy.write(
                 "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', aa.resname, 'N',
-                str(i+1)+'A', aa.resname, 'C',
+                str(i+1)+'A', seg[i], 'N',
+                str(i+1)+'A', seg[i], 'C',
                 0.000, 1.000,  1.00))
             pales_dummy.write(
                 "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', aa.resname, 'C',
-                str(i+1)+'A', aa.resname, 'CA',
+                str(i+1)+'A', seg[i], 'C',
+                str(i+1)+'A', seg[i], 'CA',
                 0.000, 1.000,  1.00))
 
         pales_dummy.close()
@@ -112,11 +104,13 @@ def callPalesOn(pdb_files):
 
         print("calculating: " + pdb_file)
 
+
+        # IF SVD
         subprocess.call([pales,
                         "-inD", "pales_dummy.txt",  # pales dummy file
                         "-pdb", pdb_file,           # pdb file
-                        '-' + rdc_lc_model,         # rdc lc model
-                        "-bestFit"],
+                        '-' + rdc_lc_model],        # rdc lc model
+                        #"-bestFit"],               # SVD
                         stdout = outfile,
                         stderr = DEVNULL)
 
@@ -126,6 +120,7 @@ def avgPalesRDCs(pales_out):
     n_of_structures = 0
     averageRDC      = {}
     npair           = 0
+    #resnum, exp, calc = [] # MIK EZEK??
 
 
     for line in pales_out:
@@ -137,7 +132,7 @@ def avgPalesRDCs(pales_out):
             resnum2 = int(line.split()[3])
             atom1   = line.split()[2]
             atom2   = line.split()[5]
-            D       = float(line.split()[6])
+            D       = float(line.split()[8])  # D coloumn of pales output
             RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
 
             if RDCtype in averageRDC.keys():
@@ -152,8 +147,8 @@ def avgPalesRDCs(pales_out):
 
 
     for RDCtype in averageRDC.keys():
-        for resnum in averageRDC[RDCtype].keys():
-            averageRDC[RDCtype][resnum] /= n_of_structures
+        for res_num in averageRDC[RDCtype].keys():
+            averageRDC[RDCtype][res_num] /= n_of_structures
 
 
     print averageRDC
