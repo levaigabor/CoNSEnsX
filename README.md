@@ -1,4 +1,4 @@
-enswat
-======
+CoNSEnsX
+========
 
 CoNSEnsX Python rewrite
