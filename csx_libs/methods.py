@@ -1,155 +1,154 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-
-import subprocess
 import os
 import re
 
+from .objects import *
 
-pales   = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
-rdc_lc_model = "bic"
-
-shortcodes = {
-    'ALA':'A',  'ASP':'D',  'ASN':'N',  'ARG':'R',  'CYS':'C',  'GLY':'G',
-    'GLU':'E',  'GLN':'Q',  'HIS':'H',  'ILE':'I',  'LEU':'L',  'LYS':'K',
-    'MET':'M',  'PHE':'F',  'PRO':'P',  'SER':'S',  'THR':'T',  'TRP':'W',
-    'TYR':'Y',  'VAL':'V'
-}
-
-
-def callPalesOn(pdb_files):
+#--------------------------  Bringing PDB to format  -------------------------#
+def pdb_cleaner(PDB_file):
     try:
-        os.remove("pales.out")                  # remove output file if present
-    except OSError:
-        pass
+        input_pdb = open(PDB_file)
+    except FileNotFoundError:
+        print(PDB_file + " was not found")
+        raise SystemExit
 
-    for pdb_file in pdb_files:
-        #-------------------  Open file and read PDB data  -------------------#
+    my_pdb = open("my_pdb.pdb", 'w')
+
+    for line in input_pdb:
+        line = line.strip()
+        line = re.sub('[+-]', ' ', line)
+
+        if line.startswith("ATOM"):
+
+            name = line.split()[2].strip()
+
+            if name is "Q": continue
+            if name is "H": name = "NH"
+
+            chars, numbers = [], []
+            for i in name:
+                try:
+                    numbers.append(int(i))
+                except ValueError:
+                    chars.append(i)
+
+            name = (''.join(str(i) for i in chars) +    # characters
+                    ''.join(str(i) for i in numbers))   # numbers
+
+            if   len(name) == 1: name = " " + name + "  "
+            elif len(name) == 2: name = " " + name + " "
+            elif len(name) == 3: name = " " + name
+
+            my_pdb.write(line[:11] + " %4s" % name + line[16:21] +
+                         'A' + line[22:] + "\n")
+            continue
+
+        my_pdb.write(line + "\n")
+
+    input_pdb.close()
+    my_pdb.close()
+
+    os.remove(PDB_file)
+    os.rename("my_pdb.pdb", PDB_file)
+
+
+#--------------------------  Splitting of PDB file   -------------------------#
+def pdb_splitter(PDB_file):
+    try:
+        my_pdb = open(PDB_file)
+    except FileNotFoundError:
+        print(PDB_file + " was not found")
+        raise SystemExit
+
+    model_names = []
+    model_data  = []
+
+    my_name = ""
+    my_data = []
+
+    for line in my_pdb:
+        if line.startswith("MODEL"):
+            my_name = line.strip().split()[1]
+        elif line.startswith("ATOM") or line.startswith("TER"):
+            my_data.append(line.strip())
+        elif line.startswith("ENDMDL"):
+            model_names.append(my_name)
+            model_data.append(my_data)
+            my_name = ""
+            my_data = []
+        else:
+            continue
+
+    for i in range(len(model_names)):
+        file_name = "temp/model_" + model_names[i] + ".pdb"
+        temp_pdb  = open(file_name, 'w')
+        temp_pdb.write("HEADER    MODEL " + model_names[i] + "\n")
+
+        for _ in model_data[i]:
+            temp_pdb.write(_ + "\n")
+
+        temp_pdb.write("END")
+        temp_pdb.close()
+
+
+def get_RDC_lists(dataBlock):
+    """Returns RDC lists as lists containing RDC_Record objects"""
+
+    list_number = 1
+    RDC_lists   = []
+
+    while True:
+        saveShiftName = 'RDC_list_' + str(list_number)
         try:
-            input_pdb = open(pdb_file)          # open input PDB file
-        except IOError:
-            print("Input file " + pdb_file + " was not found")
-            raise SystemExit                    # exit if input file not found
+            saveShifts    = dataBlock.saves[saveShiftName]
+        except KeyError:
+            break
+        loopShifts     = saveShifts.loops[-1]
+        RDC_records    = []
 
-        seg = []                                # list storing sequence data
+        # STR key values recognised by this program
+        rdc_types_keys = ["RDC.RDC_code", "Residual_dipolar_coupling_ID"]
+        rdc_res1_keys  = ["RDC.Seq_ID_1", "Atom_one_residue_seq_code"]
+        rdc_atom1_keys = ["RDC.Atom_type_1", "Atom_one_atom_name"]
+        rdc_res2_keys  = ["RDC.Seq_ID_2", "Atom_two_residue_seq_code"]
+        rdc_atom2_keys = ["RDC.Atom_type_2", "Atom_two_atom_name"]
+        rdc_value_keys = ["RDC.Val", "Residual_dipolar_coupling_value"]
 
-        for line in input_pdb:
-            if line.startswith("ATOM") and line.split()[2] == "CA":
-                resname = line.split()[3]       # get residue name
-                seg.append(resname)             # append new segname to list
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
 
+            for my_resnum1 in rdc_res1_keys:     # fetch 1. residue number
+                if my_resnum1 in row.keys():
+                    resnum1 = row[my_resnum1]
 
-        #-----------------------  Write sequence data  -----------------------#
-        short_seg = ""
+            for my_atom1 in rdc_atom1_keys:      # fetch 1. atom name
+                if my_atom1 in row.keys():
+                    atom1 = row[my_atom1]
 
-        for i in range(len(seg)):
-            short_seg += shortcodes[seg[i]]
+            for my_resnum2 in rdc_res2_keys:     # fetch 2. residue number
+                if my_resnum2 in row.keys():
+                    resnum2 = row[my_resnum2]
 
-        my_line      = "DATA SEQUENCE "
-        char_counter = 0
-        row_counter  = 0
-        pales_dummy  = open('pales_dummy.txt', 'w')
+            for my_atom2 in rdc_atom2_keys:      # fetch 2. atom name
+                if my_atom2 in row.keys():
+                    atom2 = row[my_atom2]
 
-        for char in short_seg:
-            if char_counter == 10:          # write aa output in 10 wide blocks
-                my_line      += " "
-                char_counter = 0
-                row_counter  += 1
+            for my_RDC_value in rdc_value_keys:  # fetch RDC value
+                if my_RDC_value in row.keys():
+                    RDC_value = row[my_RDC_value]
 
-                if row_counter == 5:        # write 5 block per line
-                    pales_dummy.write(my_line + "\n")
-                    char_counter = 0
-                    row_counter  = 0
-                    my_line = "DATA SEQUENCE "
-
-            my_line      += char
-            char_counter += 1
-
-        pales_dummy.write(my_line + "\n")    # write last line of aa output
-
-
-        #-----------------------  Write dummy dipoles  -----------------------#
-        pales_dummy.write(
-        "\nVARS RESID_I RESNAME_I ATOMNAME_I " +
-        "RESID_J RESNAME_J ATOMNAME_J D DD W\n" +
-        "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
-        )
-
-        for i in range(len(seg)):
-            if seg[i] == "PRO":         # skip PRO named aa-s
-                continue
-
-            # print aligned dummy dipole output
-            pales_dummy.write(
-                "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', seg[i], 'H',
-                str(i+1)+'A', seg[i], 'N',
-                0.000, 1.000,  1.00))
-            pales_dummy.write(
-                "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', seg[i], 'N',
-                str(i+1)+'A', seg[i], 'C',
-                0.000, 1.000,  1.00))
-            pales_dummy.write(
-                "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(i+1)+'A', seg[i], 'C',
-                str(i+1)+'A', seg[i], 'CA',
-                0.000, 1.000,  1.00))
-
-        pales_dummy.close()
-
-        outfile = open("pales.out", 'a')    # open output file with append mode
-        DEVNULL = open(os.devnull, 'w')     # open systems /dev/null
-
-        print("calculating: " + pdb_file)
-
-
-        # IF SVD
-        subprocess.call([pales,
-                        "-inD", "pales_dummy.txt",  # pales dummy file
-                        "-pdb", pdb_file,           # pdb file
-                        '-' + rdc_lc_model],        # rdc lc model
-                        #"-bestFit"],               # SVD
-                        stdout = outfile,
-                        stderr = DEVNULL)
-
-
-def avgPalesRDCs(pales_out):
-    pales_out       = open(pales_out)
-    n_of_structures = 0
-    averageRDC      = {}
-    npair           = 0
-    #resnum, exp, calc = [] # MIK EZEK??
-
-
-    for line in pales_out:
-        if re.match("REMARK \d+ couplings", line):
-            n_of_structures += 1 # n_of_structures to divide by
-
-        elif re.match("\s+ \d+", line):
-            resnum1 = int(line.split()[0])
-            resnum2 = int(line.split()[3])
-            atom1   = line.split()[2]
-            atom2   = line.split()[5]
-            D       = float(line.split()[8])  # D coloumn of pales output
-            RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
-
-            if RDCtype in averageRDC.keys():
-                if resnum1 in averageRDC[RDCtype].keys():
-                    averageRDC[RDCtype][resnum1] += D
-                else:
-                    averageRDC[RDCtype][resnum1] = D
+            # check if all parameters are fetched
+            if (resnum1 and atom1 and resnum2 and atom2 and RDC_value):
+                # append RDC_Record object to list
+                RDC_records.append(RDC_Record(resnum1, atom1,
+                                              resnum2, atom2, RDC_value))
             else:
-                averageRDC[RDCtype] = {}
-                averageRDC[RDCtype][resnum1] = D
+                raise ValueError('Unhandled value in STR file, check the\
+                                  specifications')
 
+        RDC_lists.append(RDC_records)
+        list_number += 1
 
-
-    for RDCtype in averageRDC.keys():
-        for res_num in averageRDC[RDCtype].keys():
-            averageRDC[RDCtype][res_num] /= n_of_structures
-
-
-    print averageRDC
-
+    return RDC_lists

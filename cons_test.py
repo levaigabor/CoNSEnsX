@@ -1,97 +1,37 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import argparse
+# standard modules
+
 import time
 import os
 import subprocess
 import re
 import math
 
+# installed modules
+import matplotlib.pyplot as plt
 import nmrpystar
+
+# own modules
+import csx_libs.misc as misc
+from csx_libs.methods import *
+from csx_libs.objects import *
+
 
 version = "1.0"
 pales   = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
 
-#--------------------  Setting up and parsing arguments   --------------------#
-
-consensx_usage = '%(prog)s -b STR_file -f PDB_file [options]'
-
-parser = argparse.ArgumentParser(add_help = False,
-                                 usage    = consensx_usage)
-
-parser.add_argument("-b", "--STR_file", help = "restraints file")
-parser.add_argument("-f", "--PDB_file", help = "PDB file (fitted)")
-parser.add_argument("-r", "--XPLOR_file", default="",
-                    help = "X-PLOR restraint file")
-
-parser.add_argument("-h", "--help", help="show help and exit",
-                    action='store_true')
-parser.add_argument('-c', action='store_true',
-                    help="show credits")
-
-parser.add_argument("-l", "--lc_model", choices=["bic", "pf1"], default="bic",
-                    help="rdc lc model: <bic|pf1>")
-parser.add_argument("-R", action='store_true', default=False,
-                    help="causes to do SVD for back-calculating RDC data")
-parser.add_argument("-O", "--output_format", choices=["txt", "html"],
-                    default="html|txt", help="output format")
-parser.add_argument("-o", "--output_file_name", default="consensx",
-                    help="output file name")
-parser.add_argument("-T", "--line_thickness", help="line thickness in raphs")
-
+parser = misc.createParser()
 args = parser.parse_args()
 
 
-help_text = """
-usage: cons_test.py -b <STR_file> -f <PDB_file>
-             [-l <RDC_LC_MODEL: <bic|pf1>] [-R] [-O <txt|html>] [-o <outfile>]
-             [-T <linethickness_in_graphs>]
-
-  -h, --help            show this help message and exit
-  -c                    show credits
-
-  -b STR_file           restraints file
-  -f PDB_file           PDB file (fitted)
-
-  -l {bic,pf1}          rdc lc model: <bic|pf1>
-  -R                    causes to do SVD for back-calculating RDC data
-  -r                    X-PLOR restraint file
-  -O {txt,html}         output format
-  -o OUTPUT_FILE_NAME   output file name
-  -T LINE_THICKNESS     line thickness in raphs
-
-
-CoNSEnsX: assessing the compliance of varios NMR data with a protein
-          structural ensemble
-The program invokes SHIFTX for chemical shift and PALES for RDC calculation
-See their respective documentation for more.
-"""
-
-cred = """
-* Description of the CoNSEnsX concept and method can be found in:
------------------------------------------------------------------
-  CoNSEnsX: assessing the accuracy of NMR-derived protein structural ensembles
-  Ángyán et al, 2009, submitted
-
-* SHIFTX is described in:
-------------------------
-   Rapid and accurate calculation of protein 1H. 13C amd 15N
-   Neal et al. (2003) J. Biomol. NMR 26:215.
-
-* PALES is described in:
-------------------------
-  Prediction of sterically induced alignment in a dilute liquid
-  crystalline phase: aid to protein strcuture determination by NMR
-  Zweckstetter & Bax (2000) J. Am. Chem. Soc. 122:3791
-"""
-
 if args.c:
-    print(cred)
+    print(misc.cred)
     raise SystemExit
 
 if args.help:
-    print(help_text)
+    print(misc.help_text)
     raise SystemExit
 
 if not args.STR_file or not args.PDB_file:
@@ -132,141 +72,26 @@ if "html" in args.output_format:
 if not os.path.exists("temp"):
     os.makedirs("temp")
 
-#--------------------------  Splitting of PDB file   -------------------------#
-
-def pdb_splitter(PDB_file):
-    try:
-        my_pdb = open(PDB_file)
-    except FileNotFoundError:
-        print(PDB_file + " was not found")
-        raise SystemExit
-
-    model_names = []
-    model_data  = []
-
-    my_name = ""
-    my_data = []
-
-    for line in my_pdb:
-        if line.startswith("MODEL"):
-            my_name = line.strip().split()[1]
-        elif line.startswith("ATOM") or line.startswith("TER"):
-            my_data.append(line.strip())
-        elif line.startswith("ENDMDL"):
-            model_names.append(my_name)
-            model_data.append(my_data)
-            my_name = ""
-            my_data = []
-        else:
-            continue
-
-    for i in range(len(model_names)):
-        file_name = "temp/model_" + model_names[i] + ".pdb"
-        temp_pdb  = open(file_name, 'w')
-        temp_pdb.write("HEADER    MODEL " + model_names[i] + "\n")
-
-        for _ in model_data[i]:
-            temp_pdb.write(_ + "\n")
-
-        temp_pdb.write("END")
-        temp_pdb.close()
-
-pdb_splitter(args.PDB_file)
+pdb_cleaner(args.PDB_file)      # bringing PDB to format
+pdb_splitter(args.PDB_file)     # splitting of PDB file
 
 
-#------------------------------  Read STR file   -----------------------------#
+#------------------------  Read  and parse STR file   ------------------------#
 
 star_file = open(args.STR_file)
 myString = ""
+
 for line in star_file:
     myString += line
 
-#----------------------  Parse STR file with nmrpystar  ----------------------#
-
 parsed = nmrpystar.parse(myString)
-if parsed.status == 'success':
-    pass
-    #print 'it worked!!  ', parsed.value
-else:
+
+if parsed.status != 'success':
     print 'Error during STR parsing: ', parsed
+    raise SystemExit
 
 
-class RDC_Record(object):
-    """Class for storing RDC data"""
 
-    def __init__(self, resnum1, atom1, resnum2, atom2, RDC_value):
-        self.RDC_type  = (str(int(resnum1) - int(resnum2))
-                          + '_' + atom1 + '_' + atom2)
-        self.resnum1   = int(resnum1)
-        self.atom1     = atom1
-        self.resnum2   = int(resnum2)
-        self.atom2     = atom2
-        self.RDC_value = float(RDC_value)
-
-
-def get_RDC_lists(dataBlock):
-    """Returns RDC lists as lists containing RDC_Record objects"""
-
-    list_number = 1
-    RDC_lists   = []
-
-    while True:
-        saveShiftName = 'RDC_list_' + str(list_number)
-        try:
-            saveShifts    = dataBlock.saves[saveShiftName]
-        except KeyError:
-            break
-        loopShifts     = saveShifts.loops[-1]
-        RDC_records    = []
-
-        # STR key values recognised by this program
-        rdc_types_keys = ["RDC.RDC_code", "Residual_dipolar_coupling_ID"]
-        rdc_res1_keys  = ["RDC.Seq_ID_1", "Atom_one_residue_seq_code"]
-        rdc_atom1_keys = ["RDC.Atom_type_1", "Atom_one_atom_name"]
-        rdc_res2_keys  = ["RDC.Seq_ID_2", "Atom_two_residue_seq_code"]
-        rdc_atom2_keys = ["RDC.Atom_type_2", "Atom_two_atom_name"]
-        rdc_value_keys = ["RDC.Val", "Residual_dipolar_coupling_value"]
-
-        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
-            row = loopShifts.getRowAsDict(ix)
-
-            # for my_RDC_type in rdc_types_keys:   # fetch RDC type
-            #     if my_RDC_type in row.keys():
-            #         RDC_type = row[my_RDC_type]
-
-            for my_resnum1 in rdc_res1_keys:     # fetch 1. residue number
-                if my_resnum1 in row.keys():
-                    resnum1 = row[my_resnum1]
-
-            for my_atom1 in rdc_atom1_keys:      # fetch 1. atom name
-                if my_atom1 in row.keys():
-                    atom1 = row[my_atom1]
-
-            for my_resnum2 in rdc_res2_keys:     # fetch 2. residue number
-                if my_resnum2 in row.keys():
-                    resnum2 = row[my_resnum2]
-
-            for my_atom2 in rdc_atom2_keys:      # fetch 2. atom name
-                if my_atom2 in row.keys():
-                    atom2 = row[my_atom2]
-
-            for my_RDC_value in rdc_value_keys:  # fetch RDC value
-                if my_RDC_value in row.keys():
-                    RDC_value = row[my_RDC_value]
-
-            # check if all parameters are fetched
-            if (resnum1 and atom1 and resnum2 and atom2 and RDC_value):
-                # append RDC_Record object to list
-                RDC_records.append(RDC_Record(resnum1, atom1,
-                                              resnum2, atom2, RDC_value))
-            else:
-                raise ValueError('Unhandled value in STR file, check the\
-                                  specifications')
-
-        RDC_lists.append(RDC_records)
-        list_number += 1
-
-    return RDC_lists
 
 RDC_lists  = get_RDC_lists(parsed.value)
 pdb_models = os.listdir("temp")
@@ -524,7 +349,57 @@ def calcRMSD(averageRDC, RDCtype, RDC_list):
 
     return round(RMSD, 6)
 
+def makeGraph(averageRDC, RDCtype, RDC_list):
+
+    minrn = 0
+    maxrn = len(averageRDC[RDCtype])
+
+    min_calc = min(averageRDC[RDCtype].values())
+    max_calc = max(averageRDC[RDCtype].values())
+
+    exp_values = []
+    for RDC_record in RDC_lists[0]:
+        exp_values.append(RDC_record.RDC_value)
+
+    min_exp = min(exp_values)
+    max_exp = max(exp_values)
+
+    miny = min(min_calc, min_exp)
+    maxy = max(max_calc, max_exp)
+
+    exp_line, calc_line = [], []
+
+    for i, j in enumerate(averageRDC[RDCtype].keys()):
+        calc = averageRDC[RDCtype][j]
+        exp  = RDC_lists[0][i].RDC_value
+
+        # # X axis
+        # for ($n=1; $n < $#RESNUM; $n++){
+        # $x1=50+($RESNUM[$n-1]-$minrn)*$ticdx;
+        # $x2=50+($RESNUM[$n]-$minrn)*$ticdx;
+
+        # # experimental
+        # $y1=450-(($EXP[$n-1]-$miny)*$ticdy);
+        # $y2=450-(($EXP[$n]-$miny)*$ticdy);
+        # $im->line($x1,$y1,$x2,$y2,$red);
+
+        exp_line.append(exp)
+        calc_line.append(calc)
+
+
+
+        # #calculated
+        # $y1=450-(($CALC[$n-1]-$miny)*$ticdy);
+        # $y2=450-(($CALC[$n]-$miny)*$ticdy);
+        # $im->line($x1,$y1,$x2,$y2,$blue);
+    plt.plot(exp_line, linewidth=2.0, color='red', label='exp')
+    plt.plot(calc_line, linewidth=2.0, color='blue', label='calc')
+    plt.axis([minrn, maxrn, miny, maxy])
+    plt.legend(loc='lower left')
+    # plt.show()
+
 
 print calcCorrel(averageRDC, '0_N_H', RDC_lists[0])
 print calcQValue(averageRDC, '0_N_H', RDC_lists[0])
 print calcRMSD(averageRDC, '0_N_H', RDC_lists[0])
+makeGraph(averageRDC, '0_N_H', RDC_lists[0])
