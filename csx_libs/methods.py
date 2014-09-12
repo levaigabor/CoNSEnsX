@@ -18,14 +18,14 @@ def pdb_cleaner(PDB_file):
 
     for line in input_pdb:
         line = line.strip()
-        line = re.sub('[+-]', ' ', line)
+        line = re.sub('[+-] ', '  ', line)
 
         if line.startswith("ATOM"):
 
             name = line.split()[2].strip()
 
             if name is "Q": continue
-            if name is "H": name = "NH"
+            if name is "NH": name = "H"
 
             chars, numbers = [], []
             for i in name:
@@ -109,7 +109,6 @@ def get_RDC_lists(dataBlock):
         RDC_records    = []
 
         # STR key values recognised by this program
-        rdc_types_keys = ["RDC.RDC_code", "Residual_dipolar_coupling_ID"]
         rdc_res1_keys  = ["RDC.Seq_ID_1", "Atom_one_residue_seq_code"]
         rdc_atom1_keys = ["RDC.Atom_type_1", "Atom_one_atom_name"]
         rdc_res2_keys  = ["RDC.Seq_ID_2", "Atom_two_residue_seq_code"]
@@ -152,3 +151,37 @@ def get_RDC_lists(dataBlock):
         list_number += 1
 
     return RDC_lists
+
+
+def avgPalesRDCs(pales_out):
+    pales_out       = open(pales_out)
+    n_of_structures = 0
+    averageRDC      = {}
+    npair           = 0
+
+    for line in pales_out:
+        if re.match("REMARK \d+ couplings", line):
+            n_of_structures += 1 # n_of_structures to divide by
+
+        elif re.match("\s+ \d+", line):
+            resnum1 = int(line.split()[0])
+            resnum2 = int(line.split()[3])
+            atom1   = line.split()[2]
+            atom2   = line.split()[5]
+            D       = float(line.split()[8])  # D coloumn of pales output
+            RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
+
+            if RDCtype in averageRDC.keys():
+                if resnum1 in averageRDC[RDCtype].keys():
+                    averageRDC[RDCtype][resnum1] += D
+                else:
+                    averageRDC[RDCtype][resnum1] = D
+            else:
+                averageRDC[RDCtype] = {}
+                averageRDC[RDCtype][resnum1] = D
+
+    for RDCtype in averageRDC.keys():
+        for res_num in averageRDC[RDCtype].keys():
+            averageRDC[RDCtype][res_num] /= n_of_structures
+
+    return averageRDC

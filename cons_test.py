@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # standard modules
-
+from __future__ import print_function
 import time
+import sys
 import os
 import subprocess
 import re
 import math
+
 
 # installed modules
 import matplotlib.pyplot as plt
@@ -15,7 +17,7 @@ import nmrpystar
 
 # own modules
 import csx_libs.misc as misc
-from csx_libs.methods import *
+import csx_libs.methods as csx_func
 from csx_libs.objects import *
 
 
@@ -72,8 +74,8 @@ if "html" in args.output_format:
 if not os.path.exists("temp"):
     os.makedirs("temp")
 
-pdb_cleaner(args.PDB_file)      # bringing PDB to format
-pdb_splitter(args.PDB_file)     # splitting of PDB file
+csx_func.pdb_cleaner(args.PDB_file)      # bringing PDB to format
+csx_func.pdb_splitter(args.PDB_file)     # splitting of PDB file
 
 
 #------------------------  Read  and parse STR file   ------------------------#
@@ -87,13 +89,14 @@ for line in star_file:
 parsed = nmrpystar.parse(myString)
 
 if parsed.status != 'success':
-    print 'Error during STR parsing: ', parsed
+    print('Error during STR parsing: ', parsed)
     raise SystemExit
 
 
 
 
-RDC_lists  = get_RDC_lists(parsed.value)
+RDC_lists  = csx_func.get_RDC_lists(parsed.value)
+
 pdb_models = os.listdir("temp")
 
 #################
@@ -116,7 +119,7 @@ def callPalesOn(pdb_files, RDC_list):
     except OSError:
         pass
 
-    for pdb_file in pdb_files:
+    for o, pdb_file in enumerate(pdb_files):
         #-------------------  Open file and read PDB data  -------------------#
         try:
             pdb_file  = "temp/" + pdb_file
@@ -179,34 +182,16 @@ def callPalesOn(pdb_files, RDC_list):
                 str(RDC_record.atom2),
                 RDC_record.RDC_value, 1.000,  1.00))
 
-
-        # for i in range(len(seg)):
-        #     if seg[i] == "PRO":         # skip PRO named aa-s
-        #         continue
-
-        #     # print aligned dummy dipole output
-        #     pales_dummy.write(
-        #         "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-        #         str(i+1)+'A', seg[i], 'H',
-        #         str(i+1)+'A', seg[i], 'N',
-        #         0.000, 1.000,  1.00))
-        #     pales_dummy.write(
-        #         "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-        #         str(i+1)+'A', seg[i], 'N',
-        #         str(i+1)+'A', seg[i], 'C',
-        #         0.000, 1.000,  1.00))
-        #     pales_dummy.write(
-        #         "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-        #         str(i+1)+'A', seg[i], 'C',
-        #         str(i+1)+'A', seg[i], 'CA',
-        #         0.000, 1.000,  1.00))
-
         pales_dummy.close()
 
         outfile = open("pales.out", 'a')    # open output file with append mode
         DEVNULL = open(os.devnull, 'w')     # open systems /dev/null
 
-        print("calculating: " + pdb_file)
+        #print("calculating: " + pdb_file)
+        print("call Pales on model: " +
+              str(o + 1) + '/' + str(len(pdb_files)), end="\r")
+        sys.stdout.flush()
+
 
         if args.R:                          # if SVD is enabled
             subprocess.call([pales,
@@ -223,60 +208,22 @@ def callPalesOn(pdb_files, RDC_list):
                             '-' + rdc_lc_model],        # rdc lc model
                             stdout = outfile,
                             stderr = DEVNULL)
+    print()
 
 
 #####for RDC_list in RDC_lists:
 
-#callPalesOn(pdb_models, RDC_lists[0])
+callPalesOn(pdb_models, RDC_lists[0])
+
+averageRDC = csx_func.avgPalesRDCs("pales.out")
+
+for RDC_type in averageRDC.keys():
+    print(RDC_type)
 
 
-def avgPalesRDCs(pales_out):
-    pales_out       = open(pales_out)
-    n_of_structures = 0
-    averageRDC      = {}
-    npair           = 0
-    #resnum, exp, calc = [] # MIK EZEK??
-
-
-    for line in pales_out:
-        if re.match("REMARK \d+ couplings", line):
-            n_of_structures += 1 # n_of_structures to divide by
-
-        elif re.match("\s+ \d+", line):
-            resnum1 = int(line.split()[0])
-            resnum2 = int(line.split()[3])
-            atom1   = line.split()[2]
-            atom2   = line.split()[5]
-            D       = float(line.split()[8])  # D coloumn of pales output
-            RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
-
-            if RDCtype in averageRDC.keys():
-                if resnum1 in averageRDC[RDCtype].keys():
-                    averageRDC[RDCtype][resnum1] += D
-                else:
-                    averageRDC[RDCtype][resnum1] = D
-            else:
-                averageRDC[RDCtype] = {}
-                averageRDC[RDCtype][resnum1] = D
-
-
-
-    for RDCtype in averageRDC.keys():
-        for res_num in averageRDC[RDCtype].keys():
-            averageRDC[RDCtype][res_num] /= n_of_structures
-
-
-    #print averageRDC
-    return averageRDC
-
-averageRDC = avgPalesRDCs("pales.out")
-
-# for RDC_type in averageRDC.keys():
-#     print RDC_type
 
 
 def calcCorrel(averageRDC, RDCtype, RDC_list):
-
     if len(averageRDC[RDCtype]) != len(RDC_lists[0]):
         return -2
 
@@ -349,6 +296,7 @@ def calcRMSD(averageRDC, RDCtype, RDC_list):
 
     return round(RMSD, 6)
 
+
 def makeGraph(averageRDC, RDCtype, RDC_list):
 
     minrn = 0
@@ -367,39 +315,28 @@ def makeGraph(averageRDC, RDCtype, RDC_list):
     miny = min(min_calc, min_exp)
     maxy = max(max_calc, max_exp)
 
-    exp_line, calc_line = [], []
+    exp_line  = []
+    calc_line = []
+
+    print(min(averageRDC[RDCtype].keys()))
+    print(max(averageRDC[RDCtype].keys()))
+
 
     for i, j in enumerate(averageRDC[RDCtype].keys()):
         calc = averageRDC[RDCtype][j]
         exp  = RDC_lists[0][i].RDC_value
 
-        # # X axis
-        # for ($n=1; $n < $#RESNUM; $n++){
-        # $x1=50+($RESNUM[$n-1]-$minrn)*$ticdx;
-        # $x2=50+($RESNUM[$n]-$minrn)*$ticdx;
-
-        # # experimental
-        # $y1=450-(($EXP[$n-1]-$miny)*$ticdy);
-        # $y2=450-(($EXP[$n]-$miny)*$ticdy);
-        # $im->line($x1,$y1,$x2,$y2,$red);
-
         exp_line.append(exp)
         calc_line.append(calc)
 
-
-
-        # #calculated
-        # $y1=450-(($CALC[$n-1]-$miny)*$ticdy);
-        # $y2=450-(($CALC[$n]-$miny)*$ticdy);
-        # $im->line($x1,$y1,$x2,$y2,$blue);
     plt.plot(exp_line, linewidth=2.0, color='red', label='exp')
     plt.plot(calc_line, linewidth=2.0, color='blue', label='calc')
     plt.axis([minrn, maxrn, miny, maxy])
     plt.legend(loc='lower left')
-    # plt.show()
+    plt.show()
 
 
-print calcCorrel(averageRDC, '0_N_H', RDC_lists[0])
-print calcQValue(averageRDC, '0_N_H', RDC_lists[0])
-print calcRMSD(averageRDC, '0_N_H', RDC_lists[0])
+print("Correl: ", calcCorrel(averageRDC, '0_N_H', RDC_lists[0]))
+print("Q-val:  ", calcQValue(averageRDC, '0_N_H', RDC_lists[0]))
+print("RMSD:   ", calcRMSD(averageRDC, '0_N_H', RDC_lists[0]))
 makeGraph(averageRDC, '0_N_H', RDC_lists[0])
