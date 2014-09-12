@@ -71,8 +71,11 @@ if "html" in args.output_format:
 
 
 #-------------------------  Making temporary folder   ------------------------#
-if not os.path.exists("temp"):
+if not os.path.exists("temp"):          # create temp folder
     os.makedirs("temp")
+else:
+    for f in os.listdir("temp"):        # clean temp folder
+        os.remove("temp/" + f)
 
 csx_func.pdb_cleaner(args.PDB_file)      # bringing PDB to format
 csx_func.pdb_splitter(args.PDB_file)     # splitting of PDB file
