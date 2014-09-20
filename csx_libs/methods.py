@@ -409,4 +409,4 @@ def makeGraph(averageRDC, RDCtype, RDC_list):
     plt.plot(calc_line, linewidth=2.0, color='blue', label='calc')
     plt.axis([minrn, maxrn, miny, maxy])
     plt.legend(loc='lower left')
-    plt.show()
+    # plt.show()
