@@ -7,8 +7,10 @@ import sys
 import re
 import subprocess
 import math
+import prody
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .objects import *
 
@@ -234,7 +236,7 @@ def callPalesOn(pdb_files, RDC_list, lc_model, SVD_enable):
                 str(RDC_record.atom1),
                 str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
                 str(RDC_record.atom2),
-                RDC_record.RDC_value, 1.000,  1.00))
+                RDC_record.value, 1.000,  1.00))
 
         pales_dummy.close()
 
@@ -276,58 +278,142 @@ def avgPalesRDCs(pales_out):
             n_of_structures += 1 # n_of_structures to divide by
 
         elif re.match("\s+ \d+", line):
-            resnum1 = int(line.split()[0])
+            resnum  = int(line.split()[0])
             resnum2 = int(line.split()[3])
-            atom1   = line.split()[2]
+            atom    = line.split()[2]
             atom2   = line.split()[5]
             D       = float(line.split()[8])  # D coloumn of pales output
-            RDCtype = str(resnum2 - resnum1) + "_" + atom1 + "_" + atom2
+            RDCtype = str(resnum2 - resnum) + "_" + atom + "_" + atom2
 
-            if RDCtype in averageRDC.keys():
-                if resnum1 in averageRDC[RDCtype].keys():
-                    averageRDC[RDCtype][resnum1] += D
-                else:
-                    averageRDC[RDCtype][resnum1] = D
+
+            if resnum in averageRDC.keys():
+                averageRDC[resnum] += D
             else:
-                averageRDC[RDCtype] = {}
-                averageRDC[RDCtype][resnum1] = D
+                averageRDC[resnum] = D
 
-    for RDCtype in averageRDC.keys():
-        for res_num in averageRDC[RDCtype].keys():
-            averageRDC[RDCtype][res_num] /= n_of_structures
+
+    for res_num in averageRDC.keys():
+        averageRDC[res_num] /= n_of_structures
 
     return averageRDC
 
 
-def calcCorrel(averageRDC, RDCtype, RDC_list):
-    if len(averageRDC[RDCtype]) != len(RDC_list):
+def calcS2(PDB_file, S2_records):
+    # parsing PDB file into models (model_list)
+    model_list = []
+    model_num = 1
+
+    while True:
+        try:
+            with suppress_output():
+                model_list.append(prody.parsePDB(PDB_file,
+                                                 model=model_num, ter=True))
+            model_num += 1
+        except prody.proteins.pdbfile.PDBParseError:
+            break
+
+
+    # get NH vectors from models (model_data[] -> vectors{resnum : vector})
+    model_data = []
+
+    for model in model_list:
+        current_Resindex = 1
+        has_H, has_N = False, False
+        vectors = {}
+
+        for atom in model:
+            atom_res = atom.getResindex() + 1
+
+            if atom_res != current_Resindex:
+                current_Resindex = atom_res
+                has_H, has_N = False, False
+
+
+            if atom_res == current_Resindex:
+
+                if atom.getName() == 'N':
+                    has_N = True
+                    N_coords = Vec_3D(atom.getCoords())
+
+                elif atom.getName() == 'H':
+                    has_H = True
+                    H_coords = Vec_3D(atom.getCoords())
+
+                if has_H and has_N:
+                    has_H, has_N = False, False
+                    vectors[atom_res] = Vec_3D(N_coords -
+                                               H_coords).normalize()
+
+        model_data.append(vectors)
+
+    S2_calced = {}
+
+    # az STR-ből származó S2 értékeken megy
+    for resnum in [int(s2rec.resnum) for s2rec in S2_records]:
+
+        x2, y2, z2, xy, xz, yz = 0, 0, 0, 0, 0, 0
+
+        # a modelleken megy
+        for m in model_data:
+
+            # adott modellben adott resnum-ra a normalizált vektorok koordinátái
+            x, y, z = m[resnum].v[0], m[resnum].v[1], m[resnum].v[2]
+
+            x2 += x ** 2
+            y2 += y ** 2
+            z2 += z ** 2
+            xy += x * y
+            xz += x * z
+            yz += y * z
+
+        x2 /= len(model_data)   # STR-ből az S2 adatok számával osztok
+        y2 /= len(model_data)
+        z2 /= len(model_data)
+        xy /= len(model_data)
+        xz /= len(model_data)
+        yz /= len(model_data)
+
+        s2 = 3 / 2.0 * (x2 ** 2 +
+                        y2 ** 2 +
+                        z2 ** 2 +
+                        2 * xy ** 2 +
+                        2 * xz ** 2 +
+                        2 * yz ** 2) - 0.5
+
+        S2_calced[resnum] = s2
+
+    return S2_calced
+
+
+def calcCorrel(calced, experimental):
+    if len(calced) != len(experimental):
         return -2
 
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
 
-    for i, j in enumerate(averageRDC[RDCtype].keys()):
-        calc = averageRDC[RDCtype][j]
-        exp  = RDC_list[i].RDC_value
+    for i, j in enumerate(calced.keys()):
+        calc = calced[j]
+        exp  = experimental[i].value
 
         M[0] += calc
         M[1] += exp
         M[2] += calc * exp
 
-    M[0] /= len(RDC_list)
-    M[1] /= len(RDC_list)
-    M[2] /= len(RDC_list)
+    M[0] /= len(experimental)
+    M[1] /= len(experimental)
+    M[2] /= len(experimental)
 
-    for i, j in enumerate(averageRDC[RDCtype].keys()):
-        calc = averageRDC[RDCtype][j]
-        exp  = RDC_list[i].RDC_value
+    for i, j in enumerate(calced.keys()):
+        calc = calced[j]
+        exp  = experimental[i].value
 
         D[0] += (calc - M[0]) ** 2
         D[1] += (exp  - M[1]) ** 2
 
-    D[0] /= len(RDC_list)
+    D[0] /= len(experimental)
     D[0] = math.sqrt(D[0])
-    D[1] /= len(RDC_list)
+    D[1] /= len(experimental)
     D[1] = math.sqrt(D[1])
 
     if D[0] * D[1] == 0:
@@ -336,16 +422,16 @@ def calcCorrel(averageRDC, RDCtype, RDC_list):
         return (M[2] - (M[0] * M[1])) / (D[0] * D[1])
 
 
-def calcQValue(averageRDC, RDCtype, RDC_list):
+def calcQValue(calced, experimental):
 
-    if len(averageRDC[RDCtype]) != len(RDC_list):
+    if len(calced) != len(experimental):
         return -2
 
     D2, E2, C2 = 0, 0, 0
 
-    for i, j in enumerate(averageRDC[RDCtype].keys()):
-        calc = averageRDC[RDCtype][j]
-        exp  = RDC_list[i].RDC_value
+    for i, j in enumerate(calced.keys()):
+        calc = calced[j]
+        exp  = experimental[i].value
 
         D2 += (calc - exp) ** 2
         E2 += exp ** 2
@@ -355,35 +441,32 @@ def calcQValue(averageRDC, RDCtype, RDC_list):
     return round(Q, 6)
 
 
-def calcRMSD(averageRDC, RDCtype, RDC_list):
+def calcRMSD(calced, experimental):
 
-    if len(averageRDC[RDCtype]) != len(RDC_list):
+    if len(calced) != len(experimental):
         return -2
 
     D2 = 0
 
-    for i, j in enumerate(averageRDC[RDCtype].keys()):
-        calc = averageRDC[RDCtype][j]
-        exp  = RDC_list[i].RDC_value
+    for i, j in enumerate(calced.keys()):
+        calc = calced[j]
+        exp  = experimental[i].value
 
         D2 += (calc - exp) ** 2
 
-    RMSD = math.sqrt(D2 / len(RDC_list))
+    RMSD = math.sqrt(D2 / len(experimental))
 
     return round(RMSD, 6)
 
 
-def makeGraph(averageRDC, RDCtype, RDC_list):
+def makeGraph(calced, experimental):
 
-    minrn = 0
-    maxrn = len(averageRDC[RDCtype])
-
-    min_calc = min(averageRDC[RDCtype].values())
-    max_calc = max(averageRDC[RDCtype].values())
+    min_calc = min(calced.values())
+    max_calc = max(calced.values())
 
     exp_values = []
-    for RDC_record in RDC_list:
-        exp_values.append(RDC_record.RDC_value)
+    for record in experimental:
+        exp_values.append(record.value)
 
     min_exp = min(exp_values)
     max_exp = max(exp_values)
@@ -391,22 +474,54 @@ def makeGraph(averageRDC, RDCtype, RDC_list):
     miny = min(min_calc, min_exp)
     maxy = max(max_calc, max_exp)
 
-    exp_line  = []
-    calc_line = []
+    exp_line, calc_line = [], []
 
-    print(min(averageRDC[RDCtype].keys()))
-    print(max(averageRDC[RDCtype].keys()))
+    for k in range(0, max(calced.keys()) + 0):
+        if k in calced.keys():
+            calc = calced[k]
+            exp  = experimental.pop(0).value
 
+            exp_line.append(exp)
+            calc_line.append(calc)
 
-    for i, j in enumerate(averageRDC[RDCtype].keys()):
-        calc = averageRDC[RDCtype][j]
-        exp  = RDC_list[i].RDC_value
+        else:
+            exp_line.append(None)
+            calc_line.append(None)
 
-        exp_line.append(exp)
-        calc_line.append(calc)
+    # connect line over missing (None) values, more info at ->
+    # http://stackoverflow.com/questions/14399689/
+    # matplotlib-drawing-lines-between-points-ignoring-missing-data
+    exp_line  = np.array(exp_line).astype(np.double)
+    exp_mask  = np.isfinite(exp_line)
+    calc_line = np.array(calc_line).astype(np.double)
+    calc_mask = np.isfinite(calc_line)
 
-    plt.plot(exp_line, linewidth=2.0, color='red', label='exp')
-    plt.plot(calc_line, linewidth=2.0, color='blue', label='calc')
-    plt.axis([minrn, maxrn, miny, maxy])
+    # x axis values as numpy array
+    xs = np.arange(max(calced.keys())+2)
+    # experimental values with 'None' values masked
+    plt.plot(xs[exp_mask], exp_line[exp_mask],
+             linewidth=2.0, color='red', marker='o', label='exp')
+    # calculated values with 'None' values masked
+    plt.plot(xs[calc_mask], calc_line[calc_mask],
+             linewidth=2.0, color='blue', marker='o', label='calc')
+    # setting axis limits
+    plt.axis([min(calced.keys()) - 1, max(calced.keys()) + 1, miny, maxy])
     plt.legend(loc='lower left')
     # plt.show()
+
+
+def makeCorrelGraph(calced, experimental):
+    min_calc = min(calced.values())
+    max_calc = max(calced.values())
+
+    exp_values = []
+    for record in experimental:
+        exp_values.append(record.value)
+
+    min_exp = min(exp_values)
+    max_exp = max(exp_values)
+
+    miny = min(min_calc, min_exp)
+    maxy = max(max_calc, max_exp)
+
+    exp_line, calc_line = [], []
