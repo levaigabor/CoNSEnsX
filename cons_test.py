@@ -109,6 +109,7 @@ print("Correl: ", csx_func.calcCorrel(averageRDC, RDC_lists[0]))
 print("Q-val:  ", csx_func.calcQValue(averageRDC, RDC_lists[0]))
 print("RMSD:   ", csx_func.calcRMSD(averageRDC, RDC_lists[0]))
 csx_func.makeGraph(averageRDC, RDC_lists[0])
+csx_func.makeCorrelGraph(averageRDC, RDC_lists[0])
 
 ##### -------------------------- for RDC_list in RDC_lists
 
@@ -140,4 +141,5 @@ print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_records))
 print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_records))
 print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_records))
 csx_func.makeGraph(S2_calced, S2_records)
+csx_func.makeCorrelGraph(S2_calced, S2_records)
 

@@ -7,6 +7,7 @@ import sys
 import re
 import subprocess
 import math
+import copy
 import prody
 
 import matplotlib.pyplot as plt
@@ -459,7 +460,9 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
-def makeGraph(calced, experimental):
+def makeGraph(calced, my_experimental):
+
+    experimental = copy.deepcopy(my_experimental)
 
     min_calc = min(calced.values())
     max_calc = max(calced.values())
@@ -507,10 +510,16 @@ def makeGraph(calced, experimental):
     # setting axis limits
     plt.axis([min(calced.keys()) - 1, max(calced.keys()) + 1, miny, maxy])
     plt.legend(loc='lower left')
-    # plt.show()
+    plt.xlabel('residue number')
+    plt.ylabel('value')
+    plt.show()
 
 
 def makeCorrelGraph(calced, experimental):
+    if len(calced) != len(experimental):
+        print("para")
+        return -2
+
     min_calc = min(calced.values())
     max_calc = max(calced.values())
 
@@ -525,3 +534,23 @@ def makeCorrelGraph(calced, experimental):
     maxy = max(max_calc, max_exp)
 
     exp_line, calc_line = [], []
+
+    for i, j in enumerate(calced.keys()):
+        calc = calced[j]
+        exp  = experimental[i].value
+
+        exp_line.append(exp)
+        calc_line.append(calc)
+
+    diag = []
+
+    for i in np.arange(miny, maxy * 1.42, 0.1):
+
+        diag.append(i)
+
+    plt.plot(diag, diag, linewidth=2.0, color='red')
+    plt.plot(exp_line, calc_line, 'bo')
+    plt.axis([miny, maxy, miny, maxy])
+    plt.xlabel('experimental')
+    plt.ylabel('calculated')
+    plt.show()
