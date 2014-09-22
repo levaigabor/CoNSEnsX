@@ -15,7 +15,8 @@ import numpy as np
 
 from .objects import *
 
-pales   = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
+
+pales = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
 
 shortcodes = {
     'ALA':'A',  'ASP':'D',  'ASN':'N',  'ARG':'R',  'CYS':'C',  'GLY':'G',
@@ -26,6 +27,10 @@ shortcodes = {
 
 
 def pdb_cleaner(PDB_file):
+    """
+    Performs some basic formatting on the given PDB file to make it suitable
+    for further calculations
+    """
     try:
         input_pdb = open(PDB_file)
     except FileNotFoundError:
@@ -73,6 +78,10 @@ def pdb_cleaner(PDB_file):
 
 
 def pdb_splitter(PDB_file):
+    """
+    Split the given PDB file into models, each model becomes a separate
+    PDB file placed in the "temp" folder
+    """
     try:
         my_pdb = open(PDB_file)
     except FileNotFoundError:
@@ -112,7 +121,6 @@ def pdb_splitter(PDB_file):
 
 def get_RDC_lists(dataBlock):
     """Returns RDC lists as lists containing RDC_Record objects"""
-
     list_number = 1
     RDC_lists   = []
 
@@ -171,6 +179,10 @@ def get_RDC_lists(dataBlock):
 
 
 def callPalesOn(pdb_files, RDC_list, lc_model, SVD_enable):
+    """
+    Writes pales dummy from the given RDC values, and call Pales with the
+    given parameters
+    """
     try:
         os.remove("pales.out")                  # remove output file if present
     except OSError:
@@ -269,6 +281,10 @@ def callPalesOn(pdb_files, RDC_list, lc_model, SVD_enable):
 
 
 def avgPalesRDCs(pales_out):
+    """
+    Returns a dictonary with the average RDCs:
+    averageRDC[residue] = value
+    """
     pales_out       = open(pales_out)
     n_of_structures = 0
     averageRDC      = {}
@@ -276,22 +292,20 @@ def avgPalesRDCs(pales_out):
 
     for line in pales_out:
         if re.match("REMARK \d+ couplings", line):
-            n_of_structures += 1 # n_of_structures to divide by
+            n_of_structures += 1                # n_of_structures to divide by
 
         elif re.match("\s+ \d+", line):
             resnum  = int(line.split()[0])
             resnum2 = int(line.split()[3])
             atom    = line.split()[2]
             atom2   = line.split()[5]
-            D       = float(line.split()[8])  # D coloumn of pales output
+            D       = float(line.split()[8])    # D coloumn of pales output
             RDCtype = str(resnum2 - resnum) + "_" + atom + "_" + atom2
-
 
             if resnum in averageRDC.keys():
                 averageRDC[resnum] += D
             else:
                 averageRDC[resnum] = D
-
 
     for res_num in averageRDC.keys():
         averageRDC[res_num] /= n_of_structures
@@ -300,13 +314,17 @@ def avgPalesRDCs(pales_out):
 
 
 def calcS2(PDB_file, S2_records):
-    # parsing PDB file into models (model_list)
+    """
+    Returns a dictonary with the average S2 values:
+    S2_calced[residue] = value
+    """
     model_list = []
     model_num = 1
 
     while True:
         try:
             with suppress_output():
+                # parsing PDB file into models (model_list)
                 model_list.append(prody.parsePDB(PDB_file,
                                                  model=model_num, ter=True))
             model_num += 1
@@ -349,15 +367,15 @@ def calcS2(PDB_file, S2_records):
 
     S2_calced = {}
 
-    # az STR-ből származó S2 értékeken megy
+    # iterating over STR records
     for resnum in [int(s2rec.resnum) for s2rec in S2_records]:
 
         x2, y2, z2, xy, xz, yz = 0, 0, 0, 0, 0, 0
 
-        # a modelleken megy
+        # iterating over PDB models
         for m in model_data:
 
-            # adott modellben adott resnum-ra a normalizált vektorok koordinátái
+            # coordinates in model at a given resnum
             x, y, z = m[resnum].v[0], m[resnum].v[1], m[resnum].v[2]
 
             x2 += x ** 2
@@ -367,19 +385,16 @@ def calcS2(PDB_file, S2_records):
             xz += x * z
             yz += y * z
 
-        x2 /= len(model_data)   # STR-ből az S2 adatok számával osztok
+        x2 /= len(model_data)
         y2 /= len(model_data)
         z2 /= len(model_data)
         xy /= len(model_data)
         xz /= len(model_data)
         yz /= len(model_data)
 
-        s2 = 3 / 2.0 * (x2 ** 2 +
-                        y2 ** 2 +
-                        z2 ** 2 +
-                        2 * xy ** 2 +
-                        2 * xz ** 2 +
-                        2 * yz ** 2) - 0.5
+        # S2 calcuation
+        s2 = 3 / 2.0 * (x2 ** 2     + y2 ** 2     + z2 ** 2 +
+                        2 * xy ** 2 + 2 * xz ** 2 + 2 * yz ** 2) - 0.5
 
         S2_calced[resnum] = s2
 
@@ -387,6 +402,11 @@ def calcS2(PDB_file, S2_records):
 
 
 def calcCorrel(calced, experimental):
+    """
+    Calculates correlation between calculated and experimental data
+    "calced" is a dict containing values for residues (as keys)
+    "experimental" is a list containing STR record objects
+    """
     if len(calced) != len(experimental):
         return -2
 
@@ -424,7 +444,11 @@ def calcCorrel(calced, experimental):
 
 
 def calcQValue(calced, experimental):
-
+    """
+    Calculates Q-value for calculated and experimental data
+    "calced" is a dict containing values for residues (as keys)
+    "experimental" is a list containing STR record objects
+    """
     if len(calced) != len(experimental):
         return -2
 
@@ -443,7 +467,11 @@ def calcQValue(calced, experimental):
 
 
 def calcRMSD(calced, experimental):
-
+    """
+    Calculates RMSD for calculated and experimental data
+    "calced" is a dict containing values for residues (as keys)
+    "experimental" is a list containing STR record objects
+    """
     if len(calced) != len(experimental):
         return -2
 
@@ -461,25 +489,30 @@ def calcRMSD(calced, experimental):
 
 
 def makeGraph(calced, my_experimental):
-
+    """
+    X axis -> residue numbers, Y axis -> values
+    "calced" is a dict containing values for residues (as keys)
+    "experimental" is a list containing STR record objects
+    """
     experimental = copy.deepcopy(my_experimental)
 
     min_calc = min(calced.values())
     max_calc = max(calced.values())
 
     exp_values = []
+
     for record in experimental:
         exp_values.append(record.value)
 
     min_exp = min(exp_values)
     max_exp = max(exp_values)
 
-    miny = min(min_calc, min_exp)
-    maxy = max(max_calc, max_exp)
+    miny = min(min_calc, min_exp)               # get minimum value
+    maxy = max(max_calc, max_exp)               # get maximum value
 
     exp_line, calc_line = [], []
 
-    for k in range(0, max(calced.keys()) + 0):
+    for k in range(0, max(calced.keys()) + 0):  # fetch data from arguments
         if k in calced.keys():
             calc = calced[k]
             exp  = experimental.pop(0).value
@@ -488,7 +521,7 @@ def makeGraph(calced, my_experimental):
             calc_line.append(calc)
 
         else:
-            exp_line.append(None)
+            exp_line.append(None)   # append 'None' where data is missing
             calc_line.append(None)
 
     # connect line over missing (None) values, more info at ->
@@ -516,8 +549,12 @@ def makeGraph(calced, my_experimental):
 
 
 def makeCorrelGraph(calced, experimental):
+    """
+    X axis -> experimental values, Y axis -> calculated values
+    "calced" is a dict containing values for residues (as keys)
+    "experimental" is a list containing STR record objects
+    """
     if len(calced) != len(experimental):
-        print("para")
         return -2
 
     min_calc = min(calced.values())
@@ -530,12 +567,12 @@ def makeCorrelGraph(calced, experimental):
     min_exp = min(exp_values)
     max_exp = max(exp_values)
 
-    miny = min(min_calc, min_exp)
-    maxy = max(max_calc, max_exp)
+    miny = min(min_calc, min_exp)               # get minimum value
+    maxy = max(max_calc, max_exp)               # get maximum value
 
     exp_line, calc_line = [], []
 
-    for i, j in enumerate(calced.keys()):
+    for i, j in enumerate(calced.keys()):       # fetch data from arguments
         calc = calced[j]
         exp  = experimental[i].value
 
@@ -544,8 +581,7 @@ def makeCorrelGraph(calced, experimental):
 
     diag = []
 
-    for i in np.arange(miny, maxy * 1.42, 0.1):
-
+    for i in np.arange(miny, maxy * 1.42, 0.1): # draw graph diagonal
         diag.append(i)
 
     plt.plot(diag, diag, linewidth=2.0, color='red')

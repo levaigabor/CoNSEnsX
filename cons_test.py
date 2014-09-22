@@ -10,8 +10,6 @@ import subprocess
 import re
 import math
 
-
-
 # installed modules
 import nmrpystar
 
@@ -22,20 +20,18 @@ import csx_libs.objects as csx_obj
 
 version = "1.0"
 
+parser = csx_misc.createParser()            # get parser from module
+args = parser.parse_args()                  # parsing CLI arguments
 
-parser = csx_misc.createParser()
-args = parser.parse_args()
-
-
-if args.c:
+if args.c:                                  # show credit
     print(csx_misc.cred)
     raise SystemExit
 
-if args.help:
+if args.help:                               # show help
     print(csx_misc.help_text)
     raise SystemExit
 
-if not args.STR_file or not args.PDB_file:
+if not args.STR_file or not args.PDB_file:  # checking for input files
     print("missing file")
     parser.print_usage()
     raise SystemExit
@@ -76,51 +72,51 @@ else:
     for f in os.listdir("temp"):        # clean temp folder
         os.remove("temp/" + f)
 
-csx_func.pdb_cleaner(args.PDB_file)      # bringing PDB to format
-csx_func.pdb_splitter(args.PDB_file)     # splitting of PDB file
+csx_func.pdb_cleaner(args.PDB_file)     # bringing PDB to format
+csx_func.pdb_splitter(args.PDB_file)    # splitting of PDB file
 
 
 #------------------------  Read  and parse STR file   ------------------------#
-
-star_file = open(args.STR_file)
+star_file = open(args.STR_file)         # open STR file
 myString = ""
 
-for line in star_file:
+for line in star_file:                  # rean STR file into a string
     myString += line
 
-parsed = nmrpystar.parse(myString)
+parsed = nmrpystar.parse(myString)      # parsing, access data -> parsed.value
 
-if parsed.status != 'success':
+if parsed.status != 'success':          # check if parsing was successful
     print('Error during STR parsing: ', parsed)
     raise SystemExit
 
 
+#-----------------------------  RDC calculation  -----------------------------#
+# get RDC lists from STR file, each list item contains a list of record objects
 RDC_lists  = csx_func.get_RDC_lists(parsed.value)
-pdb_models = os.listdir("temp")
+pdb_models = os.listdir("temp")         # list of models (PDB)
 
-##### -------------------------- for RDC_list in RDC_lists:
+for RDC_list in RDC_lists:
+    # Pales call, results output file "pales.out"
+    csx_func.callPalesOn(pdb_models, RDC_list, args.lc_model, args.R)
 
-csx_func.callPalesOn(pdb_models, RDC_lists[0], args.lc_model, args.R)
+    # get averaged RDC values -> averageRDC[residue] = value
+    averageRDC = csx_func.avgPalesRDCs("pales.out")
 
-averageRDC = csx_func.avgPalesRDCs("pales.out")
-
-
-print("Correl: ", csx_func.calcCorrel(averageRDC, RDC_lists[0]))
-print("Q-val:  ", csx_func.calcQValue(averageRDC, RDC_lists[0]))
-print("RMSD:   ", csx_func.calcRMSD(averageRDC, RDC_lists[0]))
-csx_func.makeGraph(averageRDC, RDC_lists[0])
-csx_func.makeCorrelGraph(averageRDC, RDC_lists[0])
-
-##### -------------------------- for RDC_list in RDC_lists
+    print("Correl: ", csx_func.calcCorrel(averageRDC, RDC_list))
+    print("Q-val:  ", csx_func.calcQValue(averageRDC, RDC_list))
+    print("RMSD:   ", csx_func.calcRMSD(averageRDC, RDC_list))
+    csx_func.makeGraph(averageRDC, RDC_list)
+    csx_func.makeCorrelGraph(averageRDC, RDC_list)
 
 
-#-------------------------  S2 parse from STR file   -------------------------#
+#------------------------ parse S2 data from STR file   ----------------------#
+# get S2 values from STR file, each list item contains a list of record objects
 try:
     saveShifts    = parsed.value.saves["order_param"]
 except KeyError:
     print("No S2 parameter list found")
 
-loopShifts     = saveShifts.loops[-1]
+loopShifts = saveShifts.loops[-1]
 S2_records = []
 
 for ix in range(len(loopShifts.rows)):   # fetch values from STR file
@@ -131,10 +127,8 @@ for ix in range(len(loopShifts.rows)):   # fetch values from STR file
                                                 row["S2_value"]))
 
 
-
 #---------------------------------  S2 calc  ---------------------------------#
-
-
+# get averaged S2 values -> S2_calced[residue] = value
 S2_calced = csx_func.calcS2(args.PDB_file, S2_records)
 
 print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_records))
@@ -142,4 +136,3 @@ print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_records))
 print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_records))
 csx_func.makeGraph(S2_calced, S2_records)
 csx_func.makeCorrelGraph(S2_calced, S2_records)
-

@@ -3,8 +3,6 @@
 
 import argparse
 
-
-
 #-----------------------  Help and credit information   ----------------------#
 help_text = """
 usage: cons_test.py -b <STR_file> -f <PDB_file>
