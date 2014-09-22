@@ -3,12 +3,7 @@
 
 # standard modules
 from __future__ import print_function
-import time
-import sys
 import os
-import subprocess
-import re
-import math
 
 # installed modules
 import nmrpystar
@@ -17,6 +12,7 @@ import nmrpystar
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
 import csx_libs.objects as csx_obj
+import csx_libs.ouput   as csx_out
 
 version = "1.0"
 
@@ -37,32 +33,12 @@ if not args.STR_file or not args.PDB_file:  # checking for input files
     raise SystemExit
 
 
-#-------------------------  Setting up output files   ------------------------#
-date = time.strftime("%a %d. %b %X %Z %Y")
-
+#----------------  Setting up output files & write header data  --------------#
 if "txt" in args.output_format:
-    txt = args.output_file_name + ".txt"
-    txt = open(txt, 'w')
-
-    txt.write("CoNSEnsX version " + version + " started on " + date + "\n")
-    txt.write("========================================================\n")
-    txt.write("Input files specified:" +
-                   "\n\tPDB file: "                 + args.PDB_file +
-                   "\n\tX-PLOR restraint file: "    + args.XPLOR_file +
-                   "\n\tBMRB file: "                + args.STR_file + "\n\n")
+    csx_out.writeHeaderTXT(args, version)
 
 if "html" in args.output_format:
-    html = args.output_file_name + ".html"
-    html  = open(html, 'w')
-
-    html.write( "<html><head><title>CoNSEnsX output</title></head>\n" +
-                "<body bgcolor=white><h2>CoNSEnsX version " + version +
-                "</h2>\n<small>started on " + date + " </small><br>\n")
-
-    html.write( "<br><b>Input files specified:</b>\n<ul>\n" +
-                "<li>PDB file: " + args.PDB_file + "</li>\n" +
-                "<li>X-PLOR restraint file: " + args.XPLOR_file + "</li>\n" +
-                "<li>BMRB file: " + args.STR_file + "</li>\n</ul>\n<table>\n")
+    csx_out.writeHeaderHTML(args, version)
 
 
 #-------------------------  Making temporary folder   ------------------------#
@@ -96,6 +72,8 @@ RDC_lists  = csx_func.get_RDC_lists(parsed.value)
 pdb_models = os.listdir("temp")         # list of models (PDB)
 
 for RDC_list in RDC_lists:
+    #### for RDC_type in RDC_list.keys()
+
     # Pales call, results output file "pales.out"
     csx_func.callPalesOn(pdb_models, RDC_list, args.lc_model, args.R)
 
@@ -108,11 +86,13 @@ for RDC_list in RDC_lists:
     csx_func.makeGraph(averageRDC, RDC_list)
     csx_func.makeCorrelGraph(averageRDC, RDC_list)
 
+    #### for RDC_type in RDC_list.keys()
+
 
 #------------------------ parse S2 data from STR file   ----------------------#
 # get S2 values from STR file, each list item contains a list of record objects
 try:
-    saveShifts    = parsed.value.saves["order_param"]
+    saveShifts = parsed.value.saves["order_param"]
 except KeyError:
     print("No S2 parameter list found")
 

@@ -545,7 +545,7 @@ def makeGraph(calced, my_experimental):
     plt.legend(loc='lower left')
     plt.xlabel('residue number')
     plt.ylabel('value')
-    plt.show()
+    #plt.show()
 
 
 def makeCorrelGraph(calced, experimental):
@@ -589,4 +589,4 @@ def makeCorrelGraph(calced, experimental):
     plt.axis([miny, maxy, miny, maxy])
     plt.xlabel('experimental')
     plt.ylabel('calculated')
-    plt.show()
+    #plt.show()
