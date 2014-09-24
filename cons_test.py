@@ -78,12 +78,11 @@ for list_num, RDC_dict in enumerate(RDC_lists):
     # Pales call, results output file "pales.out"
     csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
 
-    # get averaged RDC values -> averageRDC[residue] = value
-    averageRDC = csx_func.avgPalesRDCs("pales.out")
-
-
     for RDC_type in RDC_dict.keys():
         print("RDC list", list_num + 1, RDC_type)
+
+        # get averaged RDC values -> averageRDC[residue] = value
+        averageRDC = csx_func.avgPalesRDCs("pales.out", RDC_type)
 
         # removing records from other RDC types
         my_averageRDC = {}
@@ -95,8 +94,8 @@ for list_num, RDC_dict in enumerate(RDC_lists):
         print("Q-val:  ", csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type]))
         print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
         print()
-        csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
-        csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
+        # csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
+        # csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
 
 
 #------------------------ parse S2 data from STR file   ----------------------#
@@ -137,5 +136,5 @@ for S2_type in S2_dict.keys():
     print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_dict[S2_type]))
     print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_dict[S2_type]))
     print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_dict[S2_type]))
-    csx_func.makeGraph(S2_calced, S2_dict[S2_type])
-    csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])
+    # csx_func.makeGraph(S2_calced, S2_dict[S2_type])
+    # csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])

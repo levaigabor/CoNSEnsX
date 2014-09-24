@@ -318,9 +318,9 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     print()
 
 
-def avgPalesRDCs(pales_out):
+def avgPalesRDCs(pales_out, my_RDC_type):
     """
-    Returns a dictonary with the average RDCs:
+    Returns a dictonary with the average RDCs for a given RDC type:
     averageRDC[residue] = value
     """
     pales_out       = open(pales_out)
@@ -339,6 +339,10 @@ def avgPalesRDCs(pales_out):
             atom2   = line.split()[5]
             D       = float(line.split()[8])    # D coloumn of pales output
             RDCtype = str(resnum2 - resnum) + "_" + atom + "_" + atom2
+
+            # skip non relevant RDC data in the pales output file
+            if my_RDC_type != RDCtype:
+                continue
 
             if resnum in averageRDC.keys():
                 averageRDC[resnum] += D
@@ -369,6 +373,28 @@ def calcS2(PDB_file, S2_records):
         except prody.proteins.pdbfile.PDBParseError:
             break
 
+    # fitting models
+    reference = model_list[0]
+
+    print("Start FITTING")
+
+    for i in range(1, len(model_list)):
+        mobile = model_list[i]
+
+        with suppress_output():
+            matches = prody.matchChains(reference, mobile)
+
+        match = matches[0]
+
+        ref_chain = match[0]
+        mob_chain = match[1]
+
+        # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
+
+        t = prody.calcTransformation(mob_chain, ref_chain)
+        t.apply(mobile)
+
+        # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
 
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
@@ -524,7 +550,6 @@ def calcRMSD(calced, experimental):
     RMSD = math.sqrt(D2 / len(experimental))
 
     return round(RMSD, 6)
-
 
 def makeGraph(calced, my_experimental):
     """
