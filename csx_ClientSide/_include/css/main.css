@@ -9,6 +9,7 @@ Version: 1.0
 
 td {
     padding: 15px;
+    color: #000000;
 }
 
 
@@ -29,8 +30,8 @@ html, hmtl a{
 }
 
 body{
-	background:#2F3238;
-	color:#7F8289;
+	background:#FFFFFF;
+	color:#FFFFFF;
 	font-weight:300;
 	font-size:16px;
 	font-family: 'Titillium Web', sans-serif;
@@ -208,7 +209,7 @@ h4,
 h5,
 h6{
 	margin:0 0 20px 0;
-	color:#FFFFFF;
+	color: #000000;
 	font-weight:300;
 	font-family: 'Titillium Web', sans-serif;
 	line-height:1.5em;
@@ -239,12 +240,12 @@ h6{
 }
 
 h3.spec {
-	color: #FFFFFF;
-    font-size: 24px;
-    font-weight: 300;
-    line-height: 1em;
-    margin-bottom: 30px;
-    text-transform: uppercase;
+  color: #000000;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1em;
+  margin-bottom: 30px;
+  text-transform: uppercase;
 }
 
 
@@ -354,7 +355,7 @@ header #logo a:hover {
 ================================================== */
 
 .page {
-	background: #2F3238;
+	background: #FFFFFF;
 	padding: 100px 0;
 	position: relative;
 	z-index: 99;
@@ -396,6 +397,7 @@ header #logo a:hover {
 
 .accordion {
   	margin-bottom: 20px;
+    color: #000;
 }
 
 .accordion-group {
@@ -415,7 +417,7 @@ header #logo a:hover {
   	display: block;
   	padding: 15px;
 	background:#3C3F45;
-	color: #23262C;
+	color: #000000;
 	font-size: 18px;
 	font-weight: 600;
 	text-transform: uppercase;

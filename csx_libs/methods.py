@@ -120,7 +120,10 @@ def pdb_splitter(PDB_file):
 
 
 def get_RDC_lists(dataBlock):
-    """Returns RDC lists as lists containing RDC_Record objects"""
+    """
+    Returns RDC lists as dictonaries containing RDC_Record objects,
+    grouped by RDCtype (keys())
+    """
     list_number = 1
     RDC_lists   = []
 
@@ -175,10 +178,31 @@ def get_RDC_lists(dataBlock):
         RDC_lists.append(RDC_records)
         list_number += 1
 
-    return RDC_lists
+    # split list into dict according to RDC types
+    prev_type = ""
+    new_RDC_list = []
+
+    for list_num, RDC_list in enumerate(RDC_lists):
+        RDC_dict = {}
+
+        for record in RDC_list:
+            if prev_type != record.RDC_type:
+                RDC_dict[record.RDC_type] = []
+                RDC_dict[record.RDC_type].append(record)
+            else:
+                RDC_dict[record.RDC_type].append(record)
+
+            prev_type = record.RDC_type
+
+        new_RDC_list.append(RDC_dict)
+
+    # for my_list in new_RDC_list:
+    #     print(my_list.keys())
+
+    return new_RDC_list
 
 
-def callPalesOn(pdb_files, RDC_list, lc_model, SVD_enable):
+def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     """
     Writes pales dummy from the given RDC values, and call Pales with the
     given parameters
@@ -241,15 +265,29 @@ def callPalesOn(pdb_files, RDC_list, lc_model, SVD_enable):
         "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
         )
 
-        for RDC_record in RDC_list:
-            # print aligned dummy dipole output if present
-            pales_dummy.write(
-                "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
-                str(RDC_record.atom1),
-                str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
-                str(RDC_record.atom2),
-                RDC_record.value, 1.000,  1.00))
+        # for RDC_record in RDC_dict:
+        #     # print aligned dummy dipole output if present
+
+        lists = []
+        for RDC_list in RDC_dict.keys():
+            lists.append(RDC_dict[RDC_list])
+
+        for RDC_set in lists:
+            for RDC_record in RDC_set:
+
+                pales_dummy.write(
+                    "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
+                    str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
+                    str(RDC_record.atom1),
+                    str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
+                    str(RDC_record.atom2),
+                    RDC_record.value, 1.000,  1.00))
+
+
+
+
+
+
 
         pales_dummy.close()
 
@@ -545,7 +583,7 @@ def makeGraph(calced, my_experimental):
     plt.legend(loc='lower left')
     plt.xlabel('residue number')
     plt.ylabel('value')
-    #plt.show()
+    plt.show()
 
 
 def makeCorrelGraph(calced, experimental):
@@ -589,4 +627,4 @@ def makeCorrelGraph(calced, experimental):
     plt.axis([miny, maxy, miny, maxy])
     plt.xlabel('experimental')
     plt.ylabel('calculated')
-    #plt.show()
+    plt.show()

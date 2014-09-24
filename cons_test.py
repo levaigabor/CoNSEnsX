@@ -71,22 +71,32 @@ if parsed.status != 'success':          # check if parsing was successful
 RDC_lists  = csx_func.get_RDC_lists(parsed.value)
 pdb_models = os.listdir("temp")         # list of models (PDB)
 
-for RDC_list in RDC_lists:
-    #### for RDC_type in RDC_list.keys()
+prev_RDC_dict = {}
+
+for list_num, RDC_dict in enumerate(RDC_lists):
 
     # Pales call, results output file "pales.out"
-    csx_func.callPalesOn(pdb_models, RDC_list, args.lc_model, args.R)
+    csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
 
     # get averaged RDC values -> averageRDC[residue] = value
     averageRDC = csx_func.avgPalesRDCs("pales.out")
 
-    print("Correl: ", csx_func.calcCorrel(averageRDC, RDC_list))
-    print("Q-val:  ", csx_func.calcQValue(averageRDC, RDC_list))
-    print("RMSD:   ", csx_func.calcRMSD(averageRDC, RDC_list))
-    csx_func.makeGraph(averageRDC, RDC_list)
-    csx_func.makeCorrelGraph(averageRDC, RDC_list)
 
-    #### for RDC_type in RDC_list.keys()
+    for RDC_type in RDC_dict.keys():
+        print("RDC list", list_num + 1, RDC_type)
+
+        # removing records from other RDC types
+        my_averageRDC = {}
+
+        for record in RDC_dict[RDC_type]:
+            my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
+
+        print("Correl: ", csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type]))
+        print("Q-val:  ", csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type]))
+        print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
+        print()
+        csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
+        csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
 
 
 #------------------------ parse S2 data from STR file   ----------------------#
@@ -100,19 +110,32 @@ loopShifts = saveShifts.loops[-1]
 S2_records = []
 
 for ix in range(len(loopShifts.rows)):   # fetch values from STR file
-            row = loopShifts.getRowAsDict(ix)
+    row = loopShifts.getRowAsDict(ix)
 
-            S2_records.append(csx_obj.S2_Record(row["Residue_seq_code"],
-                                                row["Atom_name"],
-                                                row["S2_value"]))
+    S2_records.append(csx_obj.S2_Record(row["Residue_seq_code"],
+                                        row["Atom_name"],
+                                        row["S2_value"]))
+
+S2_dict = {}
+prev_type = ""
+
+for record in S2_records:
+    if prev_type != record.type:
+        S2_dict[record.type] = []
+        S2_dict[record.type].append(record)
+    else:
+        S2_dict[record.type].append(record)
+
+    prev_type = record.type
 
 
 #---------------------------------  S2 calc  ---------------------------------#
 # get averaged S2 values -> S2_calced[residue] = value
-S2_calced = csx_func.calcS2(args.PDB_file, S2_records)
+for S2_type in S2_dict.keys():
+    S2_calced = csx_func.calcS2(args.PDB_file, S2_dict[S2_type])
 
-print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_records))
-print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_records))
-print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_records))
-csx_func.makeGraph(S2_calced, S2_records)
-csx_func.makeCorrelGraph(S2_calced, S2_records)
+    print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_dict[S2_type]))
+    print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_dict[S2_type]))
+    print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_dict[S2_type]))
+    csx_func.makeGraph(S2_calced, S2_dict[S2_type])
+    csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])
