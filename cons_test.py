@@ -94,8 +94,8 @@ for list_num, RDC_dict in enumerate(RDC_lists):
         print("Q-val:  ", csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type]))
         print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
         print()
-        # csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
-        # csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
+        csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
+        csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
 
 
 #------------------------ parse S2 data from STR file   ----------------------#
@@ -131,10 +131,10 @@ for record in S2_records:
 #---------------------------------  S2 calc  ---------------------------------#
 # get averaged S2 values -> S2_calced[residue] = value
 for S2_type in S2_dict.keys():
-    S2_calced = csx_func.calcS2(args.PDB_file, S2_dict[S2_type])
+    S2_calced = csx_func.calcS2(args.PDB_file, S2_dict[S2_type], args.fit)
 
     print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_dict[S2_type]))
     print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_dict[S2_type]))
     print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_dict[S2_type]))
-    # csx_func.makeGraph(S2_calced, S2_dict[S2_type])
-    # csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])
+    csx_func.makeGraph(S2_calced, S2_dict[S2_type])
+    csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])

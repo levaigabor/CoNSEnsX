@@ -15,6 +15,7 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
   -b STR_file           restraints file
   -f PDB_file           PDB file (fitted)
 
+  -s, --fit             superimpoze models listed in input PDF file
   -l {bic,pf1}          rdc lc model: <bic|pf1>
   -R                    causes to do SVD for back-calculating RDC data
   -r                    X-PLOR restraint file
@@ -64,6 +65,8 @@ def createParser():
     parser.add_argument('-c', action='store_true',
                        help="show credits")
 
+    parser.add_argument("-s", "--fit", action='store_true', default=False,
+                       help="superimpoze models listed in input PDB file")
     parser.add_argument("-l", "--lc_model", choices=["bic", "pf1"],
                        default="bic", help="rdc lc model: <bic|pf1>")
     parser.add_argument("-R", action='store_true', default=False,

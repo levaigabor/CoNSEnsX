@@ -283,12 +283,6 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                     str(RDC_record.atom2),
                     RDC_record.value, 1.000,  1.00))
 
-
-
-
-
-
-
         pales_dummy.close()
 
         outfile = open("pales.out", 'a')    # open output file with append mode
@@ -355,7 +349,7 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     return averageRDC
 
 
-def calcS2(PDB_file, S2_records):
+def calcS2(PDB_file, S2_records, fit):
     """
     Returns a dictonary with the average S2 values:
     S2_calced[residue] = value
@@ -376,25 +370,25 @@ def calcS2(PDB_file, S2_records):
     # fitting models
     reference = model_list[0]
 
-    print("Start FITTING")
+    if fit:
+        print("Start FITTING")
+        for i in range(1, len(model_list)):
+            mobile = model_list[i]
 
-    for i in range(1, len(model_list)):
-        mobile = model_list[i]
+            with suppress_output():
+                matches = prody.matchChains(reference, mobile)
 
-        with suppress_output():
-            matches = prody.matchChains(reference, mobile)
+            match = matches[0]
 
-        match = matches[0]
+            ref_chain = match[0]
+            mob_chain = match[1]
 
-        ref_chain = match[0]
-        mob_chain = match[1]
+            # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
 
-        # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
+            t = prody.calcTransformation(mob_chain, ref_chain)
+            t.apply(mobile)
 
-        t = prody.calcTransformation(mob_chain, ref_chain)
-        t.apply(mobile)
-
-        # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
+            # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
 
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
