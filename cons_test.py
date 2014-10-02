@@ -5,9 +5,6 @@
 from __future__ import print_function
 import os
 
-# installed modules
-import nmrpystar
-
 # own modules
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
@@ -53,17 +50,7 @@ csx_func.pdb_splitter(args.PDB_file)    # splitting of PDB file
 
 
 #------------------------  Read  and parse STR file   ------------------------#
-star_file = open(args.STR_file)         # open STR file
-myString = ""
-
-for line in star_file:                  # rean STR file into a string
-    myString += line
-
-parsed = nmrpystar.parse(myString)      # parsing, access data -> parsed.value
-
-if parsed.status != 'success':          # check if parsing was successful
-    print('Error during STR parsing: ', parsed)
-    raise SystemExit
+parsed = csx_func.parseSTR(args.STR_file)
 
 
 #-----------------------------  RDC calculation  -----------------------------#
@@ -94,47 +81,54 @@ for list_num, RDC_dict in enumerate(RDC_lists):
         print("Q-val:  ", csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type]))
         print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
         print()
-        csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
-        csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
-
-
-#------------------------ parse S2 data from STR file   ----------------------#
-# get S2 values from STR file, each list item contains a list of record objects
-try:
-    saveShifts = parsed.value.saves["order_param"]
-except KeyError:
-    print("No S2 parameter list found")
-
-loopShifts = saveShifts.loops[-1]
-S2_records = []
-
-for ix in range(len(loopShifts.rows)):   # fetch values from STR file
-    row = loopShifts.getRowAsDict(ix)
-
-    S2_records.append(csx_obj.S2_Record(row["Residue_seq_code"],
-                                        row["Atom_name"],
-                                        row["S2_value"]))
-
-S2_dict = {}
-prev_type = ""
-
-for record in S2_records:
-    if prev_type != record.type:
-        S2_dict[record.type] = []
-        S2_dict[record.type].append(record)
-    else:
-        S2_dict[record.type].append(record)
-
-    prev_type = record.type
+        # csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
+        # csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
 
 
 #---------------------------------  S2 calc  ---------------------------------#
-# get averaged S2 values -> S2_calced[residue] = value
-for S2_type in S2_dict.keys():
-    S2_calced = csx_func.calcS2(args.PDB_file, S2_dict[S2_type], args.fit)
+# parse S2 data from STR file
+S2_dict = csx_func.parseS2_STR(parsed.value)
 
-    print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_dict[S2_type]))
-    print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_dict[S2_type]))
-    print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_dict[S2_type]))
-    csx_func.makeGraph(S2_calced, S2_dict[S2_type])
-    csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])
+# get averaged S2 values -> S2_calced[residue] = value
+if S2_dict:
+    for S2_type in S2_dict.keys():
+        S2_calced = csx_func.calcS2(args.PDB_file, S2_dict[S2_type],
+                                    args.fit, args.fit_range)
+
+        print("S2_corr:", csx_func.calcCorrel(S2_calced, S2_dict[S2_type]))
+        print("S2Q-val:", csx_func.calcQValue(S2_calced, S2_dict[S2_type]))
+        print("RMSD:   ", csx_func.calcRMSD(S2_calced, S2_dict[S2_type]))
+        print()
+        # csx_func.makeGraph(S2_calced, S2_dict[S2_type])
+        # csx_func.makeCorrelGraph(S2_calced, S2_dict[S2_type])
+
+
+#-----------------------------  J-coupling calc  -----------------------------#
+# parse J-coupling data from STR file
+Jcoup_dict = csx_func.parseJcoup_STR(parsed.value)
+
+if Jcoup_dict:
+    for Jcoup_type in Jcoup_dict.keys():
+        print(Jcoup_type)
+
+csx_func.calcDihedAngles(args.PDB_file)
+
+
+
+
+
+
+
+
+
+
+# Defining parameters for known types here
+# Equation and coefficients from:
+# Wang & Bax (1996) JACS 118:2483-2494.
+# Table 1, NMR + X-ray data
+# J = A cos2(phi+THETA) + B cos (phi+THETA) + C
+
+# $A{"0_H_HA"}=6.98; $B{"0_H_HA"}=-1.38; $C{"0_H_HA"}=1.72; $THETA_rad{"0_H_HA"}=-60*$pi/180;
+# $A{"0_HA_C"}=3.75; $B{"0_HA_C"}= 2.19; $C{"0_HA_C"}=1.28; $THETA_rad{"0_HA_C"}=-60*$pi/180;
+# $A{"0_H_CB"}=3.39; $B{"0_H_CB"}=-0.94; $C{"0_H_CB"}=0.07; $THETA_rad{"0_H_CB"}=60*$pi/180;
+# $A{"0_H_C"} =4.32; $B{"0_H_C"} = 0.84; $C{"0_H_C"} =0.00; $THETA_rad{"0_H_C"} =0;

@@ -9,9 +9,7 @@ Version: 1.0
 
 td {
     padding: 15px;
-    color: #000000;
 }
-
 
 
 /* ==================================================
@@ -355,7 +353,7 @@ header #logo a:hover {
 ================================================== */
 
 .page {
-	background: #FFFFFF;
+	background: rgba(246, 246, 246, 1);
 	padding: 100px 0;
 	position: relative;
 	z-index: 99;
@@ -414,9 +412,9 @@ header #logo a:hover {
 
 .accordion-heading .accordion-toggle {
 	position: relative;
-  	display: block;
-  	padding: 15px;
-	background:#3C3F45;
+	display: block;
+	padding: 15px;
+	background:#ABABAB;
 	color: #000000;
 	font-size: 18px;
 	font-weight: 600;
@@ -498,7 +496,12 @@ header #logo a:hover {
 }
 
 .accordion-inner {
-	background: #26292E;
+	background: #E5E5E5;
   	padding: 16px 20px;
 	border: none;
+}
+
+
+.submit_line {
+    width: 16em;  height: 4em;
 }

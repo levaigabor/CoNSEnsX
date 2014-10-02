@@ -13,6 +13,9 @@ import prody
 import matplotlib.pyplot as plt
 import numpy as np
 
+# installed modules
+import nmrpystar
+
 from .objects import *
 
 
@@ -117,6 +120,22 @@ def pdb_splitter(PDB_file):
 
         temp_pdb.write("END")
         temp_pdb.close()
+
+
+def parseSTR(STR_file):
+    star_file = open(STR_file)         # open STR file
+    myString = ""
+
+    for line in star_file:                  # rean STR file into a string
+        myString += line
+
+    parsed = nmrpystar.parse(myString)      # parsing, access data -> parsed.value
+
+    if parsed.status != 'success':          # check if parsing was successful
+        print('Error during STR parsing: ', parsed)
+        raise SystemExit
+    else:
+        return parsed
 
 
 def get_RDC_lists(dataBlock):
@@ -349,7 +368,77 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     return averageRDC
 
 
-def calcS2(PDB_file, S2_records, fit):
+def parseS2_STR(parsed_value):
+    """Returns a dictonary with the parsed S2 data"""
+    try:
+        saveShifts = parsed_value.saves["order_param"]
+
+        loopShifts = saveShifts.loops[-1]
+        S2_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            S2_records.append(S2_Record(row["Residue_seq_code"],
+                                        row["Atom_name"],
+                                        row["S2_value"]))
+
+        # split list into dict according to S2 types
+        S2_dict = {}
+        prev_type = ""
+
+        for record in S2_records:
+            if prev_type != record.type:
+                S2_dict[record.type] = []
+                S2_dict[record.type].append(record)
+            else:
+                S2_dict[record.type].append(record)
+
+            prev_type = record.type
+
+        return S2_dict
+
+    except KeyError:
+        print("No S2 parameter list found")
+        return None
+
+
+def parseJcoup_STR(parsed_value):
+    """Returns a dictonary with the parsed J-coupling data"""
+    try:
+        saveShifts = parsed_value.saves["coupling_constants"]
+
+        loopShifts = saveShifts.loops[-1]
+        jcoup_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            jcoup_records.append(JCoup_Record(row["Atom_one_residue_seq_code"],
+                                              row["Coupling_constant_code"],
+                                              row["Coupling_constant_value"]))
+
+        # split list into dict according to J-cuopling types
+        jcoup_dict = {}
+        prev_type = ""
+
+        for record in jcoup_records:
+            if prev_type != record.type:
+                jcoup_dict[record.type] = []
+                jcoup_dict[record.type].append(record)
+            else:
+                jcoup_dict[record.type].append(record)
+
+            prev_type = record.type
+
+        return jcoup_dict
+
+    except KeyError:
+        print("No J-coupling parameter list found")
+        return None
+
+
+def calcS2(PDB_file, S2_records, fit, fit_range):
     """
     Returns a dictonary with the average S2 values:
     S2_calced[residue] = value
@@ -385,7 +474,19 @@ def calcS2(PDB_file, S2_records, fit):
 
             # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
 
-            t = prody.calcTransformation(mob_chain, ref_chain)
+            if fit_range:
+                weights = np.zeros((len(ref_chain), 1), dtype=np.int)
+
+                fit_start, fit_end = fit_range.split('-')
+
+                for i in range(int(fit_start) - 1, int(fit_end) - 1):
+                    weights[i] = 1
+
+            else:
+                weights = np.ones((len(ref_chain), 1), dtype=np.int)
+
+
+            t = prody.calcTransformation(mob_chain, ref_chain, weights)
             t.apply(mobile)
 
             # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
@@ -405,9 +506,7 @@ def calcS2(PDB_file, S2_records, fit):
                 current_Resindex = atom_res
                 has_H, has_N = False, False
 
-
             if atom_res == current_Resindex:
-
                 if atom.getName() == 'N':
                     has_N = True
                     N_coords = Vec_3D(atom.getCoords())
@@ -457,6 +556,93 @@ def calcS2(PDB_file, S2_records, fit):
         S2_calced[resnum] = s2
 
     return S2_calced
+
+
+def calcDihedAngles(PDB_file):
+
+    model_list = []
+    model_num = 1
+
+    while True:
+        try:
+            with suppress_output():
+                # parsing PDB file into models (model_list)
+                model_list.append(prody.parsePDB(PDB_file,
+                                                 model=model_num, ter=True))
+            model_num += 1
+        except prody.proteins.pdbfile.PDBParseError:
+            break
+
+    JCoup_dicts = []
+
+    for model_num, model in enumerate(model_list):
+        current_Resindex = 1
+
+        prev_C, my_N, my_CA, my_C = None, None, None, None
+
+        JCoup_dict = {}
+
+        for atom in model:
+            atom_res = atom.getResindex() + 1
+
+            if atom_res != current_Resindex:
+                # APPEND
+                if (prev_C is not None and my_N is not None and
+                    my_CA is not None and my_C is not None):
+
+                    # my $V23=Vector3D->Diff2($a2,$a3);
+                    NCA_vec = my_N - my_CA
+                    # my $V12=Vector3D->Diff2($a1,$a2);
+                    CN_vec  = prev_C - my_N
+                    # my $V43=Vector3D->Diff2($a4,$a3);
+                    CCA_vec = my_C - my_CA
+
+                    # my $P1=Vector3D->VectorialProduct2($V12,$V23);
+                    first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
+                    # my $P2=Vector3D->VectorialProduct2($V43,$V23);
+                    second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
+
+                    angle = Vec_3D.dihedAngle(first_cross, second_cross)
+
+                    # print(current_Resindex, angle) # DEGREE !!!
+                    JCoup_dict[current_Resindex] = angle
+
+                current_Resindex = atom_res
+                prev_C = my_C
+                my_N, my_CA, my_C = None, None, None
+
+
+            if atom_res == current_Resindex:
+                if atom.getName() == 'N':
+                    # print("N found")
+                    my_N = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'CA':
+                    # print("CA found")
+                    my_CA = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'C':
+                    # print("C found")
+                    my_C = Vec_3D(atom.getCoords())
+
+        JCoup_dicts.append(JCoup_dict)
+
+    avg_dict = {}
+    dict_count = 0
+
+    for my_dict in JCoup_dicts:     # averaging
+
+        dict_count += 1
+
+        for resnum in my_dict.keys():
+
+            if resnum in avg_dict.keys():
+                avg_dict[resnum] += my_dict[resnum]
+            else:
+                avg_dict[resnum] = my_dict[resnum]
+
+    for key in avg_dict.keys():
+        avg_dict[key] /= dict_count
+
+    print(avg_dict)
 
 
 def calcCorrel(calced, experimental):
@@ -544,6 +730,7 @@ def calcRMSD(calced, experimental):
     RMSD = math.sqrt(D2 / len(experimental))
 
     return round(RMSD, 6)
+
 
 def makeGraph(calced, my_experimental):
     """

@@ -26,16 +26,31 @@ class S2_Record(object):
         self.value  = float(S2_value)
 
 
+class JCoup_Record(object):
+    """Class for storing J-Coupling data"""
+
+    def __init__(self, resnum, jcoup_type, JCoup_value):
+        self.resnum = int(resnum)
+        self.type   = jcoup_type
+        self.value  = float(JCoup_value)
+
+
 class Vec_3D(object):
-    """Vector class for S2 calculation"""
+    """Vector class for calculations"""
 
     def __init__(self, v):
         self.v = v
 
+    def __getitem__(self, index):
+        return self.v[index]
+
+    def __len__(self):
+        return len(self.v)
+
     def __sub__(self, other):
         v = self.v
         u = other.v
-        return [u[i] - v[i] for i in range(len(u))]
+        return Vec_3D([u[i] - v[i] for i in range(len(u))])
 
     def __iadd__(self, other):
         v = self.v
@@ -54,6 +69,19 @@ class Vec_3D(object):
         vmag = self.magnitude()
         v = self.v
         return Vec_3D([v[i] / vmag  for i in range(len(v))])
+
+    def cross(one, other):
+        c = [one.v[1] * other.v[2] - one.v[2] * other.v[1],
+             one.v[2] * other.v[0] - one.v[0] * other.v[2],
+             one.v[0] * other.v[1] - one.v[1] * other.v[0]]
+
+        return Vec_3D(c)
+
+    def dihedAngle(one, other):
+        return math.degrees(math.acos((one.v[0] * other.v[0] +
+                                       one.v[1] * other.v[1] +
+                                       one.v[2] * other.v[2]) /
+                                      (one.magnitude() * other.magnitude())))
 
 
 # Define a context manager to suppress stdout and stderr.

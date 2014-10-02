@@ -33,7 +33,7 @@
 <body>
 
 <!-- Our Shortcodes Section -->
-<div id="shortcodes" class="page">
+<div id="shortcodes" class="page" style="padding: 30px 0 0 0;">
 	<div class="container">
 
     	<!-- Title Page -->
@@ -54,26 +54,39 @@
             	<h3 class="spec">Start calculation</h3>
 
         		<div class="accordion" id="accordionArea">
+                    <form name="myform" action="http://www.mydomain.com/myformhandler.cgi" method="POST">
                     <table border="0">
                         <tr><td>PDB file: &nbsp;</td>
-                            <td><input name="pdb_upload" size="20" type="file"></td>
+                            <td><input id="pdb_file" name="pdb_upload" size="20" type="file"></td>
+                        </tr>
+                        <tr><td>&nbsp;</td>
+                            <td>or PDB ID: &nbsp;<input id="pdb_id" name="pdb_web" placeholder="1D3Z" type="text"></td>
                         </tr>
                         <tr><td>X-PLOR file: &nbsp;</td>
-                            <td><input name="xplor_upload" size="20" type="file"></td>
+                            <td><input id="xplor_file" name="xplor_upload" size="20" type="file"></td>
                         </tr>
-                        <tr><td>PDB file: &nbsp;</td>
-                            <td><input name="bmrb_upload" size="20" type="file"></td>
+                        <tr><td>BMBR file: &nbsp;</td>
+                            <td><input id="bmbr_file" name="bmrb_upload" size="20" type="file"></td>
                         </tr>
                     </table>
                     <br><br>
 
-                    <input name="noeviolanal" value="1" type="checkbox">  Perfom NOE violation analysis<br><br>
-                    <input name="RDCSVD" value="1" type="checkbox">  Use SVD for RDC back-calculation
+                    <input id="fit_box" name="superimpose" value="1" type="checkbox">  Fit models in PDB<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on range:
+                    <input id="fit_range" placeholder="1-72" type="text">&nbsp;(optional)<br>
+                    <input name="RDCSVD" value="1" type="checkbox">  Use SVD for RDC back-calculation<br><br>
+                    <input name="noeviolanal" value="1" type="checkbox">  Perfom NOE violation analysis
 
                     <br><br>RDC LC model:   <select name="RDCLC">
                     <option selected="selected" value="bic">bicelles</option>
                     <option value="pf1">Pf1 phages</option>
-                    </select>
+                    </select><br><br>
+                    <table id="bottom_table" border="0">
+                        <tr><td><input id="reset_button" type="reset" value="Reset!", style="width: 16em;  height: 4em;"></td>
+                            <td><input id="submit_button" type="submit" value="Submit", style="width: 16em;  height: 4em;"></td>
+                        </tr>
+                    </table>
+                    </form>
                 </div>
                 <!-- End Accordion -->
         	</div>
@@ -163,6 +176,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> <!-- jQuery Core -->
 <script src="_include/js/bootstrap.min.js"></script> <!-- Bootstrap -->
 <script src="_include/js/supersized.3.2.7.min.js"></script> <!-- Slider -->
+<script src="_include/js/script.js"></script>
 <!-- End Js -->
 
 </body>

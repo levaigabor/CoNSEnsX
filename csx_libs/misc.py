@@ -6,19 +6,18 @@ import argparse
 #-----------------------  Help and credit information   ----------------------#
 help_text = """
 usage: cons_test.py -b <STR_file> -f <PDB_file>
-             [-l <RDC_LC_MODEL: <bic|pf1>] [-R] [-O <txt|html>] [-o <outfile>]
-             [-T <linethickness_in_graphs>]
 
   -h, --help            show this help message and exit
   -c                    show credits
 
   -b STR_file           restraints file
-  -f PDB_file           PDB file (fitted)
+  -f PDB_file           PDB file
+  -r XPLOR_file         X-PLOR restraint file
 
   -s, --fit             superimpoze models listed in input PDF file
+  --fit_range           range for model fitting (first-last)
   -l {bic,pf1}          rdc lc model: <bic|pf1>
   -R                    causes to do SVD for back-calculating RDC data
-  -r                    X-PLOR restraint file
   -O {txt,html}         output format
   -o OUTPUT_FILE_NAME   output file name
   -T LINE_THICKNESS     line thickness in raphs
@@ -67,6 +66,7 @@ def createParser():
 
     parser.add_argument("-s", "--fit", action='store_true', default=False,
                        help="superimpoze models listed in input PDB file")
+    parser.add_argument("--fit_range", help="range of model fit")
     parser.add_argument("-l", "--lc_model", choices=["bic", "pf1"],
                        default="bic", help="rdc lc model: <bic|pf1>")
     parser.add_argument("-R", action='store_true', default=False,
