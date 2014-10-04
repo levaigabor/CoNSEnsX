@@ -28,6 +28,17 @@ shortcodes = {
     'TYR':'Y',  'VAL':'V'
 }
 
+# Equation and coefficients from:
+# Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
+# J = A cos2(phi+THETA) + B cos (phi+THETA) + C
+
+A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
+B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
+C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
+# THETA = {"3JHNCB":60,    "3JHNHA":-60,   "3JHNC": 0,   "3JHAC": -60} # DEGREE!
+THETA = {"3JHNCB":60*math.pi/180, "3JHNHA":-60*math.pi/180,
+         "3JHNC": 0,              "3JHAC": -60*math.pi/180} # RAD!
+
 
 def pdb_cleaner(PDB_file):
     """
@@ -559,7 +570,6 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
 
 
 def calcDihedAngles(PDB_file):
-
     model_list = []
     model_num = 1
 
@@ -605,7 +615,7 @@ def calcDihedAngles(PDB_file):
                     angle = Vec_3D.dihedAngle(first_cross, second_cross)
 
                     # print(current_Resindex, angle) # DEGREE !!!
-                    JCoup_dict[current_Resindex] = angle
+                    JCoup_dict[current_Resindex] = math.radians(angle) # RAD!!!
 
                 current_Resindex = atom_res
                 prev_C = my_C
@@ -642,7 +652,26 @@ def calcDihedAngles(PDB_file):
     for key in avg_dict.keys():
         avg_dict[key] /= dict_count
 
-    print(avg_dict)
+    return avg_dict
+
+
+def calcJCoup(calced, experimental, Jcoup_type):
+
+    JCoup_calced = {}
+
+    for record in experimental:
+
+        phi = calced[record.resnum]
+
+        J = (A[Jcoup_type] * (math.cos(phi+THETA[Jcoup_type])) ** 2 +
+             B[Jcoup_type] * math.cos(phi+THETA[Jcoup_type]) +
+             C[Jcoup_type])
+
+        print(Jcoup_type, calced[record.resnum], J)
+
+        JCoup_calced[record.resnum] = J
+
+    return JCoup_calced
 
 
 def calcCorrel(calced, experimental):

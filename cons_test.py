@@ -106,29 +106,26 @@ if S2_dict:
 #-----------------------------  J-coupling calc  -----------------------------#
 # parse J-coupling data from STR file
 Jcoup_dict = csx_func.parseJcoup_STR(parsed.value)
+avg_dict   = csx_func.calcDihedAngles(args.PDB_file)
 
 if Jcoup_dict:
     for Jcoup_type in Jcoup_dict.keys():
-        print(Jcoup_type)
 
-csx_func.calcDihedAngles(args.PDB_file)
+        JCoup_calced = csx_func.calcJCoup(avg_dict, Jcoup_dict[Jcoup_type],
+                                          Jcoup_type)
 
-
-
-
-
-
-
+        print(Jcoup_type + "_corr:", csx_func.calcCorrel(JCoup_calced,
+                                                    Jcoup_dict[Jcoup_type]))
+        csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
+        csx_func.makeCorrelGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
 
 
 
-# Defining parameters for known types here
-# Equation and coefficients from:
-# Wang & Bax (1996) JACS 118:2483-2494.
-# Table 1, NMR + X-ray data
-# J = A cos2(phi+THETA) + B cos (phi+THETA) + C
 
-# $A{"0_H_HA"}=6.98; $B{"0_H_HA"}=-1.38; $C{"0_H_HA"}=1.72; $THETA_rad{"0_H_HA"}=-60*$pi/180;
-# $A{"0_HA_C"}=3.75; $B{"0_HA_C"}= 2.19; $C{"0_HA_C"}=1.28; $THETA_rad{"0_HA_C"}=-60*$pi/180;
-# $A{"0_H_CB"}=3.39; $B{"0_H_CB"}=-0.94; $C{"0_H_CB"}=0.07; $THETA_rad{"0_H_CB"}=60*$pi/180;
-# $A{"0_H_C"} =4.32; $B{"0_H_C"} = 0.84; $C{"0_H_C"} =0.00; $THETA_rad{"0_H_C"} =0;
+
+
+
+
+
+
+
