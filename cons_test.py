@@ -116,7 +116,8 @@ if Jcoup_dict:
 
         print(Jcoup_type + "_corr:", csx_func.calcCorrel(JCoup_calced,
                                                     Jcoup_dict[Jcoup_type]))
-        csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
+        csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type],
+                           "J-coupling " + Jcoup_type)
         csx_func.makeCorrelGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
 
 

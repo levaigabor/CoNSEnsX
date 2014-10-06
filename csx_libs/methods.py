@@ -36,8 +36,8 @@ A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
 B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
 C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
 # THETA = {"3JHNCB":60,    "3JHNHA":-60,   "3JHNC": 0,   "3JHAC": -60} # DEGREE!
-THETA = {"3JHNCB":60*math.pi/180, "3JHNHA":-60*math.pi/180,
-         "3JHNC": 0,              "3JHAC": -60*math.pi/180} # RAD!
+THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
+         "3JHNC": math.radians(0),  "3JHAC": math.radians(-60)} # RAD!
 
 
 def pdb_cleaner(PDB_file):
@@ -614,8 +614,17 @@ def calcDihedAngles(PDB_file):
 
                     angle = Vec_3D.dihedAngle(first_cross, second_cross)
 
+                    # reference for setting sign of angle
+                    reference = Vec_3D.cross(first_cross, second_cross)
+
+                    r1 = reference.normalize()
+                    r2 = NCA_vec.normalize()
+
+                    if ((r1 - r2).magnitude() < r2.magnitude()):
+                        angle *= -1
+
                     # print(current_Resindex, angle) # DEGREE !!!
-                    JCoup_dict[current_Resindex] = math.radians(angle) # RAD!!!
+                    JCoup_dict[current_Resindex] = -1 * math.radians(angle) # DEG!!!
 
                 current_Resindex = atom_res
                 prev_C = my_C
@@ -635,23 +644,25 @@ def calcDihedAngles(PDB_file):
 
         JCoup_dicts.append(JCoup_dict)
 
-    avg_dict = {}
-    dict_count = 0
+    avg_dict    = {}
+    phi_cos_avg = 0
+    phi_sin_avg = 0
 
-    for my_dict in JCoup_dicts:     # averaging
+    for resnum in JCoup_dicts[0].keys():
 
-        dict_count += 1
+        for my_dict in JCoup_dicts:     # averaging
 
-        for resnum in my_dict.keys():
+            phi_cos_avg += math.cos(my_dict[resnum])
+            phi_sin_avg += math.sin(my_dict[resnum])
 
-            if resnum in avg_dict.keys():
-                avg_dict[resnum] += my_dict[resnum]
-            else:
-                avg_dict[resnum] = my_dict[resnum]
+        phi_cos_avg /= len(JCoup_dicts)
+        phi_sin_avg /= len(JCoup_dicts)
 
-    for key in avg_dict.keys():
-        avg_dict[key] /= dict_count
+        phi_rad = math.atan2(phi_sin_avg, phi_cos_avg)
 
+        avg_dict[resnum] = phi_rad
+
+    # print(avg_dict)
     return avg_dict
 
 
@@ -667,7 +678,7 @@ def calcJCoup(calced, experimental, Jcoup_type):
              B[Jcoup_type] * math.cos(phi+THETA[Jcoup_type]) +
              C[Jcoup_type])
 
-        print(Jcoup_type, calced[record.resnum], J)
+        # print(Jcoup_type, calced[record.resnum], J)
 
         JCoup_calced[record.resnum] = J
 
@@ -761,7 +772,7 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
-def makeGraph(calced, my_experimental):
+def makeGraph(calced, my_experimental, title):
     """
     X axis -> residue numbers, Y axis -> values
     "calced" is a dict containing values for residues (as keys)
@@ -818,8 +829,8 @@ def makeGraph(calced, my_experimental):
     plt.legend(loc='lower left')
     plt.xlabel('residue number')
     plt.ylabel('value')
+    plt.title(title)
     plt.show()
-
 
 def makeCorrelGraph(calced, experimental):
     """
