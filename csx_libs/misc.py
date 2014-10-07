@@ -19,9 +19,6 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
   --fit_range           range for model fitting (first-last)
   -l {bic,pf1}          rdc lc model: <bic|pf1>
   -R                    causes to do SVD for back-calculating RDC data
-  -O {txt,html}         output format
-  -o OUTPUT_FILE_NAME   output file name
-  -T LINE_THICKNESS     line thickness in raphs
 
 
 CoNSEnsX: assessing the compliance of varios NMR data with a protein
@@ -72,11 +69,6 @@ def createParser():
                        default="bic", help="rdc lc model: <bic|pf1>")
     parser.add_argument("-R", action='store_true', default=False,
                        help="causes to do SVD for back-calculating RDC data")
-    parser.add_argument("-O", "--output_format", choices=["txt", "html"],
-                       default="html|txt", help="output format")
-    parser.add_argument("-o", "--output_file_name", default="consensx",
-                       help="output file name")
-    parser.add_argument("-T", "--line_thickness", help="raphs line thickness")
 
     return parser       # return created parser object
 
