@@ -3,6 +3,7 @@
 
 import argparse
 
+
 #-----------------------  Help and credit information   ----------------------#
 help_text = """
 usage: cons_test.py -b <STR_file> -f <PDB_file>
@@ -78,3 +79,6 @@ def createParser():
     parser.add_argument("-T", "--line_thickness", help="raphs line thickness")
 
     return parser       # return created parser object
+
+
+

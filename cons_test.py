@@ -4,17 +4,35 @@
 # standard modules
 from __future__ import print_function
 import os
+import string
+import random
 
 # own modules
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
 import csx_libs.objects as csx_obj
-import csx_libs.ouput   as csx_out
+import csx_libs.output   as csx_out
 
 version = "1.0"
 
+#------------------------  Setting up working directory  ---------------------#
+def getID(size=6, chars=string.ascii_uppercase + string.digits):
+    """Random ID generatod"""
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+my_path = "calculations/" + getID() + '/'
+
+if not os.path.exists(my_path):          # create temp folder
+    os.makedirs(my_path)
+else:
+    for f in os.listdir(my_path):        # clean temp folder
+        os.remove(my_path + '/' + f)
+
+
+#------------------  Setting up parser and parse CLI arguments  --------------#
 parser = csx_misc.createParser()            # get parser from module
-args = parser.parse_args()                  # parsing CLI arguments
+args   = parser.parse_args()                # parsing CLI arguments
 
 if args.c:                                  # show credit
     print(csx_misc.cred)
@@ -32,10 +50,10 @@ if not args.STR_file or not args.PDB_file:  # checking for input files
 
 #----------------  Setting up output files & write header data  --------------#
 if "txt" in args.output_format:
-    csx_out.writeHeaderTXT(args, version)
+    csx_out.writeHeaderTXT(my_path, args, version)
 
 if "html" in args.output_format:
-    csx_out.writeHeaderHTML(args, version)
+    csx_out.writeHeaderHTML(my_path, args, version)
 
 
 #-------------------------  Making temporary folder   ------------------------#
@@ -81,7 +99,8 @@ for list_num, RDC_dict in enumerate(RDC_lists):
         print("Q-val:  ", csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type]))
         print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
         print()
-        # csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type])
+        csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type],
+                           "RDC " + RDC_type)
         # csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
 
 
@@ -116,9 +135,9 @@ if Jcoup_dict:
 
         print(Jcoup_type + "_corr:", csx_func.calcCorrel(JCoup_calced,
                                                     Jcoup_dict[Jcoup_type]))
-        csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type],
-                           "J-coupling " + Jcoup_type)
-        csx_func.makeCorrelGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
+        # csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type],
+        #                    "J-coupling " + Jcoup_type)
+        # csx_func.makeCorrelGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
 
 
 

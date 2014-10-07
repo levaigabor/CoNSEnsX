@@ -17,6 +17,7 @@ import numpy as np
 import nmrpystar
 
 from .objects import *
+from .output import *
 
 
 pales = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
@@ -570,6 +571,10 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
 
 
 def calcDihedAngles(PDB_file):
+    """
+    Calculates model averaged backbone diherdral angles
+    note: all returned angle values are in radian
+    """
     model_list = []
     model_num = 1
 
@@ -623,8 +628,7 @@ def calcDihedAngles(PDB_file):
                     if ((r1 - r2).magnitude() < r2.magnitude()):
                         angle *= -1
 
-                    # print(current_Resindex, angle) # DEGREE !!!
-                    JCoup_dict[current_Resindex] = -1 * math.radians(angle) # DEG!!!
+                    JCoup_dict[current_Resindex] = -1 * math.radians(angle)
 
                 current_Resindex = atom_res
                 prev_C = my_C
@@ -633,13 +637,10 @@ def calcDihedAngles(PDB_file):
 
             if atom_res == current_Resindex:
                 if atom.getName() == 'N':
-                    # print("N found")
                     my_N = Vec_3D(atom.getCoords())
                 elif atom.getName() == 'CA':
-                    # print("CA found")
                     my_CA = Vec_3D(atom.getCoords())
                 elif atom.getName() == 'C':
-                    # print("C found")
                     my_C = Vec_3D(atom.getCoords())
 
         JCoup_dicts.append(JCoup_dict)
@@ -667,7 +668,10 @@ def calcDihedAngles(PDB_file):
 
 
 def calcJCoup(calced, experimental, Jcoup_type):
-
+    """
+    Calculates J-coupling values from dihedral angles
+    note: all angles must be in radian
+    """
     JCoup_calced = {}
 
     for record in experimental:
@@ -677,8 +681,6 @@ def calcJCoup(calced, experimental, Jcoup_type):
         J = (A[Jcoup_type] * (math.cos(phi+THETA[Jcoup_type])) ** 2 +
              B[Jcoup_type] * math.cos(phi+THETA[Jcoup_type]) +
              C[Jcoup_type])
-
-        # print(Jcoup_type, calced[record.resnum], J)
 
         JCoup_calced[record.resnum] = J
 
@@ -829,8 +831,9 @@ def makeGraph(calced, my_experimental, title):
     plt.legend(loc='lower left')
     plt.xlabel('residue number')
     plt.ylabel('value')
-    plt.title(title)
-    plt.show()
+    # plt.title(title)
+    plt.savefig(title + ".svg", format="svg")
+    plt.clf()   # clear figure
 
 def makeCorrelGraph(calced, experimental):
     """

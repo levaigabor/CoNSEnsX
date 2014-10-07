@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import time
+import os
 
-date = time.strftime("%a %d. %b %X %Z %Y")
+date    = time.strftime("%a %d. %b %X %Z %Y")
 
-def writeHeaderTXT(args, version):
-    txt = args.output_file_name + ".txt"
+
+def writeHeaderTXT(path, args, version):
+    txt = path + args.output_file_name + ".txt"
     txt = open(txt, 'w')
 
     txt.write("CoNSEnsX version " + version + " started on " + date + "\n")
@@ -17,9 +19,9 @@ def writeHeaderTXT(args, version):
                    "\n\tBMRB file: "                + args.STR_file + "\n\n")
 
 
-def writeHeaderHTML(args, version):
-    html = args.output_file_name + ".html"
-    html  = open(html, 'w')
+def writeHeaderHTML(path, args, version):
+    html = path +  args.output_file_name + ".html"
+    html = open(html, 'w')
 
     html.write( "<html><head><title>CoNSEnsX output</title></head>\n" +
                 "<body bgcolor=white><h2>CoNSEnsX version " + version +
