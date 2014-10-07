@@ -11,7 +11,7 @@ import random
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
 import csx_libs.objects as csx_obj
-import csx_libs.output   as csx_out
+import csx_libs.output  as csx_out
 
 version = "1.0"
 
@@ -22,10 +22,12 @@ def getID(size=6, chars=string.ascii_uppercase + string.digits):
 my_id = getID()
 my_path = "calculations/" + my_id + '/'
 
-if not os.path.exists(my_path):          # create temp folder
+print("Job started with ID:", my_id)
+
+if not os.path.exists(my_path):             # create temp folder
     os.makedirs(my_path)
 else:
-    for f in os.listdir(my_path):        # clean temp folder
+    for f in os.listdir(my_path):           # clean temp folder
         os.remove(my_path + '/' + f)
 
 
@@ -48,11 +50,9 @@ if not args.STR_file or not args.PDB_file:  # checking for input files
 
 
 #----------------  Setting up output files & write header data  --------------#
-# if "txt" in args.output_format:
-#     csx_out.writeHeaderTXT(my_path, args, version)
+# csx_out.writeHeaderTXT(my_path, args, version)
 
-if "html" in args.output_format:
-    csx_out.writeHeaderHTML(my_path, version)
+csx_out.writeHeaderHTML(my_path, version)
 
 
 #-------------------------  Making temporary folder   ------------------------#
