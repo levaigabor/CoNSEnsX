@@ -17,7 +17,6 @@ import numpy as np
 import nmrpystar
 
 from .objects import *
-from .output import *
 
 
 pales = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
@@ -133,6 +132,7 @@ def pdb_splitter(PDB_file):
         temp_pdb.write("END")
         temp_pdb.close()
 
+    return len(model_names)
 
 def parseSTR(STR_file):
     star_file = open(STR_file)         # open STR file
@@ -820,6 +820,9 @@ def makeGraph(calced, my_experimental, title):
 
     # x axis values as numpy array
     xs = np.arange(max(calced.keys())+2)
+
+    plt.figure(figsize=(10, 5), dpi=80)
+
     # experimental values with 'None' values masked
     plt.plot(xs[exp_mask], exp_line[exp_mask],
              linewidth=2.0, color='red', marker='o', label='exp')
@@ -832,10 +835,11 @@ def makeGraph(calced, my_experimental, title):
     plt.xlabel('residue number')
     plt.ylabel('value')
     # plt.title(title)
+    plt.tight_layout(pad=1.08)
     plt.savefig(title + ".svg", format="svg")
-    plt.clf()   # clear figure
+    # plt.clf()   # clear figure
 
-def makeCorrelGraph(calced, experimental):
+def makeCorrelGraph(calced, experimental, title):
     """
     X axis -> experimental values, Y axis -> calculated values
     "calced" is a dict containing values for residues (as keys)
@@ -871,9 +875,11 @@ def makeCorrelGraph(calced, experimental):
     for i in np.arange(miny, maxy * 1.42, 0.1): # draw graph diagonal
         diag.append(i)
 
+    plt.figure(figsize=(6, 5), dpi=80)
     plt.plot(diag, diag, linewidth=2.0, color='red')
     plt.plot(exp_line, calc_line, 'bo')
     plt.axis([miny, maxy, miny, maxy])
     plt.xlabel('experimental')
     plt.ylabel('calculated')
-    plt.show()
+    plt.tight_layout(pad=1.08)
+    plt.savefig(title + ".svg", format="svg")

@@ -1,16 +1,52 @@
-/*
-Theme Name: Brushed
-Theme URI: http://www.themes.alessioatzeni.com/html/brushed/
-Author: Alessio Atzeni
-Author URI: http://www.alessioatzeni.com
-Description: Personal Website and Portfolio of Alessio Atzeni
-Version: 1.0
-*/
-
-td {
-    padding: 15px;
+table {
+  color: #000;
 }
 
+.results {
+  width: 993px;
+  padding-top: 10px;
+  margin-right: auto;
+  margin-left : auto;
+  background-color: #FFF;
+  border-radius: 10px;
+
+  -webkit-box-shadow: inset 5px 50px 7px 0px rgba(222,94,96,1);
+  -moz-box-shadow   : inset 5px 50px 7px 0px rgba(222,94,96,1);
+  box-shadow        : inset 5px 50px 7px 0px rgba(222,94,96,1);
+}
+
+.values_table {
+  width: 200px;
+}
+
+.result_table {
+  margin-right: auto;
+  margin-left : auto;
+  margin-bottom: 20px;
+}
+
+.files_table {
+  margin-right: auto;
+  margin-left : auto;
+  margin-bottom: 50px;
+}
+
+.files_table td {
+  padding: 5px;
+  border: 1px solid black;
+  width: 320px;
+  background-color: #ABABAB;
+}
+
+#head-td {
+  background-color: #DE5E60;
+  color: #FFF;
+  font-weight: 600;
+}
+
+.table-source {
+  text-align: center;
+}
 
 /* ==================================================
    Basic Styles
@@ -227,6 +263,7 @@ h3{
 
 h4{
 	font-size:20px;
+  color: #FFF;
 }
 
 h5{

@@ -17,11 +17,10 @@ version = "1.0"
 
 #------------------------  Setting up working directory  ---------------------#
 def getID(size=6, chars=string.ascii_uppercase + string.digits):
-    """Random ID generatod"""
     return ''.join(random.choice(chars) for _ in range(size))
 
-
-my_path = "calculations/" + getID() + '/'
+my_id = getID()
+my_path = "calculations/" + my_id + '/'
 
 if not os.path.exists(my_path):          # create temp folder
     os.makedirs(my_path)
@@ -49,22 +48,26 @@ if not args.STR_file or not args.PDB_file:  # checking for input files
 
 
 #----------------  Setting up output files & write header data  --------------#
-if "txt" in args.output_format:
-    csx_out.writeHeaderTXT(my_path, args, version)
+# if "txt" in args.output_format:
+#     csx_out.writeHeaderTXT(my_path, args, version)
 
 if "html" in args.output_format:
-    csx_out.writeHeaderHTML(my_path, args, version)
+    csx_out.writeHeaderHTML(my_path, version)
 
 
 #-------------------------  Making temporary folder   ------------------------#
-if not os.path.exists("temp"):          # create temp folder
+if not os.path.exists("temp"):                        # create temp folder
     os.makedirs("temp")
 else:
-    for f in os.listdir("temp"):        # clean temp folder
+    for f in os.listdir("temp"):                      # clean temp folder
         os.remove("temp/" + f)
 
-csx_func.pdb_cleaner(args.PDB_file)     # bringing PDB to format
-csx_func.pdb_splitter(args.PDB_file)    # splitting of PDB file
+csx_func.pdb_cleaner(args.PDB_file)                   # bringing PDB to format
+model_count = csx_func.pdb_splitter(args.PDB_file)    # splitting of PDB file
+
+
+#-------------------------  Write file data to HTML   ------------------------#
+csx_out.writeFileTable(my_path, args, my_id, model_count)
 
 
 #------------------------  Read  and parse STR file   ------------------------#
@@ -83,6 +86,8 @@ for list_num, RDC_dict in enumerate(RDC_lists):
     # Pales call, results output file "pales.out"
     csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
 
+    csx_out.writeRDC_table_open(my_path, list_num + 1)
+
     for RDC_type in RDC_dict.keys():
         print("RDC list", list_num + 1, RDC_type)
 
@@ -100,9 +105,11 @@ for list_num, RDC_dict in enumerate(RDC_lists):
         print("RMSD:   ", csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type]))
         print()
         csx_func.makeGraph(my_averageRDC, RDC_dict[RDC_type],
-                           "RDC " + RDC_type)
-        # csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type])
+                           "RDC_" + RDC_type)
+        csx_func.makeCorrelGraph(my_averageRDC, RDC_dict[RDC_type],
+                                 "RDC_correlation_" + RDC_type)
 
+    csx_out.writeRDC_table_close(my_path)
 
 #---------------------------------  S2 calc  ---------------------------------#
 # parse S2 data from STR file
@@ -135,6 +142,8 @@ if Jcoup_dict:
 
         print(Jcoup_type + "_corr:", csx_func.calcCorrel(JCoup_calced,
                                                     Jcoup_dict[Jcoup_type]))
+        print("Q-val:  ", csx_func.calcQValue(JCoup_calced, Jcoup_dict[Jcoup_type]))
+        print("RMSD:   ", csx_func.calcRMSD(JCoup_calced, Jcoup_dict[Jcoup_type]))
         # csx_func.makeGraph(JCoup_calced, Jcoup_dict[Jcoup_type],
         #                    "J-coupling " + Jcoup_type)
         # csx_func.makeCorrelGraph(JCoup_calced, Jcoup_dict[Jcoup_type])
