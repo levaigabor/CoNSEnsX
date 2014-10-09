@@ -13,6 +13,7 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
 
   -b STR_file           restraints file
   -f PDB_file           PDB file
+  -f PDB_id             PDB file to fetch from rcsb.org
   -r XPLOR_file         X-PLOR restraint file
 
   -s, --fit             superimpoze models listed in input PDF file
@@ -52,8 +53,9 @@ def createParser():
     parser = argparse.ArgumentParser(add_help = False,
                                     usage    = consensx_usage)
 
-    parser.add_argument("-b", "--STR_file", help = "restraints file")
-    parser.add_argument("-f", "--PDB_file", help = "PDB file (fitted)")
+    parser.add_argument("-b", "--STR_file",  help = "restraints file")
+    parser.add_argument("-f", "--PDB_file",  help = "PDB file")
+    parser.add_argument("-p", "--PDB_fetch", help = "PDB file to fetch")
     parser.add_argument("-r", "--XPLOR_file", default="",
                        help = "X-PLOR restraint file")
 

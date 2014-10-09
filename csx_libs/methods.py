@@ -19,7 +19,8 @@ import nmrpystar
 from .objects import *
 
 
-pales = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
+pales  = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
+shiftx = "/home/daniel/Programme/shiftx/shiftx"
 
 shortcodes = {
     'ALA':'A',  'ASP':'D',  'ASN':'N',  'ARG':'R',  'CYS':'C',  'GLY':'G',
@@ -30,14 +31,21 @@ shortcodes = {
 
 # Equation and coefficients from:
 # Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
-# J = A cos2(phi+THETA) + B cos (phi+THETA) + C
 
 A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
 B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
 C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
-# THETA = {"3JHNCB":60,    "3JHNHA":-60,   "3JHNC": 0,   "3JHAC": -60} # DEGREE!
 THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
          "3JHNC": math.radians(0),  "3JHAC": math.radians(-60)} # RAD!
+
+
+def get_PDB(args):
+    if args.PDB_file:
+        my_PDB = args.PDB_file
+    else:
+        my_PDB = prody.fetchPDB(args.PDB_fetch, compressed=False)
+        print()
+    return my_PDB
 
 
 def pdb_cleaner(PDB_file):
@@ -134,6 +142,7 @@ def pdb_splitter(PDB_file):
 
     return len(model_names)
 
+
 def parseSTR(STR_file):
     star_file = open(STR_file)         # open STR file
     myString = ""
@@ -150,7 +159,7 @@ def parseSTR(STR_file):
         return parsed
 
 
-def get_RDC_lists(dataBlock):
+def get_RDC_lists(parsed_value):
     """
     Returns RDC lists as dictonaries containing RDC_Record objects,
     grouped by RDCtype (keys())
@@ -161,11 +170,11 @@ def get_RDC_lists(dataBlock):
     while True:
         saveShiftName = 'RDC_list_' + str(list_number)
         try:
-            saveShifts    = dataBlock.saves[saveShiftName]
+            saveShifts = parsed_value.saves[saveShiftName]
         except KeyError:
             break
-        loopShifts     = saveShifts.loops[-1]
-        RDC_records    = []
+        loopShifts  = saveShifts.loops[-1]
+        RDC_records = []
 
         # STR key values recognised by this program
         rdc_res1_keys  = ["RDC.Seq_ID_1", "Atom_one_residue_seq_code"]
@@ -227,10 +236,140 @@ def get_RDC_lists(dataBlock):
 
         new_RDC_list.append(RDC_dict)
 
-    # for my_list in new_RDC_list:
-    #     print(my_list.keys())
-
     return new_RDC_list
+
+
+def parseS2_STR(parsed_value):
+    """Returns a dictonary with the parsed S2 data"""
+    try:
+        saveShifts = parsed_value.saves["order_param"]
+
+        loopShifts = saveShifts.loops[-1]
+        S2_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            S2_records.append(S2_Record(row["Residue_seq_code"],
+                                        row["Atom_name"],
+                                        row["S2_value"]))
+
+        # split list into dict according to S2 types
+        S2_dict = {}
+        prev_type = ""
+
+        for record in S2_records:
+            if prev_type != record.type:
+                S2_dict[record.type] = []
+                S2_dict[record.type].append(record)
+            else:
+                S2_dict[record.type].append(record)
+
+            prev_type = record.type
+
+        return S2_dict
+
+    except KeyError:
+        print("No S2 parameter list found")
+        return None
+
+
+def parseJcoup_STR(parsed_value):
+    """Returns a dictonary with the parsed J-coupling data"""
+    try:
+        saveShifts = parsed_value.saves["coupling_constants"]
+
+        loopShifts = saveShifts.loops[-1]
+        jcoup_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            jcoup_records.append(JCoup_Record(row["Atom_one_residue_seq_code"],
+                                              row["Coupling_constant_code"],
+                                              row["Coupling_constant_value"]))
+
+        # split list into dict according to J-cuopling types
+        jcoup_dict = {}
+        prev_type = ""
+
+        for record in jcoup_records:
+            if prev_type != record.type:
+                jcoup_dict[record.type] = []
+                jcoup_dict[record.type].append(record)
+            else:
+                jcoup_dict[record.type].append(record)
+
+            prev_type = record.type
+
+        return jcoup_dict
+
+    except KeyError:
+        print("No J-coupling parameter list found")
+        return None
+
+
+def parseChemShift_STR(parsed_value):
+    """
+    Returns ChemShift lists as dictonaries containing ChemShift_Record objects,
+    grouped by Atom_name (keys())
+    """
+    list_number = 1
+    ChemShift_lists   = []
+
+    while True:
+        saveShiftName = 'chem_shift_list_' + str(list_number)
+        try:
+            saveShifts = parsed_value.saves[saveShiftName]
+        except KeyError:
+            break
+
+        loopShifts = saveShifts.loops[-1]
+        ChemShift_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            # # később átéagolni kell!
+            # if row["Residue_label"] == "GLY":
+            #     if row["Atom_name"] in ["HA", "HA2", "HA3", "CA", "N", "H"]:
+
+            #         ChemShift_records.append(ChemShift_Record(
+            #                                     row["Residue_seq_code"],
+            #                                     row["Residue_label"],
+            #                                     row["Atom_name"],
+            #                                     row["Chem_shift_value"]))
+
+            # else:
+            if row["Atom_name"] in ["HA", "CA", "N", "H"]:
+
+                ChemShift_records.append(ChemShift_Record(
+                                            row["Residue_seq_code"],
+                                            row["Residue_label"],
+                                            row["Atom_name"],
+                                            row["Chem_shift_value"]))
+
+        ChemShift_lists.append(ChemShift_records)
+        list_number += 1
+
+
+    new_CS_list = []
+
+    for ChemShift_list in ChemShift_lists:
+        ChemShift_dict = {}
+
+        for record in ChemShift_list:
+
+            if record.atom_name in ChemShift_dict.keys():
+                ChemShift_dict[record.atom_name].append(record)
+            else:
+                ChemShift_dict[record.atom_name] = []
+                ChemShift_dict[record.atom_name].append(record)
+
+        # print(ChemShift_dict)
+        new_CS_list.append(ChemShift_dict)
+
+    return new_CS_list
 
 
 def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
@@ -343,6 +482,69 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     print()
 
 
+def callShiftxOn(pdb_files):
+
+    for i, pdb_file in enumerate(pdb_files):
+        pdb_file = "temp/" + pdb_file
+        out_name = "temp/modell_" + str(i+1) + ".out"
+        subprocess.call([shiftx, '1', pdb_file, out_name])
+
+    averageHA, averageH, averageN, averageCA = {}, {}, {}, {}
+
+    for some_file in os.listdir("temp"):
+        if some_file.endswith(".out"):
+            out_file = open("temp/" + some_file)
+
+            part = 0
+
+            for line in out_file:
+                if line.strip().startswith("NUM"):
+                    part += 1
+
+                    if part == 2:
+                        break
+
+                    continue
+
+                if line.strip().startswith("---"):
+                    continue
+
+                if line.strip():
+                    line_values = line.split()
+                    resnum = int(line_values[0])
+                    HA = float(line_values[2])
+                    H  = float(line_values[3])
+                    N  = float(line_values[4])
+                    CA = float(line_values[5])
+
+                    if resnum in averageHA.keys():
+                        averageHA[resnum] += HA
+                    else:
+                        averageHA[resnum] = HA
+
+                    if resnum in averageH.keys():
+                        averageH[resnum] += H
+                    else:
+                        averageH[resnum] = H
+
+                    if resnum in averageN.keys():
+                        averageN[resnum] += N
+                    else:
+                        averageN[resnum] = N
+
+                    if resnum in averageCA.keys():
+                        averageCA[resnum] += CA
+                    else:
+                        averageCA[resnum] = CA
+
+    for avg_dict in [averageHA, averageH, averageN, averageCA]:
+        for key in avg_dict:
+            avg_dict[key] /= len(pdb_files)
+
+    return {"HA" : averageHA, "H"  : averageH,
+            "N"  : averageN,  "CA" : averageCA}
+
+
 def avgPalesRDCs(pales_out, my_RDC_type):
     """
     Returns a dictonary with the average RDCs for a given RDC type:
@@ -378,76 +580,6 @@ def avgPalesRDCs(pales_out, my_RDC_type):
         averageRDC[res_num] /= n_of_structures
 
     return averageRDC
-
-
-def parseS2_STR(parsed_value):
-    """Returns a dictonary with the parsed S2 data"""
-    try:
-        saveShifts = parsed_value.saves["order_param"]
-
-        loopShifts = saveShifts.loops[-1]
-        S2_records = []
-
-        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
-            row = loopShifts.getRowAsDict(ix)
-
-            S2_records.append(S2_Record(row["Residue_seq_code"],
-                                        row["Atom_name"],
-                                        row["S2_value"]))
-
-        # split list into dict according to S2 types
-        S2_dict = {}
-        prev_type = ""
-
-        for record in S2_records:
-            if prev_type != record.type:
-                S2_dict[record.type] = []
-                S2_dict[record.type].append(record)
-            else:
-                S2_dict[record.type].append(record)
-
-            prev_type = record.type
-
-        return S2_dict
-
-    except KeyError:
-        print("No S2 parameter list found")
-        return None
-
-
-def parseJcoup_STR(parsed_value):
-    """Returns a dictonary with the parsed J-coupling data"""
-    try:
-        saveShifts = parsed_value.saves["coupling_constants"]
-
-        loopShifts = saveShifts.loops[-1]
-        jcoup_records = []
-
-        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
-            row = loopShifts.getRowAsDict(ix)
-
-            jcoup_records.append(JCoup_Record(row["Atom_one_residue_seq_code"],
-                                              row["Coupling_constant_code"],
-                                              row["Coupling_constant_value"]))
-
-        # split list into dict according to J-cuopling types
-        jcoup_dict = {}
-        prev_type = ""
-
-        for record in jcoup_records:
-            if prev_type != record.type:
-                jcoup_dict[record.type] = []
-                jcoup_dict[record.type].append(record)
-            else:
-                jcoup_dict[record.type].append(record)
-
-            prev_type = record.type
-
-        return jcoup_dict
-
-    except KeyError:
-        print("No J-coupling parameter list found")
-        return None
 
 
 def calcS2(PDB_file, S2_records, fit, fit_range):
@@ -601,7 +733,7 @@ def calcDihedAngles(PDB_file):
             atom_res = atom.getResindex() + 1
 
             if atom_res != current_Resindex:
-                # APPEND
+
                 if (prev_C is not None and my_N is not None and
                     my_CA is not None and my_C is not None):
 
@@ -645,26 +777,7 @@ def calcDihedAngles(PDB_file):
 
         JCoup_dicts.append(JCoup_dict)
 
-    avg_dict    = {}
-    phi_cos_avg = 0
-    phi_sin_avg = 0
-
-    for resnum in JCoup_dicts[0].keys():
-
-        for my_dict in JCoup_dicts:     # averaging
-
-            phi_cos_avg += math.cos(my_dict[resnum])
-            phi_sin_avg += math.sin(my_dict[resnum])
-
-        phi_cos_avg /= len(JCoup_dicts)
-        phi_sin_avg /= len(JCoup_dicts)
-
-        phi_rad = math.atan2(phi_sin_avg, phi_cos_avg)
-
-        avg_dict[resnum] = phi_rad
-
-    # print(avg_dict)
-    return avg_dict
+    return JCoup_dicts
 
 
 def calcJCoup(calced, experimental, Jcoup_type):
@@ -674,15 +787,19 @@ def calcJCoup(calced, experimental, Jcoup_type):
     """
     JCoup_calced = {}
 
-    for record in experimental:
+    for record in experimental: # resnums
 
-        phi = calced[record.resnum]
+        J = 0
 
-        J = (A[Jcoup_type] * (math.cos(phi+THETA[Jcoup_type])) ** 2 +
-             B[Jcoup_type] * math.cos(phi+THETA[Jcoup_type]) +
-             C[Jcoup_type])
+        for my_dict in calced:  # lists
 
-        JCoup_calced[record.resnum] = J
+            phi = my_dict[record.resnum]
+
+            J += (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
+                  B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
+                  C[Jcoup_type])
+
+        JCoup_calced[record.resnum] = J / len(calced)
 
     return JCoup_calced
 
@@ -774,7 +891,7 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
-def makeGraph(calced, my_experimental, title):
+def makeGraph(my_path, calced, my_experimental, graph_name):
     """
     X axis -> residue numbers, Y axis -> values
     "calced" is a dict containing values for residues (as keys)
@@ -836,10 +953,12 @@ def makeGraph(calced, my_experimental, title):
     plt.ylabel('value')
     # plt.title(title)
     plt.tight_layout(pad=1.08)
-    plt.savefig(title + ".svg", format="svg")
+    plt.savefig(my_path + "/" + graph_name, format="svg")
+    plt.close()
     # plt.clf()   # clear figure
 
-def makeCorrelGraph(calced, experimental, title):
+
+def makeCorrelGraph(my_path, calced, experimental, graph_name):
     """
     X axis -> experimental values, Y axis -> calculated values
     "calced" is a dict containing values for residues (as keys)
@@ -882,4 +1001,5 @@ def makeCorrelGraph(calced, experimental, title):
     plt.xlabel('experimental')
     plt.ylabel('calculated')
     plt.tight_layout(pad=1.08)
-    plt.savefig(title + ".svg", format="svg")
+    plt.savefig(my_path + "/" + graph_name, format="svg")
+    plt.close()

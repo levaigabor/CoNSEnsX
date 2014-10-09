@@ -42,7 +42,7 @@ def writeHeaderHTML(path, version):
 </head>""")
 
 
-def writeFileTable(path, args, my_id, PDP_model_num):
+def writeFileTable(path, args, my_PDB, my_id, PDP_model_num):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
@@ -56,7 +56,7 @@ def writeFileTable(path, args, my_id, PDP_model_num):
         <h2 class="title">CoNSENsX</h2>
         <h3 class="title-description"><b><font>Co</font></b>mpliance of <b>
         <font>N</font></b>MR-derived <b><font>S</font></b>tructural <b><font>Ens</font></b>embles with e<b><font>x</font></b>perimental data</h3><br>
-        <h3 class="title-description">Results sheet ID: <font><b>%s</b></font></h3>
+        <h3 class="title-description">Results sheet ID: <font><b>{0}</b></font></h3>
         </div>
       </div>
     </div>
@@ -64,8 +64,8 @@ def writeFileTable(path, args, my_id, PDP_model_num):
     <table class="files_table">
       <tr>
         <td id="head-td">PDB file:</td>
-        <td><i>%s</i></td>
-        <td>%i models found</td>
+        <td><i>{1}</i></td>
+        <td>{2} models found</td>
       </tr>
       <tr>
         <td id="head-td">X-PLOR restraint file:</td>
@@ -74,20 +74,20 @@ def writeFileTable(path, args, my_id, PDP_model_num):
       </tr>
       <tr>
         <td id="head-td">BMRB file:</td>
-        <td><i>%s</i></td>
+        <td><i>{3}</i></td>
         <td></td>
       </tr>
-    </table>""" % (my_id, args.PDB_file, PDP_model_num, args.STR_file) )
+    </table>""".format(my_id, my_PDB, PDP_model_num, args.STR_file) )
 
 
-def writeRDC_table_open(path, RDC_list_num):
+def writeRDC_table_open(path, name, RDC_list_num):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
     html.write("""
     <div class="results">
-      <h4 class="table-source">RDC list %i</h4>
-      <table class="result_table">\n""" % (RDC_list_num))
+      <h4 class="table-source">{0} {1}</h4>
+      <table class="result_table">\n""".format(name, RDC_list_num))
 
 
 def writeRDC_table_close(path):
@@ -95,3 +95,67 @@ def writeRDC_table_close(path):
     html = open(html, 'a')
 
     html.write("      </table>\n    </div>\n")
+
+
+def writeRDC_data(path, RDC_type, used_values,
+                  correl, q_value, rmsd, corr_graph_name, graph_name):
+
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("""
+          <tr>
+          <td><table class="values_table">
+          <tr><td><strong>{0}</strong></td><td></td></tr>
+          <tr><td>Values:</td><td>{1}</td></tr>
+          <tr><td>Correlation:</td><td>{2}</td></tr>
+          <tr><td>Q-factor:</td><td>{3} %</td></tr>
+          <tr><td>RMSD:</td><td>{4}</td></tr>
+          </table></td>
+          <td><img width="270" src="{5}"></td>
+          <td><img width="450" src="{6}"></td>
+          </tr>\n""".format(RDC_type, used_values,
+                            '{0:.3f}'.format(correl),
+                            '{0:.3f}'.format(q_value),
+                            '{0:.3f}'.format(rmsd),
+                             corr_graph_name, graph_name))
+
+
+def write_table_open(path, table_name):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("""
+    <div class="results">
+      <h4 class="table-source">{0}</h4>
+      <table class="result_table">\n""".format(table_name))
+
+
+def write_table_close(path):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("      </table>\n    </div>\n")
+
+
+def write_table_data(path, data_type, used_values,
+                     correl, q_value, rmsd, corr_graph_name, graph_name):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("""
+          <tr>
+          <td><table class="values_table">
+          <tr><td><strong>{0}</strong></td><td></td></tr>
+          <tr><td>Values:</td><td>{1}</td></tr>
+          <tr><td>Correlation:</td><td>{2}</td></tr>
+          <tr><td>Q-factor:</td><td>{3} %</td></tr>
+          <tr><td>RMSD:</td><td>{4}</td></tr>
+          </table></td>
+          <td><img width="270" src="{5}"></td>
+          <td><img width="450" src="{6}"></td>
+          </tr>\n""".format(data_type, used_values,
+                            '{0:.3f}'.format(correl),
+                            '{0:.3f}'.format(q_value),
+                            '{0:.3f}'.format(rmsd),
+                             corr_graph_name, graph_name))
