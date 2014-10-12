@@ -3,7 +3,7 @@ table {
 }
 
 .results {
-  width: 993px;
+  /*width: 993px;*/
   padding-top: 10px;
   margin-right: auto;
   margin-left : auto;
@@ -34,7 +34,7 @@ table {
 .files_table td {
   padding: 5px;
   border: 1px solid black;
-  width: 320px;
+  width: 280px;
   background-color: #ABABAB;
 }
 
@@ -251,7 +251,7 @@ h3.spec {
 
 .title-page {
 	text-align: center;
-	margin-bottom: 100px;
+	margin-bottom: 40px;
 }
 
 .title-page .title {

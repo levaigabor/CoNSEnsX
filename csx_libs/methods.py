@@ -36,7 +36,7 @@ A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
 B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
 C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
 THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
-         "3JHNC": math.radians(0),  "3JHAC": math.radians(-60)} # RAD!
+         "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
 
 
 def get_PDB(args):
@@ -326,21 +326,26 @@ def parseChemShift_STR(parsed_value):
 
         loopShifts = saveShifts.loops[-1]
         ChemShift_records = []
+        HA_sum = 0.0
 
         for ix in range(len(loopShifts.rows)):   # fetch values from STR file
             row = loopShifts.getRowAsDict(ix)
 
-            # # később átéagolni kell!
-            # if row["Residue_label"] == "GLY":
-            #     if row["Atom_name"] in ["HA", "HA2", "HA3", "CA", "N", "H"]:
+            if row["Atom_name"] == "HA2":
+                HA_sum += float(row["Chem_shift_value"])
+                continue
 
-            #         ChemShift_records.append(ChemShift_Record(
-            #                                     row["Residue_seq_code"],
-            #                                     row["Residue_label"],
-            #                                     row["Atom_name"],
-            #                                     row["Chem_shift_value"]))
+            if row["Atom_name"] == "HA3":
+                HA_sum += float(row["Chem_shift_value"])
 
-            # else:
+                ChemShift_records.append(ChemShift_Record(
+                                            row["Residue_seq_code"],
+                                            row["Residue_label"],
+                                            "HA",
+                                            HA_sum / 2))
+                HA_sum = 0.0
+                continue
+
             if row["Atom_name"] in ["HA", "CA", "N", "H"]:
 
                 ChemShift_records.append(ChemShift_Record(
@@ -348,6 +353,7 @@ def parseChemShift_STR(parsed_value):
                                             row["Residue_label"],
                                             row["Atom_name"],
                                             row["Chem_shift_value"]))
+
 
         ChemShift_lists.append(ChemShift_records)
         list_number += 1
@@ -549,15 +555,23 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     """
     Returns a dictonary with the average RDCs for a given RDC type:
     averageRDC[residue] = value
+    and calculated model data as a list of dictonaries
+    model_data_list[{1: value}, ...]
     """
     pales_out       = open(pales_out)
     n_of_structures = 0
     averageRDC      = {}
     npair           = 0
+    model_data_list = []
+    model_data_dict = {}
 
     for line in pales_out:
         if re.match("REMARK \d+ couplings", line):
             n_of_structures += 1                # n_of_structures to divide by
+
+            model_data_list.append(model_data_dict)
+
+            if model_data_dict: model_data_dict = {}
 
         elif re.match("\s+ \d+", line):
             resnum  = int(line.split()[0])
@@ -576,10 +590,12 @@ def avgPalesRDCs(pales_out, my_RDC_type):
             else:
                 averageRDC[resnum] = D
 
+            model_data_dict[resnum] = D
+
     for res_num in averageRDC.keys():
         averageRDC[res_num] /= n_of_structures
 
-    return averageRDC
+    return averageRDC, model_data_list
 
 
 def calcS2(PDB_file, S2_records, fit, fit_range):
@@ -704,11 +720,11 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
 
 def calcDihedAngles(PDB_file):
     """
-    Calculates model averaged backbone diherdral angles
+    Calculates backbone diherdral angles
     note: all returned angle values are in radian
     """
     model_list = []
-    model_num = 1
+    model_num  = 1
 
     while True:
         try:
@@ -724,9 +740,7 @@ def calcDihedAngles(PDB_file):
 
     for model_num, model in enumerate(model_list):
         current_Resindex = 1
-
         prev_C, my_N, my_CA, my_C = None, None, None, None
-
         JCoup_dict = {}
 
         for atom in model:
@@ -788,11 +802,9 @@ def calcJCoup(calced, experimental, Jcoup_type):
     JCoup_calced = {}
 
     for record in experimental: # resnums
-
         J = 0
 
-        for my_dict in calced:  # lists
-
+        for my_dict in calced:  # lists (with models as dicts)
             phi = my_dict[record.resnum]
 
             J += (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
@@ -810,9 +822,6 @@ def calcCorrel(calced, experimental):
     "calced" is a dict containing values for residues (as keys)
     "experimental" is a list containing STR record objects
     """
-    if len(calced) != len(experimental):
-        return -2
-
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
 
@@ -852,9 +861,6 @@ def calcQValue(calced, experimental):
     "calced" is a dict containing values for residues (as keys)
     "experimental" is a list containing STR record objects
     """
-    if len(calced) != len(experimental):
-        return -2
-
     D2, E2, C2 = 0, 0, 0
 
     for i, j in enumerate(calced.keys()):
@@ -875,9 +881,6 @@ def calcRMSD(calced, experimental):
     "calced" is a dict containing values for residues (as keys)
     "experimental" is a list containing STR record objects
     """
-    if len(calced) != len(experimental):
-        return -2
-
     D2 = 0
 
     for i, j in enumerate(calced.keys()):
@@ -964,9 +967,6 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
     "calced" is a dict containing values for residues (as keys)
     "experimental" is a list containing STR record objects
     """
-    if len(calced) != len(experimental):
-        return -2
-
     min_calc = min(calced.values())
     max_calc = max(calced.values())
 
@@ -1002,4 +1002,29 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
     plt.ylabel('calculated')
     plt.tight_layout(pad=1.08)
     plt.savefig(my_path + "/" + graph_name, format="svg")
+    plt.close()
+
+
+def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
+    """
+    Y axis -> correlation values
+    X axis -> ensemble correlation, model avg. correlation,
+              per modeel correlation
+    parameter 'model_corrs' is a list containing per model correlation values
+    """
+    plt.figure(figsize=(6, 5), dpi=80)
+
+    plt.plot(range(0, len(model_corrs)), [correl] * len(model_corrs),
+             linewidth=2.0, color='green', label='Ensemble corr.')
+    plt.plot(range(0, len(model_corrs)), [avg_corr] * len(model_corrs),
+             linewidth=2.0, color='red', label='Avg. corr. per model')
+    plt.plot(range(0, len(model_corrs)), sorted(model_corrs),
+             linewidth=2.0, color='blue', marker='o', label='Corr. per model')
+
+    plt.legend(loc='lower left')
+    plt.axis([-1, len(model_corrs), 0, 1])
+    plt.xlabel('models (worse to best)')
+    plt.ylabel('correlation')
+    plt.tight_layout(pad=1.08)
+    plt.savefig(my_path + "/" + corr_graph_name, format="svg")
     plt.close()

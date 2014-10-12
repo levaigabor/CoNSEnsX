@@ -3,6 +3,7 @@ ubiquitin_test.str
 dummy.str
 bmr16746.str
 pales.out
+calculations/
 lib/
 # Sphinx documentation
 bin/

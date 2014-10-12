@@ -49,8 +49,8 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num):
     html.write("""
 <body>
 <div id="shortcodes" class="page" style="padding: 30px 0 0 0;">
-    <div class="container">
-    <div class="row" id="res-page-row">
+    <div class="container" style="width: 1240px;">
+    <div class="row" id="res-page-row" style="margin-left: 0px;">
       <div class="span12">
         <div class="title-page">
         <h2 class="title">CoNSENsX</h2>
@@ -97,8 +97,8 @@ def writeRDC_table_close(path):
     html.write("      </table>\n    </div>\n")
 
 
-def writeRDC_data(path, RDC_type, used_values,
-                  correl, q_value, rmsd, corr_graph_name, graph_name):
+def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
+                  corr_graph_name, graph_name, mod_corr_graph_name=None):
 
     html = path + "result_sheet.html"
     html = open(html, 'a')
@@ -114,11 +114,12 @@ def writeRDC_data(path, RDC_type, used_values,
           </table></td>
           <td><img width="270" src="{5}"></td>
           <td><img width="450" src="{6}"></td>
+          <td><img width="270" src="{7}"></td>
           </tr>\n""".format(RDC_type, used_values,
                             '{0:.3f}'.format(correl),
                             '{0:.3f}'.format(q_value),
                             '{0:.3f}'.format(rmsd),
-                             corr_graph_name, graph_name))
+                             corr_graph_name, graph_name, mod_corr_graph_name))
 
 
 def write_table_open(path, table_name):

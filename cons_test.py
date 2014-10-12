@@ -88,47 +88,60 @@ parsed = csx_func.parseSTR(args.STR_file)
 # get RDC lists from STR file, each list item contains a list of record objects
 RDC_lists = csx_func.get_RDC_lists(parsed.value)
 
-for list_num, RDC_dict in enumerate(RDC_lists):
+if RDC_lists:
+    for list_num, RDC_dict in enumerate(RDC_lists):
 
-    # Pales call, results output file "pales.out"
-    csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
+        # Pales call, results output file "pales.out"
+        csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
 
-    csx_out.writeRDC_table_open(my_path, "Chemical shift list", list_num + 1)
+        csx_out.writeRDC_table_open(my_path, "RDC list", list_num + 1)
 
-    for RDC_type in RDC_dict.keys():
-        print("RDC list", list_num + 1, RDC_type)
+        for RDC_type in RDC_dict.keys():
+            print("RDC list", list_num + 1, RDC_type)
 
-        # get averaged RDC values -> averageRDC[residue] = value
-        averageRDC = csx_func.avgPalesRDCs("pales.out", RDC_type)
+            # get averaged RDC values -> averageRDC[residue] = value
+            averageRDC, model_data = csx_func.avgPalesRDCs("pales.out", RDC_type)
 
-        # removing records from other RDC types
-        my_averageRDC = {}
+            model_corrs = []
 
-        for record in RDC_dict[RDC_type]:
-            my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
+            for model in model_data:
+                model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
 
-        correl  = csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type])
-        q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
-        rmsd    = csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type])
+            avg_model_corr = sum(model_corrs) / len(model_corrs)
 
-        print("Correl: ", correl)
-        print("Q-val:  ", q_value)
-        print("RMSD:   ", rmsd)
-        print()
+            # removing records from other RDC types
+            my_averageRDC = {}
 
-        graph_name = str(list_num + 1) + "_RDC_" + RDC_type + ".svg"
-        csx_func.makeGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
-                           graph_name)
+            for record in RDC_dict[RDC_type]:
+                my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
 
-        corr_graph_name = str(list_num + 1) + "_RDC_corr_" + RDC_type + ".svg"
-        csx_func.makeCorrelGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
-                                 corr_graph_name)
+            correl  = csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type])
+            q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
+            rmsd    = csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type])
 
-        csx_out.writeRDC_data(my_path, RDC_type, len(RDC_dict[RDC_type]),
-                              correl, q_value, rmsd,
-                              corr_graph_name, graph_name)
+            print("Correl: ", correl)
+            print("Q-val:  ", q_value)
+            print("RMSD:   ", rmsd)
+            print()
 
-    csx_out.writeRDC_table_close(my_path)
+            graph_name = str(list_num + 1) + "_RDC_" + RDC_type + ".svg"
+            csx_func.makeGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
+                               graph_name)
+
+            corr_graph_name = str(list_num + 1) + "_RDC_corr_" + RDC_type + ".svg"
+            csx_func.makeCorrelGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
+                                     corr_graph_name)
+
+            mod_corr_graph_name = (str(list_num + 1) + "_RDC_mod_corr_" +
+                                   RDC_type + ".svg")
+            csx_func.modCorrelGraph(my_path, correl, avg_model_corr, model_corrs,
+                                    mod_corr_graph_name)
+
+            csx_out.writeRDC_data(my_path, RDC_type, len(RDC_dict[RDC_type]),
+                                  correl, q_value, rmsd,
+                                  corr_graph_name, graph_name, mod_corr_graph_name)
+
+        csx_out.writeRDC_table_close(my_path)
 
 
 #---------------------------------  S2 calc  ---------------------------------#
@@ -137,7 +150,6 @@ S2_dict = csx_func.parseS2_STR(parsed.value)
 
 # get averaged S2 values -> S2_calced[residue] = value
 if S2_dict:
-
     csx_out.write_table_open(my_path, "Order parameters (S<sup>2</sup>)")
 
     for S2_type in S2_dict.keys():
@@ -174,7 +186,7 @@ Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
 
 if Jcoup_dict:
     dihed_lists = csx_func.calcDihedAngles(my_PDB)
-    csx_out.write_table_open(my_path, "Copling constants (J-coupling)")
+    csx_out.write_table_open(my_path, "Coupling constants (J-coupling)")
 
     for Jcoup_type in Jcoup_dict.keys():
 
@@ -212,9 +224,11 @@ ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 
 if ChemShift_lists:
     CS_calced = csx_func.callShiftxOn(pdb_models)
-    csx_out.writeRDC_table_open(my_path, "Chemical shift list", list_num + 1)
 
     for list_num, CS_list in enumerate(ChemShift_lists):
+
+        csx_out.writeRDC_table_open(my_path, "Chemical shift list",
+                                    list_num + 1)
 
         for CS_type in CS_list.keys():
             exp_dict = {}
