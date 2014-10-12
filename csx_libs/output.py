@@ -98,8 +98,7 @@ def writeRDC_table_close(path):
 
 
 def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
-                  corr_graph_name, graph_name, mod_corr_graph_name=None):
-
+                  corr_graph_name, graph_name, mod_corr_graph_name):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
@@ -139,24 +138,44 @@ def write_table_close(path):
     html.write("      </table>\n    </div>\n")
 
 
-def write_table_data(path, data_type, used_values,
-                     correl, q_value, rmsd, corr_graph_name, graph_name):
+def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
+                     corr_graph_name, graph_name, mod_corr_graph_name=None):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
-    html.write("""
-          <tr>
-          <td><table class="values_table">
-          <tr><td><strong>{0}</strong></td><td></td></tr>
-          <tr><td>Values:</td><td>{1}</td></tr>
-          <tr><td>Correlation:</td><td>{2}</td></tr>
-          <tr><td>Q-factor:</td><td>{3} %</td></tr>
-          <tr><td>RMSD:</td><td>{4}</td></tr>
-          </table></td>
-          <td><img width="270" src="{5}"></td>
-          <td><img width="450" src="{6}"></td>
-          </tr>\n""".format(data_type, used_values,
-                            '{0:.3f}'.format(correl),
-                            '{0:.3f}'.format(q_value),
-                            '{0:.3f}'.format(rmsd),
-                             corr_graph_name, graph_name))
+    if mod_corr_graph_name:
+      html.write("""
+            <tr>
+            <td><table class="values_table">
+            <tr><td><strong>{0}</strong></td><td></td></tr>
+            <tr><td>Values:</td><td>{1}</td></tr>
+            <tr><td>Correlation:</td><td>{2}</td></tr>
+            <tr><td>Q-factor:</td><td>{3} %</td></tr>
+            <tr><td>RMSD:</td><td>{4}</td></tr>
+            </table></td>
+            <td><img width="270" src="{5}"></td>
+            <td><img width="450" src="{6}"></td>
+            <td><img width="270" src="{7}"></td>
+            </tr>\n""".format(data_type, used_values,
+                              '{0:.3f}'.format(correl),
+                              '{0:.3f}'.format(q_value),
+                              '{0:.3f}'.format(rmsd),
+                               corr_graph_name, graph_name,
+                               mod_corr_graph_name))
+    else:
+        html.write("""
+            <tr>
+            <td><table class="values_table">
+            <tr><td><strong>{0}</strong></td><td></td></tr>
+            <tr><td>Values:</td><td>{1}</td></tr>
+            <tr><td>Correlation:</td><td>{2}</td></tr>
+            <tr><td>Q-factor:</td><td>{3} %</td></tr>
+            <tr><td>RMSD:</td><td>{4}</td></tr>
+            </table></td>
+            <td><img width="270" src="{5}"></td>
+            <td><img width="450" src="{6}"></td>
+            </tr>\n""".format(data_type, used_values,
+                              '{0:.3f}'.format(correl),
+                              '{0:.3f}'.format(q_value),
+                              '{0:.3f}'.format(rmsd),
+                               corr_graph_name, graph_name))

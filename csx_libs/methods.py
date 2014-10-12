@@ -496,6 +496,8 @@ def callShiftxOn(pdb_files):
         subprocess.call([shiftx, '1', pdb_file, out_name])
 
     averageHA, averageH, averageN, averageCA = {}, {}, {}, {}
+    modHA, modH, modN, modCA                 = {}, {}, {}, {}
+    model_data_list = []
 
     for some_file in os.listdir("temp"):
         if some_file.endswith(".out"):
@@ -523,6 +525,11 @@ def callShiftxOn(pdb_files):
                     N  = float(line_values[4])
                     CA = float(line_values[5])
 
+                    modHA[resnum] = HA
+                    modH[resnum]  = H
+                    modN[resnum]  = N
+                    modCA[resnum] = CA
+
                     if resnum in averageHA.keys():
                         averageHA[resnum] += HA
                     else:
@@ -543,12 +550,20 @@ def callShiftxOn(pdb_files):
                     else:
                         averageCA[resnum] = CA
 
+            model_data_list.append({"HA":modHA, "H":modH,
+                                    "N":modN, "CA":modCA})
+            modHA, modH, modN, modCA = {}, {}, {}, {}
+
+
     for avg_dict in [averageHA, averageH, averageN, averageCA]:
         for key in avg_dict:
             avg_dict[key] /= len(pdb_files)
 
+    # print(model_data_list)
+
     return {"HA" : averageHA, "H"  : averageH,
-            "N"  : averageN,  "CA" : averageCA}
+            "N"  : averageN,  "CA" : averageCA}, model_data_list
+
 
 
 def avgPalesRDCs(pales_out, my_RDC_type):
@@ -799,7 +814,7 @@ def calcJCoup(calced, experimental, Jcoup_type):
     Calculates J-coupling values from dihedral angles
     note: all angles must be in radian
     """
-    JCoup_calced = {}
+    JCoup_calced    = {}
 
     for record in experimental: # resnums
         J = 0
@@ -813,7 +828,24 @@ def calcJCoup(calced, experimental, Jcoup_type):
 
         JCoup_calced[record.resnum] = J / len(calced)
 
-    return JCoup_calced
+    model_data_list = []
+    model_data_dict = {}
+
+    for Jcoup_dict in calced:   # model
+        for record in experimental:
+            phi = Jcoup_dict[record.resnum]
+
+            J = (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
+                  B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
+                  C[Jcoup_type])
+
+            model_data_dict[record.resnum] = J
+
+        model_data_list.append(model_data_dict)
+        model_data_dict = {}
+
+    return JCoup_calced, model_data_list
+    # return JCoup_calced
 
 
 def calcCorrel(calced, experimental):

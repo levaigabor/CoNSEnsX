@@ -49,7 +49,7 @@ def getID(size=6, chars=string.ascii_uppercase + string.digits):
 my_id = getID()
 my_path = "calculations/" + my_id + '/'
 
-print("Job started with ID:", my_id)
+print("Job started with \033[1mID\033[0m: " + my_id)
 
 if not os.path.exists(my_path):                # create working folder
     os.makedirs(my_path)
@@ -190,8 +190,17 @@ if Jcoup_dict:
 
     for Jcoup_type in Jcoup_dict.keys():
 
-        JCoup_calced = csx_func.calcJCoup(dihed_lists, Jcoup_dict[Jcoup_type],
-                                          Jcoup_type)
+        JCoup_calced, model_data = csx_func.calcJCoup(dihed_lists,
+                                                      Jcoup_dict[Jcoup_type],
+                                                      Jcoup_type)
+
+        model_corrs = []
+
+        for model in model_data:
+            model_corrs.append(csx_func.calcCorrel(model,
+                                                   Jcoup_dict[Jcoup_type]))
+
+        avg_model_corr = sum(model_corrs) / len(model_corrs)
 
         correl  = csx_func.calcCorrel(JCoup_calced, Jcoup_dict[Jcoup_type])
         q_value = csx_func.calcQValue(JCoup_calced, Jcoup_dict[Jcoup_type])
@@ -210,10 +219,14 @@ if Jcoup_dict:
         csx_func.makeCorrelGraph(my_path, JCoup_calced, Jcoup_dict[Jcoup_type],
                                  corr_graph_name)
 
+        mod_corr_graph_name = "JCoup_mod_corr_" + Jcoup_type + ".svg"
+        csx_func.modCorrelGraph(my_path, correl, avg_model_corr, model_corrs,
+                                mod_corr_graph_name)
+
         csx_out.write_table_data(my_path, Jcoup_type,
                                  len(Jcoup_dict[Jcoup_type]),
                                  correl, q_value, rmsd,
-                                 corr_graph_name, graph_name)
+                                 corr_graph_name, graph_name, mod_corr_graph_name)
 
     csx_out.write_table_close(my_path)
 
@@ -223,7 +236,7 @@ if Jcoup_dict:
 ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 
 if ChemShift_lists:
-    CS_calced = csx_func.callShiftxOn(pdb_models)
+    CS_calced, model_data = csx_func.callShiftxOn(pdb_models)
 
     for list_num, CS_list in enumerate(ChemShift_lists):
 
@@ -231,6 +244,19 @@ if ChemShift_lists:
                                     list_num + 1)
 
         for CS_type in CS_list.keys():
+            model_corrs = []
+
+            for model in model_data:
+                # print(model[CS_type])
+                inner_exp_dict = {}
+                for record in CS_list[CS_type]:
+                    inner_exp_dict[record.resnum] = model[CS_type][record.resnum]
+
+                model_corrs.append(csx_func.calcCorrel(inner_exp_dict,
+                                                       CS_list[CS_type]))
+
+            avg_model_corr = sum(model_corrs) / len(model_corrs)
+
             exp_dict = {}
 
             for record in CS_list[CS_type]:
@@ -254,9 +280,14 @@ if ChemShift_lists:
             csx_func.makeCorrelGraph(my_path, exp_dict, CS_list[CS_type],
                                      corr_graph_name)
 
+            mod_corr_graph_name = "CS_mod_corr_" + CS_type + ".svg"
+            csx_func.modCorrelGraph(my_path, correl, avg_model_corr, model_corrs,
+                                mod_corr_graph_name)
+
             csx_out.writeRDC_data(my_path, CS_type, len(CS_list[CS_type]),
                                   correl, q_value, rmsd,
-                                  corr_graph_name, graph_name)
+                                  corr_graph_name, graph_name,
+                                  mod_corr_graph_name)
 
     csx_out.writeRDC_table_close(my_path)
 
@@ -266,4 +297,4 @@ if ChemShift_lists:
 # if args.PDB_fetch:
 #     os.remove(my_PDB)
 
-
+print("Your \033[1mID\033[0m was: " + my_id)
