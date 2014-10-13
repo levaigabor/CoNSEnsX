@@ -49,7 +49,7 @@ def getID(size=6, chars=string.ascii_uppercase + string.digits):
 my_id = getID()
 my_path = "calculations/" + my_id + '/'
 
-print("Job started with \033[1mID\033[0m: " + my_id)
+print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
 
 if not os.path.exists(my_path):                # create working folder
     os.makedirs(my_path)
@@ -297,4 +297,4 @@ if ChemShift_lists:
 # if args.PDB_fetch:
 #     os.remove(my_PDB)
 
-print("Your \033[1mID\033[0m was: " + my_id)
+print("Your ID was: \033[0;35m" + my_id + "\033[0m")

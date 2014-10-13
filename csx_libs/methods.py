@@ -10,6 +10,8 @@ import math
 import copy
 import prody
 
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -39,6 +41,20 @@ THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
          "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
 
 
+
+def timeit(method):
+    """Timer decorator to keep an eye on CPU hungry processes"""
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+
+        print('\x1b[31m%r -> %2.2f sec\x1b[0m' % (method.__name__, te-ts))
+        return result
+
+    return timed
+
+
 def get_PDB(args):
     if args.PDB_file:
         my_PDB = args.PDB_file
@@ -48,6 +64,7 @@ def get_PDB(args):
     return my_PDB
 
 
+@timeit
 def pdb_cleaner(PDB_file):
     """
     Performs some basic formatting on the given PDB file to make it suitable
@@ -143,6 +160,7 @@ def pdb_splitter(PDB_file):
     return len(model_names)
 
 
+@timeit
 def parseSTR(STR_file):
     star_file = open(STR_file)         # open STR file
     myString = ""
@@ -378,6 +396,7 @@ def parseChemShift_STR(parsed_value):
     return new_CS_list
 
 
+@timeit
 def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     """
     Writes pales dummy from the given RDC values, and call Pales with the
@@ -488,6 +507,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     print()
 
 
+@timeit
 def callShiftxOn(pdb_files):
 
     for i, pdb_file in enumerate(pdb_files):
@@ -565,7 +585,6 @@ def callShiftxOn(pdb_files):
             "N"  : averageN,  "CA" : averageCA}, model_data_list
 
 
-
 def avgPalesRDCs(pales_out, my_RDC_type):
     """
     Returns a dictonary with the average RDCs for a given RDC type:
@@ -613,6 +632,7 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     return averageRDC, model_data_list
 
 
+@timeit
 def calcS2(PDB_file, S2_records, fit, fit_range):
     """
     Returns a dictonary with the average S2 values:
@@ -733,6 +753,7 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
     return S2_calced
 
 
+@timeit
 def calcDihedAngles(PDB_file):
     """
     Calculates backbone diherdral angles
@@ -1051,7 +1072,7 @@ def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
     plt.plot(range(0, len(model_corrs)), [avg_corr] * len(model_corrs),
              linewidth=2.0, color='red', label='Avg. corr. per model')
     plt.plot(range(0, len(model_corrs)), sorted(model_corrs),
-             linewidth=2.0, color='blue', marker='o', label='Corr. per model')
+             linewidth=2.0, color='blue', label='Corr. per model')
 
     plt.legend(loc='lower left')
     plt.axis([-1, len(model_corrs), 0, 1])
