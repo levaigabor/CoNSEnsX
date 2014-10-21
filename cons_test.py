@@ -3,9 +3,13 @@
 
 # standard modules
 from __future__ import print_function
+from multiprocessing import Process, Pipe
 import os
 import string
 import random
+import time
+import subprocess
+import ast
 
 # own modules
 import csx_libs.misc    as csx_misc
@@ -15,6 +19,7 @@ import csx_libs.output  as csx_out
 
 version = "1.0"
 
+ts = time.time()
 
 #------------------  Setting up parser and parse CLI arguments  --------------#
 parser = csx_misc.createParser()            # get parser from module
@@ -73,7 +78,7 @@ else:
 
 csx_func.pdb_cleaner(my_PDB)                   # bringing PDB to format
 model_count = csx_func.pdb_splitter(my_PDB)    # splitting of PDB file
-pdb_models  = os.listdir("temp")                # list of models (PDB)
+pdb_models  = os.listdir("temp")               # list of models (PDB)
 
 
 #-------------------------  Write file data to HTML   ------------------------#
@@ -82,6 +87,26 @@ csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
 
 #------------------------  Read  and parse STR file   ------------------------#
 parsed = csx_func.parseSTR(args.STR_file)
+
+def f(conn, restain_file):
+    print("PARSER PROCESS STARTED")
+    # restraints_parsed = csx_func.parseSTR(args.XPLOR_file)
+
+
+    restraints_parsed = subprocess.check_output(["pypy", "pypyParse.py"])
+
+    restraints_parsed = ast.literal_eval(restraints_parsed)
+
+    conn.send(restraints_parsed)
+
+    print("PARSER PROCESS READY")
+    conn.close()
+
+
+if args.XPLOR_file:
+    parent_conn, child_conn = Pipe()
+    p = Process(target=f, args=(child_conn, args.XPLOR_file,))
+    p.start()
 
 
 #-----------------------------  RDC calculation  -----------------------------#
@@ -293,8 +318,11 @@ if ChemShift_lists:
 
 
 
+saveShifts = parent_conn.recv()
+p.join()
 
-# if args.PDB_fetch:
-#     os.remove(my_PDB)
+te = time.time()
+print("total runtime", te-ts)
 
 print("Your ID was: \033[0;35m" + my_id + "\033[0m")
+
