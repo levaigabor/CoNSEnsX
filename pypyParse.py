@@ -1,6 +1,7 @@
 import nmrpystar
 import time
 import math
+import sys
 
 ts = time.time()
 
@@ -33,7 +34,9 @@ def parseSTR(STR_file):
         return parsed
 
 
-my_parsed  = parseSTR("../1d3z_mr.str")
+sys.argv[1]
+
+my_parsed  = parseSTR(sys.argv[1])
 saveShifts = my_parsed.value
 
 saveShiftName = "CNS/XPLOR_distance_constraints_"
