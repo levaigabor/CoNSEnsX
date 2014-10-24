@@ -110,64 +110,64 @@ if args.XPLOR_file:
     p.start()
 
 
-#-----------------------------  RDC calculation  -----------------------------#
-# get RDC lists from STR file, each list item contains a list of record objects
-RDC_lists = csx_func.get_RDC_lists(parsed.value)
+# #-----------------------------  RDC calculation  -----------------------------#
+# # get RDC lists from STR file, each list item contains a list of record objects
+# RDC_lists = csx_func.get_RDC_lists(parsed.value)
 
-if RDC_lists:
-    for list_num, RDC_dict in enumerate(RDC_lists):
+# if RDC_lists:
+#     for list_num, RDC_dict in enumerate(RDC_lists):
 
-        # Pales call, results output file "pales.out"
-        csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
+#         # Pales call, results output file "pales.out"
+#         csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
 
-        csx_out.writeRDC_table_open(my_path, "RDC list", list_num + 1)
+#         csx_out.writeRDC_table_open(my_path, "RDC list", list_num + 1)
 
-        for RDC_type in RDC_dict.keys():
-            print("RDC list", list_num + 1, RDC_type)
+#         for RDC_type in RDC_dict.keys():
+#             print("RDC list", list_num + 1, RDC_type)
 
-            # get averaged RDC values -> averageRDC[residue] = value
-            averageRDC, model_data = csx_func.avgPalesRDCs("pales.out", RDC_type)
+#             # get averaged RDC values -> averageRDC[residue] = value
+#             averageRDC, model_data = csx_func.avgPalesRDCs("pales.out", RDC_type)
 
-            model_corrs = []
+#             model_corrs = []
 
-            for model in model_data:
-                model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
+#             for model in model_data:
+#                 model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
 
-            avg_model_corr = sum(model_corrs) / len(model_corrs)
+#             avg_model_corr = sum(model_corrs) / len(model_corrs)
 
-            # removing records from other RDC types
-            my_averageRDC = {}
+#             # removing records from other RDC types
+#             my_averageRDC = {}
 
-            for record in RDC_dict[RDC_type]:
-                my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
+#             for record in RDC_dict[RDC_type]:
+#                 my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
 
-            correl  = csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type])
-            q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
-            rmsd    = csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type])
+#             correl  = csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type])
+#             q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
+#             rmsd    = csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type])
 
-            print("Correl: ", correl)
-            print("Q-val:  ", q_value)
-            print("RMSD:   ", rmsd)
-            print()
+#             print("Correl: ", correl)
+#             print("Q-val:  ", q_value)
+#             print("RMSD:   ", rmsd)
+#             print()
 
-            graph_name = str(list_num + 1) + "_RDC_" + RDC_type + ".svg"
-            csx_func.makeGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
-                               graph_name)
+#             graph_name = str(list_num + 1) + "_RDC_" + RDC_type + ".svg"
+#             csx_func.makeGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
+#                                graph_name)
 
-            corr_graph_name = str(list_num + 1) + "_RDC_corr_" + RDC_type + ".svg"
-            csx_func.makeCorrelGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
-                                     corr_graph_name)
+#             corr_graph_name = str(list_num + 1) + "_RDC_corr_" + RDC_type + ".svg"
+#             csx_func.makeCorrelGraph(my_path, my_averageRDC, RDC_dict[RDC_type],
+#                                      corr_graph_name)
 
-            mod_corr_graph_name = (str(list_num + 1) + "_RDC_mod_corr_" +
-                                   RDC_type + ".svg")
-            csx_func.modCorrelGraph(my_path, correl, avg_model_corr, model_corrs,
-                                    mod_corr_graph_name)
+#             mod_corr_graph_name = (str(list_num + 1) + "_RDC_mod_corr_" +
+#                                    RDC_type + ".svg")
+#             csx_func.modCorrelGraph(my_path, correl, avg_model_corr, model_corrs,
+#                                     mod_corr_graph_name)
 
-            csx_out.writeRDC_data(my_path, RDC_type, len(RDC_dict[RDC_type]),
-                                  correl, q_value, rmsd,
-                                  corr_graph_name, graph_name, mod_corr_graph_name)
+#             csx_out.writeRDC_data(my_path, RDC_type, len(RDC_dict[RDC_type]),
+#                                   correl, q_value, rmsd,
+#                                   corr_graph_name, graph_name, mod_corr_graph_name)
 
-        csx_out.writeRDC_table_close(my_path)
+#         csx_out.writeRDC_table_close(my_path)
 
 
 # #---------------------------------  S2 calc  ---------------------------------#
@@ -323,10 +323,7 @@ if args.XPLOR_file:
     p.join()
 
 
-
-
-
-
+csx_func.getDistance(args.PDB_file, 1, "HA", 2, "H")
 
 
 

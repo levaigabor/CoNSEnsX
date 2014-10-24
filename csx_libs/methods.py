@@ -947,6 +947,41 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
+def getDistance(PDB_file, resnum1, atom1, resnum2, atom2):
+    model_list = []
+    model_num  = 1
+    atom1_found, atom2_found = [], []
+
+    while True:
+        try:
+            with suppress_output():
+                # parsing PDB file into models (model_list)
+                model_list.append(prody.parsePDB(PDB_file,
+                                                 model=model_num, ter=True))
+            model_num += 1
+        except prody.proteins.pdbfile.PDBParseError:
+            break
+
+    for model_num, model in enumerate(model_list):
+        for atom in model:
+            resnum = int(atom.getResindex())
+            name   = str(atom.getName())
+
+            if atom1_found != [] and atom2_found != []:
+                # RETURN THIS
+                print((Vec_3D(atom1_found) - Vec_3D(atom2_found)).magnitude())
+                atom1_found, atom2_found = [], []
+                break
+
+            if name == atom1 and resnum == resnum1:
+                atom1_found = atom.getCoords()
+            if name == atom2 and resnum == resnum2:
+                atom2_found = atom.getCoords()
+
+
+
+
+
 def makeGraph(my_path, calced, my_experimental, graph_name):
     """
     X axis -> residue numbers, Y axis -> values
