@@ -947,10 +947,9 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
-def getDistance(PDB_file, resnum1, atom1, resnum2, atom2):
+def parse2dicts(PDB_file):
     model_list = []
     model_num  = 1
-    atom1_found, atom2_found = [], []
 
     while True:
         try:
@@ -962,24 +961,34 @@ def getDistance(PDB_file, resnum1, atom1, resnum2, atom2):
         except prody.proteins.pdbfile.PDBParseError:
             break
 
+    prev_resnum = -1
+    PDB_coords = {}
+
     for model_num, model in enumerate(model_list):
+        PDB_coords[model_num] = {}
+
         for atom in model:
-            resnum = int(atom.getResindex())
+            resnum = int(atom.getResindex()) + 1
             name   = str(atom.getName())
 
-            if atom1_found != [] and atom2_found != []:
-                # RETURN THIS
-                print((Vec_3D(atom1_found) - Vec_3D(atom2_found)).magnitude())
-                atom1_found, atom2_found = [], []
-                break
+            if resnum == prev_resnum:
+                PDB_coords[model_num][resnum][name] = Vec_3D(atom.getCoords())
 
-            if name == atom1 and resnum == resnum1:
-                atom1_found = atom.getCoords()
-            if name == atom2 and resnum == resnum2:
-                atom2_found = atom.getCoords()
+            else:
+                PDB_coords[model_num][resnum] = {}
+                PDB_coords[model_num][resnum][name] = Vec_3D(atom.getCoords())
+                prev_resnum = resnum
 
+    return PDB_coords
 
 
+def getDistance(PDB_coords, resnum1, atom1, resnum2, atom2):
+
+    for model in PDB_coords.keys():
+        a1 = PDB_coords[model][resnum1][atom1]
+        a2 = PDB_coords[model][resnum2][atom2]
+
+        print((a1 - a2).magnitude())
 
 
 def makeGraph(my_path, calced, my_experimental, graph_name):
