@@ -41,6 +41,17 @@ class ChemShift_Record(object):
         self.value     = float(ChemShift_value)
 
 
+class Restraint_Record(object):
+    """Class for storing restraint data"""
+    def __init__(self, curr_distID, seq_ID1, seq_ID2, atom_ID1, atom_ID2, dist_max):
+        self.curr_distID = int(curr_distID)
+        self.seq_ID1     = int(seq_ID1)
+        self.seq_ID2     = int(seq_ID2)
+        self.atom_ID1    = str(atom_ID1)
+        self.atom_ID2    = str(atom_ID2)
+        self.dist_max    = float(dist_max)
+
+
 class Vec_3D(object):
     """Vector class for calculations"""
     def __init__(self, v):

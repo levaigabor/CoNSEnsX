@@ -1,21 +1,5 @@
 import nmrpystar
-import time
-import math
 import sys
-
-ts = time.time()
-
-
-class Restraint_Record(object):
-    """Class for storing restraint data"""
-    def __init__(self, curr_distID, seq_ID1, seq_ID2, atom_ID1, atom_ID2, dist_val):
-
-        self.curr_distID = int(curr_distID)
-        self.seq_ID1     = int(seq_ID1)
-        self.seq_ID2     = int(seq_ID2)
-        self.atom_ID1    = str(atom_ID1)
-        self.atom_ID2    = str(atom_ID2)
-        self.dist_val    = float(dist_val)
 
 
 def parseSTR(STR_file):
@@ -34,8 +18,6 @@ def parseSTR(STR_file):
         return parsed
 
 
-sys.argv[1]
-
 my_parsed  = parseSTR(sys.argv[1])
 saveShifts = my_parsed.value
 
@@ -49,11 +31,6 @@ for frame in saveShifts.saves.keys():
                 loopShifts = saveShifts.saves[frame].loops[-1]
                 break
 
-prev_distID = 0
-
-# dist_dict = {}
-# dist_acc  = []
-
 restraints = []
 
 for ix in range(len(loopShifts.rows)):   # fetch values from STR file
@@ -64,31 +41,9 @@ for ix in range(len(loopShifts.rows)):   # fetch values from STR file
     seq_ID2     = row["Gen_dist_constraint.Seq_ID_2"]
     atom_ID1    = row["Gen_dist_constraint.Atom_ID_1"]
     atom_ID2    = row["Gen_dist_constraint.Atom_ID_2"]
-    dist_val    = row["Gen_dist_constraint.Distance_val"]
+    max_val     = row["Gen_dist_constraint.Distance_upper_bound_val"]
 
-    restraints.append(Restraint_Record(curr_distID, seq_ID1, seq_ID2,
-                                       atom_ID1, atom_ID2, dist_val))
+    restraints.append([curr_distID, seq_ID1,  seq_ID2,
+                                    atom_ID1, atom_ID2, max_val])
 
-
-#     if curr_distID == prev_distID:
-#         dist_acc.append(dist_val)
-
-#     else:
-#         if dist_acc:
-
-#             avg_dist = 0.0
-
-#             for distance in dist_acc:
-#                 avg_dist += math.pow(float(distance), -6)
-
-#             dist_dict[prev_distID] = math.pow(avg_dist, -1/6)
-
-
-#         prev_distID = curr_distID
-#         dist_acc    = [dist_val]
-
-# print dist_dict
-
-
-te = time.time()
-print "runtime:", te - ts
+print restraints
