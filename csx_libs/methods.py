@@ -372,10 +372,8 @@ def parseChemShift_STR(parsed_value):
                                             row["Atom_name"],
                                             row["Chem_shift_value"]))
 
-
         ChemShift_lists.append(ChemShift_records)
         list_number += 1
-
 
     new_CS_list = []
 
@@ -390,7 +388,6 @@ def parseChemShift_STR(parsed_value):
                 ChemShift_dict[record.atom_name] = []
                 ChemShift_dict[record.atom_name].append(record)
 
-        # print(ChemShift_dict)
         new_CS_list.append(ChemShift_dict)
 
     return new_CS_list

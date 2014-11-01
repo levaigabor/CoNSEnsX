@@ -43,13 +43,17 @@ class ChemShift_Record(object):
 
 class Restraint_Record(object):
     """Class for storing restraint data"""
-    def __init__(self, curr_distID, seq_ID1, seq_ID2, atom_ID1, atom_ID2, dist_max):
+    all_restraints = []
+
+    def __init__(self, curr_distID, seq_ID1, seq_ID2,
+                 atom_ID1, atom_ID2, dist_max):
         self.curr_distID = int(curr_distID)
         self.seq_ID1     = int(seq_ID1)
         self.seq_ID2     = int(seq_ID2)
         self.atom_ID1    = str(atom_ID1)
         self.atom_ID2    = str(atom_ID2)
         self.dist_max    = float(dist_max)
+        Restraint_Record.all_restraints.append(self)
 
 
 class Vec_3D(object):
@@ -86,6 +90,7 @@ class Vec_3D(object):
         v = self.v
         return Vec_3D([v[i] / vmag  for i in range(len(v))])
 
+    @staticmethod
     def cross(one, other):
         c = [one.v[1] * other.v[2] - one.v[2] * other.v[1],
              one.v[2] * other.v[0] - one.v[0] * other.v[2],
@@ -93,6 +98,7 @@ class Vec_3D(object):
 
         return Vec_3D(c)
 
+    @staticmethod
     def dihedAngle(one, other):
         return math.degrees(math.acos((one.v[0] * other.v[0] +
                                        one.v[1] * other.v[1] +
