@@ -49,7 +49,8 @@ def timeit(method):
         result = method(*args, **kw)
         te = time.time()
 
-        print('\x1b[31m%r -> %2.2f sec\x1b[0m' % (method.__name__, te-ts))
+        print('\x1b[31m%r -> %2.2f sec\x1b[0m' % (method.__name__, te-ts),
+              file = sys.stderr)
         return result
 
     return timed

@@ -3,6 +3,7 @@
 
 import math
 import os
+import copy
 
 class RDC_Record(object):
     """Class for storing RDC data"""
@@ -69,7 +70,7 @@ class Restraint_Record(object):
                         },
                 "ILE" : {
                             "MD"  : ["HD11", "HD12", "HD13"],
-                            "MG"  : ["HG11", "HG12", "HG13"],
+                            "MG"  : ["HG21", "HG22", "HG23"],
                             "MB"  : ["HB1",  "HB2",  "HB3"],
                             "MD1" : ["HD11", "HD12", "HD13"],
                             "MD2" : ["HD21", "HD22", "HD23"],
@@ -132,7 +133,9 @@ class Restraint_Record(object):
                 self.atom_ID1 = atom1
                 self.atom_ID2 = atom2
 
-                Restraint_Record.all_restraints.append(self)
+                me = copy.deepcopy(self)
+
+                Restraint_Record.all_restraints.append(me)
 
 
 class Vec_3D(object):
