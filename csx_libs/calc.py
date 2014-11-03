@@ -204,8 +204,8 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
 def calcNOEviolations(args, saveShifts):
     # parse data to restraint objects returned from pypy process
     for data in saveShifts:
-        csx_obj.Restraint_Record(data[0], data[1], data[2],
-                                 data[3], data[4], data[5])
+        csx_obj.Restraint_Record(data[0], data[1], data[2], data[3],
+                                 data[4], data[5], data[6], data[7])
 
     # fetch all restraint from class
     restraints = csx_obj.Restraint_Record.all_restraints
@@ -216,27 +216,11 @@ def calcNOEviolations(args, saveShifts):
     str_distaces  = {}
 
     for restraint in restraints:
-
-        ######################### TEMPONARY WORKAROUND #########################
-        if restraint.atom_ID1 == "ME" or restraint.atom_ID2 == "ME":
-            continue
-        if restraint.atom_ID1 == "MG" or restraint.atom_ID2 == "MG":
-            continue
-        if restraint.atom_ID1 == "MB" or restraint.atom_ID2 == "MB":
-            continue
-        if restraint.atom_ID1 == "MD" or restraint.atom_ID2 == "MD":
-            continue
-        if restraint.atom_ID1 == "MD1" or restraint.atom_ID2 == "MD1":
-            continue
-        if restraint.atom_ID1 == "MD2" or restraint.atom_ID2 == "MD2":
-            continue
-        if restraint.atom_ID1 == "MG1" or restraint.atom_ID2 == "MG1":
-            continue
-        if restraint.atom_ID1 == "MG2" or restraint.atom_ID2 == "MG2":
-            continue
-        ######################### TEMPONARY WORKAROUND #########################
-
         curr_id = int(restraint.curr_distID)
+
+        print(restraint.curr_distID,
+              restraint.seq_ID1, restraint.seq_name1, restraint.atom_ID1,
+              restraint.seq_ID2, restraint.seq_name2, restraint.atom_ID2)
 
         if prev_id == curr_id:
             model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,

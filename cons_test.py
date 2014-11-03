@@ -52,7 +52,7 @@ my_PDB = csx_func.get_PDB(args)
 def getID(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-my_id = getID()
+my_id   = getID()
 my_path = "calculations/" + my_id + '/'
 
 print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
@@ -104,32 +104,32 @@ if args.XPLOR_file:
     p.start()
 
 
-#-----------------------------  RDC calculation  -----------------------------#
-RDC_lists = csx_func.get_RDC_lists(parsed.value)
+# #-----------------------------  RDC calculation  -----------------------------#
+# RDC_lists = csx_func.get_RDC_lists(parsed.value)
 
-if RDC_lists:
-    csx_calc.calcRDC(RDC_lists, pdb_models, my_path, args)
-
-
-#---------------------------------  S2 calc  ---------------------------------#
-S2_dict = csx_func.parseS2_STR(parsed.value)
-
-if S2_dict:
-    csx_calc.calcS2(S2_dict, my_PDB, my_path, args)
+# if RDC_lists:
+#     csx_calc.calcRDC(RDC_lists, pdb_models, my_path, args)
 
 
-#-----------------------------  J-coupling calc  -----------------------------#
-Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
+# #---------------------------------  S2 calc  ---------------------------------#
+# S2_dict = csx_func.parseS2_STR(parsed.value)
 
-if Jcoup_dict:
-    csx_calc.calcJCouplings(Jcoup_dict, my_PDB, my_path)
+# if S2_dict:
+#     csx_calc.calcS2(S2_dict, my_PDB, my_path, args)
 
 
-#----------------------------  Chemical shift calc  --------------------------#
-ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
+# #-----------------------------  J-coupling calc  -----------------------------#
+# Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
 
-if ChemShift_lists:
-    csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
+# if Jcoup_dict:
+#     csx_calc.calcJCouplings(Jcoup_dict, my_PDB, my_path)
+
+
+# #----------------------------  Chemical shift calc  --------------------------#
+# ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
+
+# if ChemShift_lists:
+#     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
 #------------------------  NOE distance violation calc  ----------------------#
 if args.XPLOR_file:

@@ -45,15 +45,94 @@ class Restraint_Record(object):
     """Class for storing restraint data"""
     all_restraints = []
 
-    def __init__(self, curr_distID, seq_ID1, seq_ID2,
+    def __init__(self, curr_distID, seq_ID1, seq_ID2, seq_name1, seq_name2,
                  atom_ID1, atom_ID2, dist_max):
+
+        # print curr_distID, seq_name1, seq_ID1, atom_ID1, seq_name2, seq_ID2, atom_ID2
+
         self.curr_distID = int(curr_distID)
         self.seq_ID1     = int(seq_ID1)
         self.seq_ID2     = int(seq_ID2)
-        self.atom_ID1    = str(atom_ID1)
-        self.atom_ID2    = str(atom_ID2)
+        self.seq_name1   = str(seq_name1)
+        self.seq_name2   = str(seq_name2)
         self.dist_max    = float(dist_max)
-        Restraint_Record.all_restraints.append(self)
+
+        resol = {
+                "MET" : {
+                            "ME"  : ["HE1",  "HE2",  "HE3"],
+                            "MD"  : ["HD11", "HD12", "HD13"],
+                            "MG"  : ["HG11", "HG12", "HG13"],
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MD2" : ["HD21", "HD22", "HD23"],
+                            "MG1" : ["HG11", "HG12", "HG13"],
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "ILE" : {
+                            "MD"  : ["HD11", "HD12", "HD13"],
+                            "MG"  : ["HG11", "HG12", "HG13"],
+                            "MB"  : ["HB1",  "HB2",  "HB3"],
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MD2" : ["HD21", "HD22", "HD23"],
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MG1" : ["HG11", "HG12", "HG13"],
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "LYS" : {
+                            "MB"  : ["HB1",  "HB2",  "HB3"],
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MD2" : ["HD21", "HD22", "HD23"],
+                            "MD"  : ["HD11", "HD12", "HD13"],
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "ALA" : {
+                            "MD"  : ["HD11", "HD12", "HD13"],
+                            "MB"  : ["HB1",  "HB2",  "HB3"],
+                            "MG1" : ["HG11", "HG12", "HG13"],
+                            "MG2" : ["HG21", "HG22", "HG23"],
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MD2" : ["HD21", "HD22", "HD23"]
+                        },
+                "LEU" : {
+                            "MD1" : ["HD11", "HD12", "HD13"],
+                            "MD2" : ["HD21", "HD22", "HD23"]
+                        },
+                "VAL" : {
+                            "MG1" : ["HG11", "HG12", "HG13"],
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "GLN" : {
+                            "MG"  : ["HG11", "HG12", "HG13"],
+                            "MG1" : ["HG11", "HG12", "HG13"],
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "HIS" : {
+                            "MG"  : ["HG11", "HG12", "HG13"],
+                            "MG1" : ["HG11", "HG12", "HG13"]
+                        },
+                "PHE" : {
+                            "MG2" : ["HG21", "HG22", "HG23"]
+                        },
+                "THR" : {
+                            "MG"  : ["HG21", "HG22", "HG23"]
+                        }
+        }
+
+        if atom_ID1.startswith('M'):
+            atom_list1 = resol[seq_name1][atom_ID1]
+        else:
+            atom_list1 = [atom_ID1]
+
+        if atom_ID2.startswith('M'):
+            atom_list2 = resol[seq_name2][atom_ID2]
+        else:
+            atom_list2 = [atom_ID2]
+
+        for atom1 in atom_list1:
+            for atom2 in atom_list2:
+                self.atom_ID1 = atom1
+                self.atom_ID2 = atom2
+
+                Restraint_Record.all_restraints.append(self)
 
 
 class Vec_3D(object):
@@ -106,7 +185,6 @@ class Vec_3D(object):
                                       (one.magnitude() * other.magnitude())))
 
 
-# Define a context manager to suppress stdout and stderr.
 class suppress_output(object):
     '''
     A context manager for doing a "deep suppression" of stdout and stderr in

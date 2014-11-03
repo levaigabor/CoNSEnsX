@@ -39,11 +39,13 @@ for ix in range(len(loopShifts.rows)):   # fetch values from STR file
     curr_distID = row["Gen_dist_constraint.ID"]
     seq_ID1     = row["Gen_dist_constraint.Seq_ID_1"]
     seq_ID2     = row["Gen_dist_constraint.Seq_ID_2"]
+    seq_name1   = row["Gen_dist_constraint.Comp_ID_1"]
+    seq_name2   = row["Gen_dist_constraint.Comp_ID_2"]
     atom_ID1    = row["Gen_dist_constraint.Atom_ID_1"]
     atom_ID2    = row["Gen_dist_constraint.Atom_ID_2"]
     max_val     = row["Gen_dist_constraint.Distance_upper_bound_val"]
 
-    restraints.append([curr_distID, seq_ID1,  seq_ID2,
+    restraints.append([curr_distID, seq_ID1, seq_ID2, seq_name1, seq_name2,
                                     atom_ID1, atom_ID2, max_val])
 
 print restraints
