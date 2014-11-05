@@ -48,6 +48,69 @@ table {
   text-align: center;
 }
 
+#reset_button {
+    margin: 0 10px 0 10px;
+}
+
+#submit_button {
+    margin: 0 10px 0 10px;
+}
+
+.form_param {
+    height: 40px;
+}
+
+.submit_line {
+    width: 16em;  height: 4em;
+}
+
+input[type="text"]:hover,
+input[type="text"]:active,
+input[type="text"]:focus {
+    border: 1px solid #DE5E60;
+    box-shadow: 0px 0px 0px #000;
+}
+
+input[type="reset"] {
+    border: 1px solid #DE5E60;
+    background-color: #C5C5C5;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+input[type="reset"]:hover,
+input[type="reset"]:active,
+input[type="reset"]:focus {
+    background-color: #DE5E60;
+    color:#FFFFFF;
+    text-decoration:none;
+    -webkit-transition: all 0.1s linear 0s;
+    -moz-transition: all 0.1s linear 0s;
+    -ms-transition: all 0.1s linear 0s;
+    -o-transition: all 0.1s linear 0s;
+    transition: all 0.1s linear 0s;
+}
+
+input[type="submit"] {
+    border: 1px solid #DE5E60;
+    background-color: #C5C5C5;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+input[type="submit"]:hover,
+input[type="submit"]:active,
+input[type="submit"]:focus{
+    background-color: #DE5E60;
+    color:#FFFFFF;
+    text-decoration:none;
+    -webkit-transition: all 0.1s linear 0s;
+    -moz-transition: all 0.1s linear 0s;
+    -ms-transition: all 0.1s linear 0s;
+    -o-transition: all 0.1s linear 0s;
+    transition: all 0.1s linear 0s;
+}
+
 /* ==================================================
    Basic Styles
 ================================================== */
@@ -282,7 +345,7 @@ h3.spec {
 }
 
 .accordion-group {
-  	margin-bottom: 4px;
+  	margin-bottom: 6px;
   	border: none;
   	-webkit-border-radius: 0;
        -moz-border-radius: 0;
@@ -385,6 +448,4 @@ h3.spec {
 }
 
 
-.submit_line {
-    width: 16em;  height: 4em;
-}
+

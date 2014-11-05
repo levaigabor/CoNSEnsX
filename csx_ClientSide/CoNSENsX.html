@@ -55,17 +55,17 @@
 
         		<div class="accordion" id="accordionArea">
                     <form name="myform" action="http://www.mydomain.com/myformhandler.cgi" method="POST">
-                    <table border="0">
-                        <tr><td>PDB file: &nbsp;</td>
+                    <table  border="0">
+                        <tr class="form_param"><td>PDB file: &nbsp;</td>
                             <td><input id="pdb_file" name="pdb_upload" size="20" type="file"></td>
                         </tr>
-                        <tr><td>&nbsp;</td>
+                        <tr class="form_param"><td>&nbsp;</td>
                             <td>or PDB ID: &nbsp;<input id="pdb_id" name="pdb_web" placeholder="1D3Z" type="text"></td>
                         </tr>
-                        <tr><td>X-PLOR file: &nbsp;</td>
+                        <tr class="form_param"><td>NOE restraints file: &nbsp;</td>
                             <td><input id="xplor_file" name="xplor_upload" size="20" type="file"></td>
                         </tr>
-                        <tr><td>BMBR file: &nbsp;</td>
+                        <tr class="form_param"><td>BMBR file: &nbsp;</td>
                             <td><input id="bmbr_file" name="bmrb_upload" size="20" type="file"></td>
                         </tr>
                     </table>
@@ -82,8 +82,8 @@
                     <option value="pf1">Pf1 phages</option>
                     </select><br><br>
                     <table id="bottom_table" border="0">
-                        <tr><td><input id="reset_button" type="reset" value="Reset!", style="width: 16em;  height: 4em;"></td>
-                            <td><input id="submit_button" type="submit" value="Submit", style="width: 16em;  height: 4em;"></td>
+                        <tr><td><input id="reset_button" type="reset" value="Reset form", style="width: 16em;  height: 4em;"></td>
+                            <td><input id="submit_button" type="submit" value="Ready and fire!", style="width: 16em;  height: 4em;"></td>
                         </tr>
                     </table>
                     </form>
@@ -108,8 +108,8 @@
                         <div id="collapseOne" class="accordion-body collapse">
                             <div class="accordion-inner">
                                 Input a
-                                multi-model PDB file, an X-PLOR format NOE distance restraint file and a
-                                 BMRB file to check the accuracy of the protein structural ensemble
+                                multi-model PDB file, a BMRB format NOE distance restraint file (optional, V2 NMR Restraints at the <a href="http://www.rcsb.org">Protein Data Bank</a>) and a
+                                BMRB restraint file to check the accuracy of the protein structural ensemble
                                 against experimental data. For more details on the method and usage of
                                 the service, please consult the
                                 <a href="http://himalia.chem.elte.hu/consensx/help.html">CoNSEnsX help page</a>
