@@ -8,6 +8,7 @@ import methods as csx_func
 import objects as csx_obj
 import output  as csx_out
 
+import matplotlib.pyplot as plt
 
 def calcRDC(RDC_lists, pdb_models, my_path, args):
     for list_num, RDC_dict in enumerate(RDC_lists):
@@ -201,7 +202,7 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
     csx_out.writeRDC_table_close(my_path)
 
 
-def calcNOEviolations(args, saveShifts):
+def calcNOEviolations(args, saveShifts, my_path):
     # parse data to restraint objects returned from pypy process
     for data in saveShifts:
         csx_obj.Restraint_Record(data[0], data[1], data[2], data[3],
@@ -217,10 +218,6 @@ def calcNOEviolations(args, saveShifts):
 
     for restraint in restraints:
         curr_id = int(restraint.curr_distID)
-
-        print(restraint.curr_distID,
-              restraint.seq_ID1, restraint.seq_name1, restraint.atom_ID1,
-              restraint.seq_ID2, restraint.seq_name2, restraint.atom_ID2)
 
         if prev_id == curr_id:
             model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,
@@ -255,13 +252,29 @@ def calcNOEviolations(args, saveShifts):
 
     avg_dist_keys = avg_distances.keys()
     avg_dist_keys.sort()
-    violations = {}
+    violations = {"0-0.5" : 0, "0.5-1" : 0, "1-1.5" : 0,
+                  "1.5-2" : 0, "2-2.5" : 0, "2.5-3" : 0, "3<" : 0}
     viol_count = 0
 
     for key in avg_dist_keys:
         if avg_distances[key] > str_distaces[key]:
-            # print(key, "NOE VIOLATION at")
-            violations[key] = avg_distances[key] - str_distaces[key]
             viol_count += 1
+            diff = avg_distances[key] - str_distaces[key]
+
+            if diff <= 0.5:
+                violations["0-0.5"] +=1
+            elif 0.5 < diff <= 1:
+                violations["0.5-1"] +=1
+            elif 1 < diff <= 1.5:
+                violations["1-1.5"] +=1
+            elif 1.5 < diff <= 2:
+                violations["1.5-2"] +=1
+            elif 2 < diff <= 2.5:
+                violations["2-2.5"] +=1
+            elif 2.5 < diff <= 3:
+                violations["2.5-3"] +=1
+            else:
+                violations["3<"] +=1
 
     print("Total # of violations:", viol_count)
+    csx_func.makeNOEHist(my_path, violations)

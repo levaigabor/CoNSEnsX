@@ -1130,3 +1130,33 @@ def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
     plt.tight_layout(pad=1.08)
     plt.savefig(my_path + "/" + corr_graph_name, format="svg")
     plt.close()
+
+
+def makeNOEHist(my_path, violations):
+
+    plt.figure(figsize=(6, 5), dpi=80)
+
+    n_groups = len(violations)
+
+    means_men = [
+        violations['0-0.5'], violations['0.5-1'], violations['1-1.5'],
+        violations['1.5-2'], violations['2-2.5'], violations['2.5-3'],
+        violations['3<']
+    ]
+
+    ticks = ['0-0.5', '0.5-1', '1-1.5', '1.5-2', '2-2.5', '2.5-3', '3<']
+    index = np.arange(n_groups)
+    bar_width = 0.7
+
+    rects1 = plt.bar(index, means_men, bar_width, alpha=1, color='b')
+
+    plt.xlabel(u"Violation (Å)")
+    plt.ylabel("# of NOE distance violations")
+    plt.title("NOE distance violations")
+    plt.xticks(index + bar_width / 2, ticks)
+    ax = plt.axes()
+    ax.yaxis.grid()
+
+    plt.tight_layout()
+    plt.savefig(my_path + "/NOE_hist.svg", format="svg")
+    plt.close()

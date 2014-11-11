@@ -73,9 +73,6 @@ class Restraint_Record(object):
                             "MG"  : ["HG21", "HG22", "HG23"],
                             "MB"  : ["HB1",  "HB2",  "HB3"],
                             "MD1" : ["HD11", "HD12", "HD13"],
-                            "MD2" : ["HD21", "HD22", "HD23"],
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MG1" : ["HG11", "HG12", "HG13"],
                             "MG2" : ["HG21", "HG22", "HG23"]
                         },
                 "LYS" : {

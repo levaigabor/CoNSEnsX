@@ -15,14 +15,13 @@ import ast
 import csx_libs.calc    as csx_calc
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
-# import csx_libs.objects as csx_obj
 import csx_libs.output  as csx_out
 
 version = "1.0"
 
 ts = time.time()
 
-#------------------  Setting up parser and parse CLI arguments  --------------#
+#------------------  Setting up parser and parse CLI arguments  ---------------#
 parser = csx_misc.createParser()            # get parser from module
 args   = parser.parse_args()                # parsing CLI arguments
 
@@ -48,7 +47,7 @@ if args.PDB_fetch and args.PDB_file:
 my_PDB = csx_func.get_PDB(args)
 
 
-#------------------------  Setting up working directory  ---------------------#
+#------------------------  Setting up working directory  ----------------------#
 def getID(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -64,13 +63,13 @@ else:
         os.remove(my_path + '/' + f)
 
 
-#----------------  Setting up output files & write header data  --------------#
+#----------------  Setting up output files & write header data  ---------------#
 # csx_out.writeHeaderTXT(my_path, args, version)
 
 csx_out.writeHeaderHTML(my_path, version)
 
 
-#-------------------------  Making temporary folder   ------------------------#
+#-------------------------  Making temporary folder   -------------------------#
 if not os.path.exists("temp"):                 # create temp folder
     os.makedirs("temp")
 else:
@@ -82,11 +81,11 @@ model_count = csx_func.pdb_splitter(my_PDB)    # splitting of PDB file
 pdb_models  = os.listdir("temp")               # list of models (PDB)
 
 
-#-------------------------  Write file data to HTML   ------------------------#
+#-------------------------  Write file data to HTML   -------------------------#
 csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
 
 
-#------------------------  Read  and parse STR file   ------------------------#
+#------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)
 
 def pypyProcess(conn, restain_file):
@@ -104,38 +103,38 @@ if args.XPLOR_file:
     p.start()
 
 
-# #-----------------------------  RDC calculation  -----------------------------#
-# RDC_lists = csx_func.get_RDC_lists(parsed.value)
+#-----------------------------  RDC calculation  ------------------------------#
+RDC_lists = csx_func.get_RDC_lists(parsed.value)
 
-# if RDC_lists:
-#     csx_calc.calcRDC(RDC_lists, pdb_models, my_path, args)
-
-
-# #---------------------------------  S2 calc  ---------------------------------#
-# S2_dict = csx_func.parseS2_STR(parsed.value)
-
-# if S2_dict:
-#     csx_calc.calcS2(S2_dict, my_PDB, my_path, args)
+if RDC_lists:
+    csx_calc.calcRDC(RDC_lists, pdb_models, my_path, args)
 
 
-# #-----------------------------  J-coupling calc  -----------------------------#
-# Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
+#---------------------------------  S2 calc  ----------------------------------#
+S2_dict = csx_func.parseS2_STR(parsed.value)
 
-# if Jcoup_dict:
-#     csx_calc.calcJCouplings(Jcoup_dict, my_PDB, my_path)
+if S2_dict:
+    csx_calc.calcS2(S2_dict, my_PDB, my_path, args)
 
 
-# #----------------------------  Chemical shift calc  --------------------------#
-# ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
+#-----------------------------  J-coupling calc  ------------------------------#
+Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
 
-# if ChemShift_lists:
-#     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
+if Jcoup_dict:
+    csx_calc.calcJCouplings(Jcoup_dict, my_PDB, my_path)
 
-#------------------------  NOE distance violation calc  ----------------------#
+
+#----------------------------  Chemical shift calc  ---------------------------#
+ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
+
+if ChemShift_lists:
+    csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
+
+#------------------------  NOE distance violation calc  -----------------------#
 if args.XPLOR_file:
     saveShifts = parent_conn.recv()
     p.join()
-    csx_calc.calcNOEviolations(args, saveShifts)
+    csx_calc.calcNOEviolations(args, saveShifts, my_path)
 
 
 
