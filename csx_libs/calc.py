@@ -212,10 +212,14 @@ def calcNOEviolations(args, saveShifts, my_path):
     restraints = csx_obj.Restraint_Record.all_restraints
 
     PDB_coords    = csx_func.parse2dicts(args.PDB_file)
+    prev_id       = -1
     avg_distances = {}
+    measured_avg  = {}
     str_distaces  = {}
 
     for model in PDB_coords.keys():
+        avg_distances[model] = {}
+
         for restraint in restraints:
             curr_id = int(restraint.curr_distID)
             resnum1 = restraint.seq_ID1
@@ -228,44 +232,67 @@ def calcNOEviolations(args, saveShifts, my_path):
 
             distance = (atom_coord1 - atom_coord2).magnitude()
 
-            if curr_id in avg_distances:
-                avg_distances[curr_id].append(distance)
+            if prev_id == curr_id:
+                avg_distances[model][curr_id].append(distance)
 
             else:
-                avg_distances[curr_id] = [distance]
+                prev_id = curr_id
+                avg_distances[model][curr_id] = []
                 str_distaces[curr_id] = restraint.dist_max
 
+                avg_distances[model][curr_id].append(distance)
+
+    # at this point avg_distances[model][curr_id] contains distances for one
+    # model and one restraint GROUP identified with "curr_distID" number
 
     prev_id  = -1
 
+    for model in PDB_coords.keys():
+        for restraint in restraints:
+            curr_id = int(restraint.curr_distID)
+
+            if prev_id == curr_id:
+                continue
+            else:
+                prev_id = curr_id
+
+            avg = 0.0
+
+            for distance in avg_distances[model][curr_id]:
+                avg += math.pow(float(distance), -6)
+
+            avg /= len(avg_distances[model][curr_id])
+            avg_distances[model][curr_id] = math.pow(avg, -1.0/6)
+
+    # at this point avg_distances[model][curr_id] contain a single (r-6)
+    # averaged distance for one model and one restraint GROUP identified with
+    # "curr_distID" number. Averaging is done on "in GROUP" distances
+
     for restraint in restraints:
         curr_id = int(restraint.curr_distID)
+        avg     = 0.0
 
-        if prev_id == curr_id:
-            continue
-        else:
-            prev_id = curr_id
+        for model in PDB_coords.keys():
+            avg += math.pow(avg_distances[model][curr_id], -6)
 
-        avg = 0.0
+        avg /= len(PDB_coords.keys())
+        measured_avg[curr_id] = math.pow(avg, -1.0/6)
 
-        for distance in avg_distances[curr_id]:
-            avg += math.pow(float(distance), -6)
+    # at this point measured_avg[curr_id] is a simple dictonary containing the
+    # model averaged distances for the given "curr_distID" number
 
-        avg /= len(avg_distances[curr_id])
-        avg_distances[curr_id] = math.pow(avg, -1.0/6)
-
-
-    avg_dist_keys = avg_distances.keys()
+    avg_dist_keys = measured_avg.keys()
     avg_dist_keys.sort()
     violations = {"0-0.5" : 0, "0.5-1" : 0, "1-1.5" : 0,
                   "1.5-2" : 0, "2-2.5" : 0, "2.5-3" : 0, "3<" : 0}
     viol_count = 0
-    diff_sum   = 0
+
+    diff_sum = 0
 
     for key in avg_dist_keys:
-        if avg_distances[key] > str_distaces[key]:
+        if measured_avg[key] > str_distaces[key]:
             viol_count += 1
-            diff = avg_distances[key] - str_distaces[key]
+            diff = measured_avg[key] - str_distaces[key]
             diff_sum += diff
 
             if diff <= 0.5:
