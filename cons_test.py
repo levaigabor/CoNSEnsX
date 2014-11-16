@@ -63,6 +63,7 @@ else:
     for f in os.listdir(my_path):              # clean working folder
         os.remove(my_path + '/' + f)
 
+csx_func.get_model_list(my_PDB)
 
 #----------------  Setting up output files & write header data  ---------------#
 # csx_out.writeHeaderTXT(my_path, args, version)

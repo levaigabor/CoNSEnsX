@@ -211,7 +211,7 @@ def calcNOEviolations(args, saveShifts, my_path):
     # fetch all restraint from class
     restraints = csx_obj.Restraint_Record.all_restraints
 
-    PDB_coords    = csx_func.parse2dicts(args.PDB_file)
+    PDB_coords    = csx_func.pdb2coords(args.PDB_file)
     prev_id       = -1
     avg_distances = {}
     measured_avg  = {}

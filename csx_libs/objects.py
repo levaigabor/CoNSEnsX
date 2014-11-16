@@ -42,6 +42,15 @@ class ChemShift_Record(object):
         self.value     = float(ChemShift_value)
 
 
+class PDB_model(object):
+    """Class for storing chemical shift data"""
+    model_list = []
+
+    def __init__(self, atomgroup,):
+        self.atomgroup = atomgroup
+        PDB_model.model_list.append(self.atomgroup)
+
+
 class Restraint_Record(object):
     """Class for storing restraint data"""
     all_restraints   = []
@@ -64,7 +73,7 @@ class Restraint_Record(object):
         seq_dist = abs(self.seq_ID1 - self.seq_ID2)
 
         if seq1_ok and seq2_ok and seq_dist > 2:
-            print(atom_ID1, atom_ID2, seq_dist)
+            # print(atom_ID1, atom_ID2, seq_dist)
             if seq_dist in Restraint_Record.PRIDE_restraints:
                 Restraint_Record.PRIDE_restraints[seq_dist] += 1
             else:

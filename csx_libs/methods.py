@@ -72,6 +72,20 @@ def get_PDB(args):
 
 
 @timeit
+def get_model_list(PDB_file):
+    model_num = 1
+
+    while True:
+        try:
+            with suppress_output():
+                # parsing PDB file into models (model_list)
+                PDB_model(prody.parsePDB(PDB_file, model=model_num, ter=True))
+            model_num += 1
+        except prody.proteins.pdbfile.PDBParseError:
+            break
+
+
+@timeit
 def pdb_cleaner(PDB_file):
     """
     Performs some basic formatting on the given PDB file to make it suitable
@@ -153,6 +167,8 @@ def pdb_splitter(PDB_file):
         else:
             continue
 
+    my_pdb.close()
+
     for i in range(len(model_names)):
         file_name = "temp/model_" + model_names[i] + ".pdb"
         temp_pdb  = open(file_name, 'w')
@@ -175,6 +191,7 @@ def parseSTR(STR_file):
     for line in star_file:                  # rean STR file into a string
         myString += line
 
+    star_file.close()
     parsed = nmrpystar.parse(myString)      # parsing, access data -> parsed.value
 
     if parsed.status != 'success':          # check if parsing was successful
@@ -427,6 +444,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                 resname = line.split()[3]       # get residue name
                 seg.append(resname)             # append new segname to list
 
+        input_pdb.close()
 
         #-----------------------  Write sequence data  -----------------------#
         short_seg = ""
@@ -508,6 +526,9 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                             '-' + lc_model],            # rdc lc model
                             stdout = outfile,
                             stderr = DEVNULL)
+        outfile.close()
+        DEVNULL.close()
+
     print()
 
 
@@ -574,6 +595,7 @@ def callShiftxOn(pdb_files):
                     else:
                         averageCA[resnum] = CA
 
+            out_file.close()
             model_data_list.append({"HA":modHA, "H":modH,
                                     "N":modN, "CA":modCA})
             modHA, modH, modN, modCA = {}, {}, {}, {}
@@ -633,6 +655,7 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     for res_num in averageRDC.keys():
         averageRDC[res_num] /= n_of_structures
 
+    pales_out.close()
     return averageRDC, model_data_list
 
 
@@ -642,18 +665,7 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
     Returns a dictonary with the average S2 values:
     S2_calced[residue] = value
     """
-    model_list = []
-    model_num = 1
-
-    while True:
-        try:
-            with suppress_output():
-                # parsing PDB file into models (model_list)
-                model_list.append(prody.parsePDB(PDB_file,
-                                                 model=model_num, ter=True))
-            model_num += 1
-        except prody.proteins.pdbfile.PDBParseError:
-            break
+    model_list = PDB_model.model_list
 
     # fitting models
     reference = model_list[0]
@@ -763,18 +775,7 @@ def calcDihedAngles(PDB_file):
     Calculates backbone diherdral angles
     note: all returned angle values are in radian
     """
-    model_list = []
-    model_num  = 1
-
-    while True:
-        try:
-            with suppress_output():
-                # parsing PDB file into models (model_list)
-                model_list.append(prody.parsePDB(PDB_file,
-                                                 model=model_num, ter=True))
-            model_num += 1
-        except prody.proteins.pdbfile.PDBParseError:
-            break
+    model_list = PDB_model.model_list
 
     JCoup_dicts = []
 
@@ -951,19 +952,8 @@ def calcRMSD(calced, experimental):
     return round(RMSD, 6)
 
 
-def parse2dicts(PDB_file):
-    model_list = []
-    model_num  = 1
-
-    while True:
-        try:
-            with suppress_output():
-                # parsing PDB file into models (model_list)
-                model_list.append(prody.parsePDB(PDB_file,
-                                                 model=model_num, ter=True))
-            model_num += 1
-        except prody.proteins.pdbfile.PDBParseError:
-            break
+def pdb2coords(PDB_file):
+    model_list = PDB_model.model_list
 
     prev_resnum = -1
     PDB_coords = {}
