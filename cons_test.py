@@ -16,6 +16,7 @@ import csx_libs.calc    as csx_calc
 import csx_libs.misc    as csx_misc
 import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
+import csx_libs.objects as csx_obj
 
 version = "1.0"
 
@@ -90,16 +91,16 @@ parsed = csx_func.parseSTR(args.STR_file)
 
 def pypyProcess(conn, restain_file):
     """function called in seperate process to parse mr file"""
-    pypy_command      = ["pypy", "pypyParse.py", args.XPLOR_file]
+    pypy_command      = ["pypy", "pypyParse.py", args.NOE_file]
     restraints_parsed = subprocess.check_output(pypy_command)
     restraints_parsed = ast.literal_eval(restraints_parsed)
     conn.send(restraints_parsed)
     conn.close()
 
 
-if args.XPLOR_file:
+if args.NOE_file:
     parent_conn, child_conn = Pipe()
-    p = Process(target = pypyProcess, args = (child_conn, args.XPLOR_file,))
+    p = Process(target = pypyProcess, args = (child_conn, args.NOE_file,))
     p.start()
 
 
@@ -131,12 +132,15 @@ if ChemShift_lists:
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
 #------------------------  NOE distance violation calc  -----------------------#
-if args.XPLOR_file:
+if args.NOE_file:
     saveShifts = parent_conn.recv()
     p.join()
     csx_calc.calcNOEviolations(args, saveShifts, my_path)
 
+    # restraints = csx_obj.Restraint_Record.PRIDE_restraints
+    # print(restraints)
 
+    csx_calc.calcNMR_Pride(pdb_models, my_path)
 
 te = time.time()
 print("total runtime", te-ts)

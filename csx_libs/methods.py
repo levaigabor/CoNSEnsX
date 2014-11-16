@@ -56,6 +56,12 @@ def timeit(method):
     return timed
 
 
+def natural_sort(l):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(l, key = alphanum_key)
+
+
 def get_PDB(args):
     if args.PDB_file:
         my_PDB = args.PDB_file
@@ -978,22 +984,6 @@ def parse2dicts(PDB_file):
                 prev_resnum = resnum
 
     return PDB_coords
-
-
-def getModelAvgDistance(PDB_coords, resnum1, atom1, resnum2, atom2):
-
-    avg_dist = 0.0
-    dist_acc = []
-
-    for model in PDB_coords.keys():
-        atom_coord1 = PDB_coords[model][resnum1][atom1]
-        atom_coord2 = PDB_coords[model][resnum2][atom2]
-        dist_acc.append((atom_coord1 - atom_coord2).magnitude())
-
-    for distance in dist_acc:
-        avg_dist += math.pow(float(distance), -6)
-
-    return math.pow(avg_dist / len(dist_acc), -1.0/6)
 
 
 def makeGraph(my_path, calced, my_experimental, graph_name):

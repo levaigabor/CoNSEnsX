@@ -212,69 +212,105 @@ def calcNOEviolations(args, saveShifts, my_path):
     restraints = csx_obj.Restraint_Record.all_restraints
 
     PDB_coords    = csx_func.parse2dicts(args.PDB_file)
-    prev_id       = -1
     avg_distances = {}
     str_distaces  = {}
+
+    for model in PDB_coords.keys():
+        for restraint in restraints:
+            curr_id = int(restraint.curr_distID)
+            resnum1 = restraint.seq_ID1
+            atom1   = restraint.atom_ID1
+            resnum2 = restraint.seq_ID2
+            atom2   = restraint.atom_ID2
+
+            atom_coord1 = PDB_coords[model][resnum1][atom1]
+            atom_coord2 = PDB_coords[model][resnum2][atom2]
+
+            distance = (atom_coord1 - atom_coord2).magnitude()
+
+            if curr_id in avg_distances:
+                avg_distances[curr_id].append(distance)
+
+            else:
+                avg_distances[curr_id] = [distance]
+                str_distaces[curr_id] = restraint.dist_max
+
+
+    prev_id  = -1
 
     for restraint in restraints:
         curr_id = int(restraint.curr_distID)
 
         if prev_id == curr_id:
-            model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,
-                                                          restraint.seq_ID1,
-                                                          restraint.atom_ID1,
-                                                          restraint.seq_ID2,
-                                                          restraint.atom_ID2)
-
-            avg_distances[curr_id].append(model_avg_dist)
-
+            continue
         else:
             prev_id = curr_id
-            avg_distances[curr_id] = []
-            str_distaces[curr_id] = restraint.dist_max
 
-            model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,
-                                                          restraint.seq_ID1,
-                                                          restraint.atom_ID1,
-                                                          restraint.seq_ID2,
-                                                          restraint.atom_ID2)
-
-            avg_distances[curr_id].append(model_avg_dist)
-
-    # averaging over the same restraint ID data
-    for key in avg_distances.keys():
         avg = 0.0
 
-        for distance in avg_distances[key]:
+        for distance in avg_distances[curr_id]:
             avg += math.pow(float(distance), -6)
 
-        avg_distances[key] = math.pow(avg / len(avg_distances[key]), -1.0/6)
+        avg /= len(avg_distances[curr_id])
+        avg_distances[curr_id] = math.pow(avg, -1.0/6)
+
 
     avg_dist_keys = avg_distances.keys()
     avg_dist_keys.sort()
     violations = {"0-0.5" : 0, "0.5-1" : 0, "1-1.5" : 0,
                   "1.5-2" : 0, "2-2.5" : 0, "2.5-3" : 0, "3<" : 0}
     viol_count = 0
+    diff_sum   = 0
 
     for key in avg_dist_keys:
         if avg_distances[key] > str_distaces[key]:
             viol_count += 1
             diff = avg_distances[key] - str_distaces[key]
+            diff_sum += diff
 
             if diff <= 0.5:
-                violations["0-0.5"] +=1
+                violations["0-0.5"] += 1
             elif 0.5 < diff <= 1:
-                violations["0.5-1"] +=1
+                violations["0.5-1"] += 1
             elif 1 < diff <= 1.5:
-                violations["1-1.5"] +=1
+                violations["1-1.5"] += 1
             elif 1.5 < diff <= 2:
-                violations["1.5-2"] +=1
+                violations["1.5-2"] += 1
             elif 2 < diff <= 2.5:
-                violations["2-2.5"] +=1
+                violations["2-2.5"] += 1
             elif 2.5 < diff <= 3:
-                violations["2.5-3"] +=1
+                violations["2.5-3"] += 1
             else:
-                violations["3<"] +=1
+                violations["3<"] += 1
 
     print("Total # of violations:", viol_count)
+    print("Total distance of violations:", diff_sum)
     csx_func.makeNOEHist(my_path, violations)
+
+
+def calcNMR_Pride(pdb_models, my_path):
+    # write model list text file
+    pdb_models = csx_func.natural_sort(pdb_models)
+    model_list = open("temp/model_list.txt", 'w')
+
+    for model in pdb_models:
+        model_list.write("temp/" + model + "\n")
+
+    model_list.write("END\n")
+    model_list.close()
+
+    # write distance dict to text file
+    restraints  = csx_obj.Restraint_Record.PRIDE_restraints
+    pride_input = open("temp/pride_input.txt", 'w')
+
+    pride_input.write("HEADER\n")
+
+    prime_distances = restraints.keys()
+    prime_distances.sort()
+
+    for distance in prime_distances:
+        pride_input.write(str(distance) + ' ' +
+                          str(restraints[distance]) + '\n')
+
+    pride_input.write("END\n")
+    pride_input.close()

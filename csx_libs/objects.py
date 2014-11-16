@@ -8,13 +8,13 @@ import copy
 class RDC_Record(object):
     """Class for storing RDC data"""
     def __init__(self, resnum1, atom1, resnum2, atom2, RDC_value):
-        self.RDC_type  = (str(int(resnum1) - int(resnum2))
-                          + '_' + atom1 + '_' + atom2)
-        self.resnum1   = int(resnum1)
-        self.atom1     = atom1
-        self.resnum2   = int(resnum2)
-        self.atom2     = atom2
-        self.value     = float(RDC_value)
+        self.RDC_type = (str(int(resnum1) - int(resnum2))
+                         + '_' + atom1 + '_' + atom2)
+        self.resnum1  = int(resnum1)
+        self.atom1    = atom1
+        self.resnum2  = int(resnum2)
+        self.atom2    = atom2
+        self.value    = float(RDC_value)
 
 
 class S2_Record(object):
@@ -44,12 +44,11 @@ class ChemShift_Record(object):
 
 class Restraint_Record(object):
     """Class for storing restraint data"""
-    all_restraints = []
+    all_restraints   = []
+    PRIDE_restraints = {}
 
     def __init__(self, curr_distID, seq_ID1, seq_ID2, seq_name1, seq_name2,
                  atom_ID1, atom_ID2, dist_max):
-
-        # print curr_distID, seq_name1, seq_ID1, atom_ID1, seq_name2, seq_ID2, atom_ID2
 
         self.curr_distID = int(curr_distID)
         self.seq_ID1     = int(seq_ID1)
@@ -57,6 +56,20 @@ class Restraint_Record(object):
         self.seq_name1   = str(seq_name1)
         self.seq_name2   = str(seq_name2)
         self.dist_max    = float(dist_max)
+
+        # check if restraint is suitable for PRIDE-NMR
+
+        seq1_ok =  atom_ID1 in ["H", "HA"] or atom_ID1.startswith("HB")
+        seq2_ok =  atom_ID2 in ["H", "HA"] or atom_ID2.startswith("HB")
+        seq_dist = abs(self.seq_ID1 - self.seq_ID2)
+
+        if seq1_ok and seq2_ok and seq_dist > 2:
+            print(atom_ID1, atom_ID2, seq_dist)
+            if seq_dist in Restraint_Record.PRIDE_restraints:
+                Restraint_Record.PRIDE_restraints[seq_dist] += 1
+            else:
+                Restraint_Record.PRIDE_restraints[seq_dist] = 1
+
 
         resol = {
                 "MET" : {

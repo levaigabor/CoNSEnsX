@@ -11,10 +11,10 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
   -h, --help            show this help message and exit
   -c                    show credits
 
-  -b STR_file           restraints file
+  -b STR_file           restraints file (BMRB format)
   -f PDB_file           PDB file
   -f PDB_id             PDB file to fetch from rcsb.org
-  -r XPLOR_file         X-PLOR restraint file
+  -r NOE_file           NOE restraint file (BMRB format)
 
   -s, --fit             superimpoze models listed in input PDF file
   --fit_range           range for model fitting (first-last)
@@ -56,7 +56,7 @@ def createParser():
     parser.add_argument("-b", "--STR_file",  help = "restraints file")
     parser.add_argument("-f", "--PDB_file",  help = "PDB file")
     parser.add_argument("-p", "--PDB_fetch", help = "PDB file to fetch")
-    parser.add_argument("-r", "--XPLOR_file", default="",
+    parser.add_argument("-r", "--NOE_file", default="",
                        help = "X-PLOR restraint file")
 
     parser.add_argument("-h", "--help", help="show help and exit",
