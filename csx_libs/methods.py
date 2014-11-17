@@ -158,6 +158,10 @@ def pdb_splitter(PDB_file):
         if line.startswith("MODEL"):
             my_name = line.strip().split()[1]
         elif line.startswith("ATOM") or line.startswith("TER"):
+            if line.split()[2] == "OC1":
+                line = line.replace('OC1', 'O  ')
+            elif line.split()[2] == "OC2":
+                line = line.replace('OC2', 'OXT')
             my_data.append(line.strip())
         elif line.startswith("ENDMDL"):
             model_names.append(my_name)
@@ -496,7 +500,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                     "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
                     str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
                     str(RDC_record.atom1),
-                    str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
+                    str(RDC_record.resnum2) + 'A', seg[RDC_record.resnum2 - 1],
                     str(RDC_record.atom2),
                     RDC_record.value, 1.000,  1.00))
 
@@ -505,7 +509,6 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
         outfile = open("pales.out", 'a')    # open output file with append mode
         DEVNULL = open(os.devnull, 'w')     # open systems /dev/null
 
-        #print("calculating: " + pdb_file)
         print("call Pales on model: " +
               str(o + 1) + '/' + str(len(pdb_files)), end="\r")
         sys.stdout.flush()
@@ -652,10 +655,11 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
             model_data_dict[resnum] = D
 
+    pales_out.close()
+
     for res_num in averageRDC.keys():
         averageRDC[res_num] /= n_of_structures
 
-    pales_out.close()
     return averageRDC, model_data_list
 
 
@@ -675,8 +679,10 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
         for i in range(1, len(model_list)):
             mobile = model_list[i]
 
-            with suppress_output():
-                matches = prody.matchChains(reference, mobile)
+            # with suppress_output():
+            #     matches = prody.matchChains(reference, mobile)
+
+            matches = prody.matchChains(reference, mobile)
 
             match = matches[0]
 
