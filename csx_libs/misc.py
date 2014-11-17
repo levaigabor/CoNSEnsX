@@ -16,6 +16,7 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
   -f PDB_id             PDB file to fetch from rcsb.org
   -r NOE_file           NOE restraint file (BMRB format)
 
+  -r3, --r3_averaging   use r-3 averaging in model data
   -s, --fit             superimpoze models listed in input PDF file
   --fit_range           range for model fitting (first-last)
   -l {bic,pf1}          rdc lc model: <bic|pf1>
@@ -64,6 +65,8 @@ def createParser():
     parser.add_argument('-c', action='store_true',
                        help="show credits")
 
+    parser.add_argument("-r3", "--r3-averaging", action='store_true',
+                       default=False, help="use r-3 averaging in model data")
     parser.add_argument("-s", "--fit", action='store_true', default=False,
                        help="superimpoze models listed in input PDB file")
     parser.add_argument("--fit_range", help="range of model fit")

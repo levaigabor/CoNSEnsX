@@ -202,7 +202,7 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
     csx_out.writeRDC_table_close(my_path)
 
 
-def calcNOEviolations(args, saveShifts, my_path):
+def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
     # parse data to restraint objects returned from pypy process
     for data in saveShifts:
         csx_obj.Restraint_Record(data[0], data[1], data[2], data[3],
@@ -259,10 +259,16 @@ def calcNOEviolations(args, saveShifts, my_path):
             avg = 0.0
 
             for distance in avg_distances[model][curr_id]:
-                avg += math.pow(float(distance), -6)
+                if r3_averaging:
+                    avg += math.pow(float(distance), -3)
+                else:
+                    avg += math.pow(float(distance), -6)
 
             avg /= len(avg_distances[model][curr_id])
-            avg_distances[model][curr_id] = math.pow(avg, -1.0/6)
+            if r3_averaging:
+                avg_distances[model][curr_id] = math.pow(avg, -1.0/3)
+            else:
+                avg_distances[model][curr_id] = math.pow(avg, -1.0/6)
 
     # at this point avg_distances[model][curr_id] contain a single (r-6)
     # averaged distance for one model and one restraint GROUP identified with

@@ -5,8 +5,6 @@
 from __future__ import print_function
 from multiprocessing import Process, Pipe
 import os
-import string
-import random
 import time
 import subprocess
 import ast
@@ -45,17 +43,9 @@ if args.PDB_fetch and args.PDB_file:
     print("Double input for PDB data, deselect one of the input sources")
     raise SystemExit
 
-my_PDB = csx_func.get_PDB(args)
-
 
 #------------------------  Setting up working directory  ----------------------#
-def getID(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-
-my_id   = getID()
-my_path = "calculations/" + my_id + '/'
-
-print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
+my_id, my_path = csx_func.getID()
 
 if not os.path.exists(my_path):                # create working folder
     os.makedirs(my_path)
@@ -63,11 +53,7 @@ else:
     for f in os.listdir(my_path):              # clean working folder
         os.remove(my_path + '/' + f)
 
-csx_func.get_model_list(my_PDB)
-
 #----------------  Setting up output files & write header data  ---------------#
-# csx_out.writeHeaderTXT(my_path, args, version)
-
 csx_out.writeHeaderHTML(my_path, version)
 
 
@@ -78,7 +64,9 @@ else:
     for f in os.listdir("temp"):               # clean temp folder
         os.remove("temp/" + f)
 
+my_PDB = csx_func.get_PDB(args)
 csx_func.pdb_cleaner(my_PDB)                   # bringing PDB to format
+csx_func.get_model_list(my_PDB)
 model_count = csx_func.pdb_splitter(my_PDB)    # splitting of PDB file
 pdb_models  = os.listdir("temp")               # list of models (PDB)
 
@@ -97,7 +85,6 @@ def pypyProcess(conn, restain_file):
     restraints_parsed = ast.literal_eval(restraints_parsed)
     conn.send(restraints_parsed)
     conn.close()
-
 
 if args.NOE_file:
     parent_conn, child_conn = Pipe()
@@ -132,15 +119,12 @@ ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 if ChemShift_lists:
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
+
 #------------------------  NOE distance violation calc  -----------------------#
 if args.NOE_file:
     saveShifts = parent_conn.recv()
     p.join()
-    csx_calc.calcNOEviolations(args, saveShifts, my_path)
-
-    # restraints = csx_obj.Restraint_Record.PRIDE_restraints
-    # print(restraints)
-
+    csx_calc.calcNOEviolations(args, saveShifts, my_path, args.r3_averaging)
     csx_calc.calcNMR_Pride(pdb_models, my_path)
 
 te = time.time()

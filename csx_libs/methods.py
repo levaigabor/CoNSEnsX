@@ -8,6 +8,8 @@ import re
 import subprocess
 import math
 import copy
+import string
+import random
 import prody
 
 import time
@@ -60,6 +62,19 @@ def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(l, key = alphanum_key)
+
+
+def getID(size=6, chars=string.ascii_uppercase + string.digits):
+    if os.path.exists("calculations"):
+        while True:
+            my_id    = ''.join(random.choice(chars) for _ in range(size))
+            used_IDs = os.listdir("calculations")
+            if my_id not in used_IDs:
+                break
+
+    my_path = "calculations/" + my_id + '/'
+    print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
+    return my_id, my_path
 
 
 def get_PDB(args):
@@ -158,6 +173,7 @@ def pdb_splitter(PDB_file):
         if line.startswith("MODEL"):
             my_name = line.strip().split()[1]
         elif line.startswith("ATOM") or line.startswith("TER"):
+            # replace oxygen names in line
             if line.split()[2] == "OC1":
                 line = line.replace('OC1', 'O  ')
             elif line.split()[2] == "OC2":
