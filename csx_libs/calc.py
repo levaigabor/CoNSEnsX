@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import __main__
 import math
+import subprocess
+import os
 
 import methods as csx_func
 import objects as csx_obj
@@ -324,17 +327,18 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
 def calcNMR_Pride(pdb_models, my_path):
     # write model list text file
     pdb_models = csx_func.natural_sort(pdb_models)
-    model_list = open("temp/model_list.txt", 'w')
+    model_list = open(my_path + "model_list.txt", 'w')
 
     for model in pdb_models:
+        #model_list.write(my_path + model + "\n")
         model_list.write("temp/" + model + "\n")
 
     model_list.write("END\n")
     model_list.close()
 
     # write distance dict to text file
-    restraints  = csx_obj.Restraint_Record.PRIDE_restraints
-    pride_input = open("temp/pride_input.txt", 'w')
+    restraints  = csx_obj.Restraint_Record.getPRIDE_restraints()
+    pride_input = open(my_path + "pride_input.txt", 'w')
 
     pride_input.write("HEADER\n")
 
@@ -347,3 +351,31 @@ def calcNMR_Pride(pdb_models, my_path):
 
     pride_input.write("END\n")
     pride_input.close()
+
+    # create binary database for PRIDE-NMR
+    DEVNULL    = open(os.devnull, 'w')
+    hhdb_log   = open(my_path + "hhdb.log", 'w')
+    model_list = open(my_path + "model_list.txt", 'r')
+    subprocess.call([__main__.pridedb,
+                    "-D", my_path + "hhdb"  # model list
+                    ],
+                    stdin  = model_list,
+                    stdout = DEVNULL,
+                    stderr = hhdb_log)
+
+    hhdb_log.close()
+    DEVNULL.close()
+    model_list.close()
+
+    # ./pdb2hhbindbM -D temp/hhdb < temp/model_list.txt 2> temp/hhdb.log
+    # ./mrhisthhbindbM -D temp/hhdb -d 65 -b 10 -m 3 < temp/pride_input.txt
+
+    pride_input = open(my_path + "pride_input.txt", 'r')
+    # DEVNULL     = open(os.devnull, 'w')
+    subprocess.call([__main__.pridenmr,
+                    "-D", my_path + "hhdb",
+                    "-d", str(65),
+                    "-b", str(10),
+                    "-m", str(3)
+                    ],
+                    stdin  = pride_input)

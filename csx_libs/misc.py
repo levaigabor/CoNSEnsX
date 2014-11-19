@@ -13,10 +13,11 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
 
   -b STR_file           restraints file (BMRB format)
   -f PDB_file           PDB file
-  -f PDB_id             PDB file to fetch from rcsb.org
+  -p PDB_id             PDB file to fetch from rcsb.org
   -r NOE_file           NOE restraint file (BMRB format)
 
-  -r3, --r3_averaging   use r-3 averaging in model data
+  -r3, --r3_averaging   use r-3 averaging in model data in NOE
+                        violation calculations
   -s, --fit             superimpoze models listed in input PDF file
   --fit_range           range for model fitting (first-last)
   -l {bic,pf1}          rdc lc model: <bic|pf1>

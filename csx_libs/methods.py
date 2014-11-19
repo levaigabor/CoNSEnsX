@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import __main__
 import os
 import sys
 import re
@@ -22,9 +23,6 @@ import nmrpystar
 
 from .objects import *
 
-
-pales  = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
-shiftx = "/home/daniel/Programme/shiftx/shiftx"
 
 shortcodes = {
     'ALA':'A',  'ASP':'D',  'ASN':'N',  'ARG':'R',  'CYS':'C',  'GLY':'G',
@@ -531,7 +529,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
 
 
         if SVD_enable:                          # if SVD is enabled
-            subprocess.call([pales,
+            subprocess.call([__main__.pales,
                             "-inD", "pales_dummy.txt",  # pales dummy file
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model,             # rdc lc model
@@ -539,7 +537,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                             stdout = outfile,
                             stderr = DEVNULL)
         else:                               # if SVD is disabled (default)
-            subprocess.call([pales,
+            subprocess.call([__main__.pales,
                             "-inD", "pales_dummy.txt",  # pales dummy file
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model],            # rdc lc model
@@ -557,7 +555,7 @@ def callShiftxOn(pdb_files):
     for i, pdb_file in enumerate(pdb_files):
         pdb_file = "temp/" + pdb_file
         out_name = "temp/modell_" + str(i+1) + ".out"
-        subprocess.call([shiftx, '1', pdb_file, out_name])
+        subprocess.call([__main__.shiftx, '1', pdb_file, out_name])
 
     averageHA, averageH, averageN, averageCA = {}, {}, {}, {}
     modHA, modH, modN, modCA                 = {}, {}, {}, {}

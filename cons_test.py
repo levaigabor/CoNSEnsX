@@ -16,7 +16,12 @@ import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
 
-version = "1.0"
+version  = "1.0"
+pales    = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
+shiftx   = "/home/daniel/Programme/shiftx/shiftx"
+pridedb  = "/home/daniel/Programme/prideNMR/pdb2hhbindbM"
+pridenmr = "/home/daniel/Programme/prideNMR/mrhisthhbindbM"
+
 
 ts = time.time()
 

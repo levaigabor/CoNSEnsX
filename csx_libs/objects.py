@@ -54,7 +54,6 @@ class PDB_model(object):
 class Restraint_Record(object):
     """Class for storing restraint data"""
     all_restraints   = []
-    PRIDE_restraints = {}
 
     def __init__(self, curr_distID, seq_ID1, seq_ID2, seq_name1, seq_name2,
                  atom_ID1, atom_ID2, dist_max):
@@ -65,21 +64,6 @@ class Restraint_Record(object):
         self.seq_name1   = str(seq_name1)
         self.seq_name2   = str(seq_name2)
         self.dist_max    = float(dist_max)
-
-        # check if restraint is suitable for PRIDE-NMR
-
-        seq1_ok =  atom_ID1 in ["H", "HA"] or atom_ID1.startswith("HB")
-        seq2_ok =  atom_ID2 in ["H", "HA"] or atom_ID2.startswith("HB")
-        seq_dist = abs(self.seq_ID1 - self.seq_ID2)
-
-        if seq1_ok and seq2_ok and seq_dist > 2:
-            # print(atom_ID1, atom_ID2, seq_dist)
-            if seq_dist in Restraint_Record.PRIDE_restraints:
-                Restraint_Record.PRIDE_restraints[seq_dist] += 1
-            else:
-                Restraint_Record.PRIDE_restraints[seq_dist] = 1
-
-
         resol = {
                 "MET" : {
                             "ME"  : ["HE1",  "HE2",  "HE3"],
@@ -151,10 +135,47 @@ class Restraint_Record(object):
             for atom2 in atom_list2:
                 self.atom_ID1 = atom1
                 self.atom_ID2 = atom2
-
                 me = copy.deepcopy(self)
-
                 Restraint_Record.all_restraints.append(me)
+
+
+    @staticmethod
+    def getPRIDE_restraints():
+        PRIDE_restraints = {}
+        prev_id = -1
+        seq1_ok, seq2_ok, distance_ok = False, False, False
+
+        for restraint in Restraint_Record.all_restraints:
+            curr_id  = restraint.curr_distID
+            atom_ID1 = restraint.atom_ID1
+            atom_ID2 = restraint.atom_ID2
+            seq_ID1  = restraint.seq_ID1
+            seq_ID2  = restraint.seq_ID2
+
+            if prev_id != curr_id:
+                prev_id = curr_id
+
+                if seq1_ok and seq2_ok and distance_ok:
+                    if seq_dist in PRIDE_restraints:
+                        PRIDE_restraints[seq_dist] += 1
+                    else:
+                        PRIDE_restraints[seq_dist] = 1
+
+                seq1_ok  = atom_ID1 in ["H", "HA"] or atom_ID1.startswith("HB")
+                seq2_ok  = atom_ID2 in ["H", "HA"] or atom_ID2.startswith("HB")
+                seq_dist = abs(seq_ID1 - seq_ID2)
+                distance_ok = seq_dist > 2
+
+                id_distance = seq_dist
+
+            else:
+                seq1_ok  &= atom_ID1 in ["H", "HA"] or atom_ID1.startswith("HB")
+                seq2_ok  &= atom_ID2 in ["H", "HA"] or atom_ID2.startswith("HB")
+                seq_dist = abs(seq_ID1 - seq_ID2)
+                distance_ok &= seq_dist > 2 and id_distance == seq_dist
+
+        return PRIDE_restraints
+
 
 
 class Vec_3D(object):
@@ -191,13 +212,13 @@ class Vec_3D(object):
         v = self.v
         return Vec_3D([v[i] / vmag  for i in range(len(v))])
 
-    @staticmethod
-    def cross(one, other):
+    @classmethod
+    def cross(cls, one, other):
         c = [one.v[1] * other.v[2] - one.v[2] * other.v[1],
              one.v[2] * other.v[0] - one.v[0] * other.v[2],
              one.v[0] * other.v[1] - one.v[1] * other.v[0]]
 
-        return Vec_3D(c)
+        return cls(c)
 
     @staticmethod
     def dihedAngle(one, other):
