@@ -230,6 +230,8 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
             resnum2 = restraint.seq_ID2
             atom2   = restraint.atom_ID2
 
+            # print(curr_id, resnum1, atom1, resnum2, atom2)
+
             atom_coord1 = PDB_coords[model][resnum1][atom1]
             atom_coord2 = PDB_coords[model][resnum2][atom2]
 
@@ -324,6 +326,87 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
     csx_func.makeNOEHist(my_path, violations)
 
 
+# def calcNOEviolations(args, saveShifts, my_path):
+#     # parse data to restraint objects returned from pypy process
+#     for data in saveShifts:
+#         csx_obj.Restraint_Record(data[0], data[1], data[2], data[3],
+#                                  data[4], data[5], data[6], data[7])
+
+#     # fetch all restraint from class
+#     restraints = csx_obj.Restraint_Record.all_restraints
+
+#     PDB_coords    = csx_func.parse2dicts(args.PDB_file)
+#     prev_id       = -1
+#     avg_distances = {}
+#     str_distaces  = {}
+
+#     for restraint in restraints:
+#         curr_id = int(restraint.curr_distID)
+
+#         if prev_id == curr_id:
+#             model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,
+#                                                           restraint.seq_ID1,
+#                                                           restraint.atom_ID1,
+#                                                           restraint.seq_ID2,
+#                                                           restraint.atom_ID2)
+
+#             avg_distances[curr_id].append(model_avg_dist)
+
+#         else:
+#             prev_id = curr_id
+#             avg_distances[curr_id] = []
+#             str_distaces[curr_id] = restraint.dist_max
+
+#             model_avg_dist = csx_func.getModelAvgDistance(PDB_coords,
+#                                                           restraint.seq_ID1,
+#                                                           restraint.atom_ID1,
+#                                                           restraint.seq_ID2,
+#                                                           restraint.atom_ID2)
+
+#             avg_distances[curr_id].append(model_avg_dist)
+
+#     # averaging over the same restraint ID data
+#     for key in avg_distances.keys():
+#         avg = 0.0
+
+#         for distance in avg_distances[key]:
+#             avg += math.pow(float(distance), -6)
+
+#         avg_distances[key] = math.pow(avg / len(avg_distances[key]), -1.0/6)
+
+#     avg_dist_keys = avg_distances.keys()
+#     avg_dist_keys.sort()
+#     violations = {"0-0.5" : 0, "0.5-1" : 0, "1-1.5" : 0,
+#                   "1.5-2" : 0, "2-2.5" : 0, "2.5-3" : 0, "3<" : 0}
+#     viol_count = 0
+#     diff_sum = 0
+
+#     for key in avg_dist_keys:
+#         if avg_distances[key] > str_distaces[key]:
+#             viol_count += 1
+#             diff = avg_distances[key] - str_distaces[key]
+#             diff_sum += diff
+
+#             if diff <= 0.5:
+#                 violations["0-0.5"] +=1
+#             elif 0.5 < diff <= 1:
+#                 violations["0.5-1"] +=1
+#             elif 1 < diff <= 1.5:
+#                 violations["1-1.5"] +=1
+#             elif 1.5 < diff <= 2:
+#                 violations["1.5-2"] +=1
+#             elif 2 < diff <= 2.5:
+#                 violations["2-2.5"] +=1
+#             elif 2.5 < diff <= 3:
+#                 violations["2.5-3"] +=1
+#             else:
+#                 violations["3<"] +=1
+
+#     print("Total # of violations:", viol_count)
+#     print("Total distance of violations:", diff_sum)
+#     csx_func.makeNOEHist(my_path, violations)
+
+
 def calcNMR_Pride(pdb_models, my_path):
     # write model list text file
     pdb_models = csx_func.natural_sort(pdb_models)
@@ -367,15 +450,41 @@ def calcNMR_Pride(pdb_models, my_path):
     DEVNULL.close()
     model_list.close()
 
-    # ./pdb2hhbindbM -D temp/hhdb < temp/model_list.txt 2> temp/hhdb.log
-    # ./mrhisthhbindbM -D temp/hhdb -d 65 -b 10 -m 3 < temp/pride_input.txt
-
-    pride_input = open(my_path + "pride_input.txt", 'r')
-    # DEVNULL     = open(os.devnull, 'w')
+    # run PRIDE-NMR
+    DEVNULL      = open(os.devnull, 'w')
+    pride_input  = open(my_path + "pride_input.txt", 'r')
+    pride_output = open(my_path + "pride_output.txt", 'w')
     subprocess.call([__main__.pridenmr,
-                    "-D", my_path + "hhdb",
-                    "-d", str(65),
-                    "-b", str(10),
-                    "-m", str(3)
-                    ],
-                    stdin  = pride_input)
+                     "-D", my_path + "hhdb",
+                     "-d", str(56),
+                     "-b", str(10),
+                     "-m", str(3)],
+                     stdin  = pride_input,
+                     stdout = pride_output,
+                     stderr = DEVNULL)
+
+    pride_input.close()
+    pride_output.close()
+    DEVNULL.close()
+
+    pride_scores = {}
+
+    pride_output = open(my_path + "pride_output.txt", 'r')
+    for line in pride_output:
+        if line.startswith("PRIDENMR:"):
+            model_num   = int(line.split()[-1])
+            model_score = float(line.split()[1])
+            pride_scores[model_num] = model_score
+
+    scores = pride_scores.values()
+
+    avg = sum(scores) * 1.0 / len(scores)
+    variance = map(lambda x: (x - avg) ** 2, scores)
+    standard_deviation = math.sqrt(sum(variance) * 1.0 / len(variance))
+
+    print("MAX: ", max(pride_scores, key=pride_scores.get))
+    print("MIN: ", min(pride_scores, key=pride_scores.get))
+    print("AVG: ", avg)
+    print("DEV: ", standard_deviation)
+
+    csx_func.makeNMRPrideGraph(my_path, scores, avg)

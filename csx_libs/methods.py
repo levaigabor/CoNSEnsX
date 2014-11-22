@@ -69,7 +69,8 @@ def getID(size=6, chars=string.ascii_uppercase + string.digits):
             used_IDs = os.listdir("calculations")
             if my_id not in used_IDs:
                 break
-
+    else:
+        my_id = ''.join(random.choice(chars) for _ in range(size))
     my_path = "calculations/" + my_id + '/'
     print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
     return my_id, my_path
@@ -90,9 +91,8 @@ def get_model_list(PDB_file):
 
     while True:
         try:
-            with suppress_output():
-                # parsing PDB file into models (model_list)
-                PDB_model(prody.parsePDB(PDB_file, model=model_num, ter=True))
+            # parsing PDB file into models (model_list)
+            PDB_model(prody.parsePDB(PDB_file, model=model_num, ter=True))
             model_num += 1
         except prody.proteins.pdbfile.PDBParseError:
             break
@@ -279,11 +279,11 @@ def get_RDC_lists(parsed_value):
         list_number += 1
 
     # split list into dict according to RDC types
-    prev_type = ""
-    new_RDC_list = []
 
+    new_RDC_list = []
     for list_num, RDC_list in enumerate(RDC_lists):
-        RDC_dict = {}
+        prev_type = ""
+        RDC_dict  = {}
 
         for record in RDC_list:
             if prev_type != record.RDC_type:
@@ -1135,7 +1135,6 @@ def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
 def makeNOEHist(my_path, violations):
 
     plt.figure(figsize=(6, 5), dpi=80)
-
     n_groups = len(violations)
 
     means_men = [
@@ -1159,4 +1158,23 @@ def makeNOEHist(my_path, violations):
 
     plt.tight_layout()
     plt.savefig(my_path + "/NOE_hist.svg", format="svg")
+    plt.close()
+
+
+def makeNMRPrideGraph(my_path, graph_data, avg_score):
+
+    graph_data.sort()
+
+    plt.figure(figsize=(6, 5), dpi=80)
+    plt.plot(graph_data, linewidth=2.0, color='blue', label='Model scores')
+    plt.plot(range(0, len(graph_data)), [avg_score] * len(graph_data),
+             linewidth=2.0, color='green', label='Average score')
+    plt.axis([-1, len(graph_data), 0, 1])
+    plt.xlabel('models by score (worse to best)')
+    plt.ylabel('PRIDE-NMR score')
+    plt.tight_layout()
+    plt.legend(loc='lower left')
+    ax = plt.axes()
+    ax.yaxis.grid()
+    plt.savefig(my_path + "/PRIDE-NMR_score.svg", format="svg")
     plt.close()

@@ -4,7 +4,7 @@
 import time
 import os
 
-date    = time.strftime("%a %d. %b %X %Z %Y")
+date = time.strftime("%a %d. %b %X %Z %Y")
 
 
 def writeHeaderTXT(path, args, version):
@@ -42,7 +42,8 @@ def writeHeaderHTML(path, version):
 </head>""")
 
 
-def writeFileTable(path, args, my_PDB, my_id, PDP_model_num):
+def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
+                   my_NOE="", NOE_restraint_count=""):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
@@ -68,16 +69,17 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num):
         <td>{2} models found</td>
       </tr>
       <tr>
-        <td id="head-td">X-PLOR restraint file:</td>
-        <td><i></i></td>
-        <td>0 distance restdaints found</td>
+        <td id="head-td">NOE restraint file:</td>
+        <td><i>{3}</i></td>
+        <td>{4} distance restdaints found</td>
       </tr>
       <tr>
         <td id="head-td">BMRB file:</td>
-        <td><i>{3}</i></td>
+        <td><i>{5}</i></td>
         <td></td>
       </tr>
-    </table>""".format(my_id, my_PDB, PDP_model_num, args.STR_file) )
+    </table>""".format(my_id, my_PDB, PDP_model_num,
+                       my_NOE, NOE_restraint_count, args.STR_file))
 
 
 def writeRDC_table_open(path, name, RDC_list_num):

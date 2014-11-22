@@ -76,10 +76,6 @@ model_count = csx_func.pdb_splitter(my_PDB)    # splitting of PDB file
 pdb_models  = os.listdir("temp")               # list of models (PDB)
 
 
-#-------------------------  Write file data to HTML   -------------------------#
-csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
-
-
 #------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)
 
@@ -95,6 +91,21 @@ if args.NOE_file:
     parent_conn, child_conn = Pipe()
     p = Process(target = pypyProcess, args = (child_conn, args.NOE_file,))
     p.start()
+#------------------------  NOE distance violation calc  -----------------------#
+# SEPARATE HERE TO JOIN PROCESS LATER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# if args.NOE_file:
+    saveShifts = parent_conn.recv()
+    p.join()
+    csx_calc.calcNOEviolations(args, saveShifts, my_path, args.r3_averaging)
+    csx_calc.calcNMR_Pride(pdb_models, my_path)
+    csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count,
+                           args.NOE_file,
+                           csx_obj.Restraint_Record.getRestraintCount())
+# SEPARATE HERE TO JOIN PROCESS LATER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+#-------------------------  Write file data to HTML   -------------------------#
+else:
+    csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
 
 
 #-----------------------------  RDC calculation  ------------------------------#
@@ -125,12 +136,6 @@ if ChemShift_lists:
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
 
-#------------------------  NOE distance violation calc  -----------------------#
-if args.NOE_file:
-    saveShifts = parent_conn.recv()
-    p.join()
-    csx_calc.calcNOEviolations(args, saveShifts, my_path, args.r3_averaging)
-    csx_calc.calcNMR_Pride(pdb_models, my_path)
 
 te = time.time()
 print("total runtime", te-ts)
