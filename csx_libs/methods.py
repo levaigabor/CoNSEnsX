@@ -150,7 +150,7 @@ def pdb_cleaner(PDB_file):
     os.rename("my_pdb.pdb", PDB_file)
 
 
-def pdb_splitter(PDB_file):
+def pdb_splitter(my_path, PDB_file):
     """
     Split the given PDB file into models, each model becomes a separate
     PDB file placed in the "temp" folder
@@ -188,7 +188,7 @@ def pdb_splitter(PDB_file):
     my_pdb.close()
 
     for i in range(len(model_names)):
-        file_name = "temp/model_" + model_names[i] + ".pdb"
+        file_name = my_path + "/model_" + model_names[i] + ".pdb"
         temp_pdb  = open(file_name, 'w')
         temp_pdb.write("HEADER    MODEL " + model_names[i] + "\n")
 
@@ -436,7 +436,7 @@ def parseChemShift_STR(parsed_value):
 
 
 @timeit
-def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
+def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
     """
     Writes pales dummy from the given RDC values, and call Pales with the
     given parameters
@@ -449,7 +449,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
     for o, pdb_file in enumerate(pdb_files):
         #-------------------  Open file and read PDB data  -------------------#
         try:
-            pdb_file  = "temp/" + pdb_file
+            pdb_file  = my_path + pdb_file
             input_pdb = open(pdb_file)
         except IOError:
             print("Input file " + pdb_file + " was not found")
@@ -473,7 +473,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
         my_line      = "DATA SEQUENCE "
         char_counter = 0
         row_counter  = 0
-        pales_dummy  = open('pales_dummy.txt', 'w')
+        pales_dummy  = open(my_path + 'pales_dummy.txt', 'w')
 
         for char in short_seg:
             if char_counter == 10:          # write aa output in 10 wide blocks
@@ -520,8 +520,8 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
 
         pales_dummy.close()
 
-        outfile = open("pales.out", 'a')    # open output file with append mode
-        DEVNULL = open(os.devnull, 'w')     # open systems /dev/null
+        outfile = open(my_path + "pales.out", 'a')
+        DEVNULL = open(os.devnull, 'w')
 
         print("call Pales on model: " +
               str(o + 1) + '/' + str(len(pdb_files)), end="\r")
@@ -530,7 +530,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
 
         if SVD_enable:                          # if SVD is enabled
             subprocess.call([__main__.pales,
-                            "-inD", "pales_dummy.txt",  # pales dummy file
+                            "-inD", my_path + "pales_dummy.txt",
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model,             # rdc lc model
                             "-bestFit"],                # SVD
@@ -538,7 +538,7 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
                             stderr = DEVNULL)
         else:                               # if SVD is disabled (default)
             subprocess.call([__main__.pales,
-                            "-inD", "pales_dummy.txt",  # pales dummy file
+                            "-inD", my_path + "pales_dummy.txt",  # pales dummy file
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model],            # rdc lc model
                             stdout = outfile,
@@ -550,21 +550,20 @@ def callPalesOn(pdb_files, RDC_dict, lc_model, SVD_enable):
 
 
 @timeit
-def callShiftxOn(pdb_files):
+def callShiftxOn(my_path, pdb_files):
 
     for i, pdb_file in enumerate(pdb_files):
-        pdb_file = "temp/" + pdb_file
-        out_name = "temp/modell_" + str(i+1) + ".out"
+        pdb_file = my_path + pdb_file
+        out_name = my_path + "/modell_" + str(i+1) + ".out"
         subprocess.call([__main__.shiftx, '1', pdb_file, out_name])
 
     averageHA, averageH, averageN, averageCA = {}, {}, {}, {}
     modHA, modH, modN, modCA                 = {}, {}, {}, {}
     model_data_list = []
 
-    for some_file in os.listdir("temp"):
-        if some_file.endswith(".out"):
-            out_file = open("temp/" + some_file)
-
+    for some_file in os.listdir(my_path):
+        if some_file.startswith("modell") and some_file.endswith(".out"):
+            out_file = open(my_path + some_file)
             part = 0
 
             for line in out_file:
@@ -621,8 +620,6 @@ def callShiftxOn(pdb_files):
     for avg_dict in [averageHA, averageH, averageN, averageCA]:
         for key in avg_dict:
             avg_dict[key] /= len(pdb_files)
-
-    # print(model_data_list)
 
     return {"HA" : averageHA, "H"  : averageH,
             "N"  : averageN,  "CA" : averageCA}, model_data_list
@@ -1172,6 +1169,7 @@ def makeNMRPrideGraph(my_path, graph_data, avg_score):
     plt.axis([-1, len(graph_data), 0, 1])
     plt.xlabel('models by score (worse to best)')
     plt.ylabel('PRIDE-NMR score')
+    plt.title("PRIDE-NMR scores")
     plt.tight_layout()
     plt.legend(loc='lower left')
     ax = plt.axes()

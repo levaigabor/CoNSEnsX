@@ -25,7 +25,7 @@ def writeHeaderHTML(path, version):
 
     html.write("""
 <!DOCTYPE html>
-
+<html class="" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>CoNSENsX result sheet</title>
@@ -41,9 +41,11 @@ def writeHeaderHTML(path, version):
               rel='stylesheet' type='text/css'>
 </head>""")
 
+    html.close()
+
 
 def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
-                   my_NOE="", NOE_restraint_count=""):
+                   my_NOE="not present", NOE_restraint_count=0):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
@@ -81,6 +83,8 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
     </table>""".format(my_id, my_PDB, PDP_model_num,
                        my_NOE, NOE_restraint_count, args.STR_file))
 
+    html.close()
+
 
 def writeRDC_table_open(path, name, RDC_list_num):
     html = path + "result_sheet.html"
@@ -91,12 +95,15 @@ def writeRDC_table_open(path, name, RDC_list_num):
       <h4 class="table-source">{0} {1}</h4>
       <table class="result_table">\n""".format(name, RDC_list_num))
 
+    html.close()
+
 
 def writeRDC_table_close(path):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
     html.write("      </table>\n    </div>\n")
+    html.close()
 
 
 def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
@@ -122,6 +129,8 @@ def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
                             '{0:.3f}'.format(rmsd),
                              corr_graph_name, graph_name, mod_corr_graph_name))
 
+    html.close()
+
 
 def write_table_open(path, table_name):
     html = path + "result_sheet.html"
@@ -131,6 +140,7 @@ def write_table_open(path, table_name):
     <div class="results">
       <h4 class="table-source">{0}</h4>
       <table class="result_table">\n""".format(table_name))
+    html.close()
 
 
 def write_table_close(path):
@@ -138,6 +148,7 @@ def write_table_close(path):
     html = open(html, 'a')
 
     html.write("      </table>\n    </div>\n")
+    html.close()
 
 
 def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
@@ -181,3 +192,101 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
                               '{0:.3f}'.format(q_value),
                               '{0:.3f}'.format(rmsd),
                                corr_graph_name, graph_name))
+
+    html.close()
+
+
+def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
+                     corr_graph_name, graph_name, mod_corr_graph_name=None):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    if mod_corr_graph_name:
+      html.write("""
+            <tr>
+            <td><table class="values_table">
+            <tr><td><strong>{0}</strong></td><td></td></tr>
+            <tr><td>Values:</td><td>{1}</td></tr>
+            <tr><td>Correlation:</td><td>{2}</td></tr>
+            <tr><td>Q-factor:</td><td>{3} %</td></tr>
+            <tr><td>RMSD:</td><td>{4}</td></tr>
+            </table></td>
+            <td><img width="270" src="{5}"></td>
+            <td><img width="450" src="{6}"></td>
+            <td><img width="270" src="{7}"></td>
+            </tr>\n""".format(data_type, used_values,
+                              '{0:.3f}'.format(correl),
+                              '{0:.3f}'.format(q_value),
+                              '{0:.3f}'.format(rmsd),
+                               corr_graph_name, graph_name,
+                               mod_corr_graph_name))
+    else:
+        html.write("""
+            <tr>
+            <td><table class="values_table">
+            <tr><td><strong>{0}</strong></td><td></td></tr>
+            <tr><td>Values:</td><td>{1}</td></tr>
+            <tr><td>Correlation:</td><td>{2}</td></tr>
+            <tr><td>Q-factor:</td><td>{3} %</td></tr>
+            <tr><td>RMSD:</td><td>{4}</td></tr>
+            </table></td>
+            <td><img width="270" src="{5}"></td>
+            <td><img width="450" src="{6}"></td>
+            </tr>\n""".format(data_type, used_values,
+                              '{0:.3f}'.format(correl),
+                              '{0:.3f}'.format(q_value),
+                              '{0:.3f}'.format(rmsd),
+                               corr_graph_name, graph_name))
+
+    html.close()
+
+
+def write_bottom_table(path, NOE_violations, PRIDE_data):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("""
+    <div class="results">
+      <h4 class="table-source">NOE violations and PRIDE-NMR</h4>
+      <table class="result_table">
+
+          <td><table class="NOE_PRIME_table">
+          <tr><td><strong>NOE distance violation</strong></td></tr>
+          <tr><td>Total # of violations:</td><td>{0}</td></tr>
+          </table></td>
+          <td width="10"></td>
+          <td><img width="320" src="NOE_hist.svg"></td>
+
+          <td width="30"></td>
+
+          <td><table class="NOE_PRIME_table">
+          <tr><td><strong>NPRIDE-NMR</strong></td></tr>
+          <tr><td>Model with best score:</td><td>{1}</td></tr>
+          <tr><td>Model with worst score:</td><td>{2}</td></tr>
+          <tr><td>Average score:</td><td>{3}</td></tr>
+          <tr><td>Standard Deviation:</td><td>{4}</td></tr>
+          </table></td>
+          <td width="10"></td>
+          <td><img width="320" src="PRIDE-NMR_score.svg"></td>
+
+      </table>
+    </div>\n""".format(NOE_violations,
+                       PRIDE_data[0],
+                       PRIDE_data[1],
+                       '{0:.3f}'.format(PRIDE_data[2]),
+                       '{0:.3f}'.format(PRIDE_data[3])))
+
+    html.close()
+
+
+def close_HTML(path):
+    html = path + "result_sheet.html"
+    html = open(html, 'a')
+
+    html.write("""
+      </div>
+</div>
+</body>
+</html>""")
+
+    html.close()

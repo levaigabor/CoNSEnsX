@@ -17,7 +17,7 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
     for list_num, RDC_dict in enumerate(RDC_lists):
 
         # Pales call, results output file "pales.out"
-        csx_func.callPalesOn(pdb_models, RDC_dict, args.lc_model, args.R)
+        csx_func.callPalesOn(my_path, pdb_models, RDC_dict, args.lc_model, args.R)
 
         csx_out.writeRDC_table_open(my_path, "RDC list", list_num + 1)
 
@@ -25,7 +25,8 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             print("RDC list", list_num + 1, RDC_type)
 
             # get averaged RDC values -> averageRDC[residue] = value
-            averageRDC, model_data = csx_func.avgPalesRDCs("pales.out", RDC_type)
+            pales_out = my_path + "pales.out"
+            averageRDC, model_data = csx_func.avgPalesRDCs(pales_out, RDC_type)
 
             model_corrs = []
 
@@ -149,7 +150,7 @@ def calcJCouplings(Jcoup_dict, my_PDB, my_path):
 
 
 def calcChemShifts(ChemShift_lists, pdb_models, my_path):
-    CS_calced, model_data = csx_func.callShiftxOn(pdb_models)
+    CS_calced, model_data = csx_func.callShiftxOn(my_path, pdb_models)
 
     for list_num, CS_list in enumerate(ChemShift_lists):
 
@@ -160,8 +161,8 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
             model_corrs = []
 
             for model in model_data:
-                # print(model[CS_type])
                 inner_exp_dict = {}
+
                 for record in CS_list[CS_type]:
                     inner_exp_dict[record.resnum] = model[CS_type][record.resnum]
 
@@ -325,6 +326,7 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
     print("Total distance of violations:", diff_sum)
     csx_func.makeNOEHist(my_path, violations)
 
+    return viol_count
 
 # def calcNOEviolations(args, saveShifts, my_path):
 #     # parse data to restraint objects returned from pypy process
@@ -414,7 +416,7 @@ def calcNMR_Pride(pdb_models, my_path):
 
     for model in pdb_models:
         #model_list.write(my_path + model + "\n")
-        model_list.write("temp/" + model + "\n")
+        model_list.write(my_path + "/" + model + "\n")
 
     model_list.write("END\n")
     model_list.close()
@@ -482,9 +484,17 @@ def calcNMR_Pride(pdb_models, my_path):
     variance = map(lambda x: (x - avg) ** 2, scores)
     standard_deviation = math.sqrt(sum(variance) * 1.0 / len(variance))
 
+    PRIDE_data = []
+
     print("MAX: ", max(pride_scores, key=pride_scores.get))
+    PRIDE_data.append(max(pride_scores, key=pride_scores.get))
     print("MIN: ", min(pride_scores, key=pride_scores.get))
+    PRIDE_data.append(min(pride_scores, key=pride_scores.get))
     print("AVG: ", avg)
+    PRIDE_data.append(avg)
     print("DEV: ", standard_deviation)
+    PRIDE_data.append(standard_deviation)
 
     csx_func.makeNMRPrideGraph(my_path, scores, avg)
+
+    return PRIDE_data

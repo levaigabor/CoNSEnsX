@@ -8,6 +8,7 @@ import os
 import time
 import subprocess
 import ast
+import glob
 
 # own modules
 import csx_libs.calc    as csx_calc
@@ -58,22 +59,19 @@ else:
     for f in os.listdir(my_path):              # clean working folder
         os.remove(my_path + '/' + f)
 
-#----------------  Setting up output files & write header data  ---------------#
 csx_out.writeHeaderHTML(my_path, version)
 
 
-#-------------------------  Making temporary folder   -------------------------#
-if not os.path.exists("temp"):                 # create temp folder
-    os.makedirs("temp")
-else:
-    for f in os.listdir("temp"):               # clean temp folder
-        os.remove("temp/" + f)
-
+#-----------------------------  Prepare PDB data  -----------------------------#
 my_PDB = csx_func.get_PDB(args)
 csx_func.pdb_cleaner(my_PDB)                   # bringing PDB to format
 csx_func.get_model_list(my_PDB)
-model_count = csx_func.pdb_splitter(my_PDB)    # splitting of PDB file
-pdb_models  = os.listdir("temp")               # list of models (PDB)
+model_count = csx_func.pdb_splitter(my_path, my_PDB)
+
+pdb_models = []                                # list of models (PDB)
+for file in os.listdir(my_path):
+    if file.endswith(".pdb"):
+        pdb_models.append(file)
 
 
 #------------------------  Read  and parse STR file   -------------------------#
@@ -96,14 +94,14 @@ if args.NOE_file:
 # if args.NOE_file:
     saveShifts = parent_conn.recv()
     p.join()
-    csx_calc.calcNOEviolations(args, saveShifts, my_path, args.r3_averaging)
-    csx_calc.calcNMR_Pride(pdb_models, my_path)
-    csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count,
-                           args.NOE_file,
+    NOE_violations = csx_calc.calcNOEviolations(args, saveShifts,
+                                                my_path, args.r3_averaging)
+    PRIDE_data = csx_calc.calcNMR_Pride(pdb_models, my_path)
+    csx_out.writeFileTable(my_path, args, my_PDB, my_id,
+                           model_count, args.NOE_file,
                            csx_obj.Restraint_Record.getRestraintCount())
+    csx_out.write_bottom_table(my_path, NOE_violations, PRIDE_data)
 # SEPARATE HERE TO JOIN PROCESS LATER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-#-------------------------  Write file data to HTML   -------------------------#
 else:
     csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
 
@@ -134,7 +132,6 @@ ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 
 if ChemShift_lists:
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
-
 
 
 te = time.time()
