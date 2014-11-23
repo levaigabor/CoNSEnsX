@@ -459,7 +459,7 @@ def calcNMR_Pride(pdb_models, my_path):
     subprocess.call([__main__.pridenmr,
                      "-D", my_path + "hhdb",
                      "-d", str(56),
-                     "-b", str(10),
+                     "-b", str(len(pdb_models)),
                      "-m", str(3)],
                      stdin  = pride_input,
                      stdout = pride_output,
