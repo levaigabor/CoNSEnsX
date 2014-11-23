@@ -52,7 +52,7 @@ class PDB_model(object):
 
 
 class Restraint_Record(object):
-    """Class for storing restraint data"""
+    """Class for storing NOE restraint data"""
     all_restraints   = []
 
     def __init__(self, curr_distID, seq_ID1, seq_ID2, seq_name1, seq_name2,
@@ -138,11 +138,9 @@ class Restraint_Record(object):
                 me = copy.deepcopy(self)
                 Restraint_Record.all_restraints.append(me)
 
-
     @staticmethod
     def getRestraintCount():
         return Restraint_Record.all_restraints[-1].curr_distID
-
 
     @staticmethod
     def getPRIDE_restraints():
@@ -180,7 +178,6 @@ class Restraint_Record(object):
                 distance_ok &= seq_dist > 2 and id_distance == seq_dist
 
         return PRIDE_restraints
-
 
 
 class Vec_3D(object):

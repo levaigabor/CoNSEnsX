@@ -8,7 +8,6 @@ import os
 import time
 import subprocess
 import ast
-import glob
 
 # own modules
 import csx_libs.calc    as csx_calc
@@ -17,7 +16,7 @@ import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
 
-version  = "1.0"
+version  = "0.9_python"
 pales    = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
 shiftx   = "/home/daniel/Programme/shiftx/shiftx"
 pridedb  = "/home/daniel/Programme/prideNMR/pdb2hhbindbM"
@@ -50,14 +49,9 @@ if args.PDB_fetch and args.PDB_file:
     raise SystemExit
 
 
-#------------------------  Setting up working directory  ----------------------#
+#----------------  Setting up working directory and results HTML  -------------#
 my_id, my_path = csx_func.getID()
-
-if not os.path.exists(my_path):                # create working folder
-    os.makedirs(my_path)
-else:
-    for f in os.listdir(my_path):              # clean working folder
-        os.remove(my_path + '/' + f)
+os.makedirs(my_path)
 
 csx_out.writeHeaderHTML(my_path, version)
 

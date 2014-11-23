@@ -12,9 +12,7 @@ import copy
 import string
 import random
 import prody
-
 import time
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -33,7 +31,6 @@ shortcodes = {
 
 # Equation and coefficients from:
 # Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
-
 A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
 B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
 C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
@@ -63,6 +60,7 @@ def natural_sort(l):
 
 
 def getID(size=6, chars=string.ascii_uppercase + string.digits):
+    """Generates unique ID for calculation"""
     if os.path.exists("calculations"):
         while True:
             my_id    = ''.join(random.choice(chars) for _ in range(size))
@@ -77,6 +75,7 @@ def getID(size=6, chars=string.ascii_uppercase + string.digits):
 
 
 def get_PDB(args):
+    """Gets PDB file or downloads PDF file from rcsb.org"""
     if args.PDB_file:
         my_PDB = args.PDB_file
     else:
@@ -87,11 +86,11 @@ def get_PDB(args):
 
 @timeit
 def get_model_list(PDB_file):
+    """Parsing PDB file into models in the PDB_model object"""
     model_num = 1
 
     while True:
         try:
-            # parsing PDB file into models (model_list)
             PDB_model(prody.parsePDB(PDB_file, model=model_num, ter=True))
             model_num += 1
         except prody.proteins.pdbfile.PDBParseError:
@@ -100,10 +99,8 @@ def get_model_list(PDB_file):
 
 @timeit
 def pdb_cleaner(PDB_file):
-    """
-    Performs some basic formatting on the given PDB file to make it suitable
-    for further calculations
-    """
+    """Performs some basic formatting on the given PDB file to make it suitable
+       for further calculations (from RCSB to BMRB PDF format)"""
     try:
         input_pdb = open(PDB_file)
     except FileNotFoundError:
@@ -151,10 +148,8 @@ def pdb_cleaner(PDB_file):
 
 
 def pdb_splitter(my_path, PDB_file):
-    """
-    Split the given PDB file into models, each model becomes a separate
-    PDB file placed in the "temp" folder
-    """
+    """Split the given PDB file into models, each model becomes a separate
+       PDB file placed in the "temp" folder"""
     try:
         my_pdb = open(PDB_file)
     except FileNotFoundError:
@@ -203,6 +198,7 @@ def pdb_splitter(my_path, PDB_file):
 
 @timeit
 def parseSTR(STR_file):
+    """Parse BMRB file into a python object"""
     star_file = open(STR_file)         # open STR file
     myString = ""
 
@@ -220,10 +216,8 @@ def parseSTR(STR_file):
 
 
 def get_RDC_lists(parsed_value):
-    """
-    Returns RDC lists as dictonaries containing RDC_Record objects,
-    grouped by RDCtype (keys())
-    """
+    """Returns RDC lists as dictonaries containing RDC_Record objects,
+       grouped by RDCtype (keys())"""
     list_number = 1
     RDC_lists   = []
 
@@ -279,7 +273,6 @@ def get_RDC_lists(parsed_value):
         list_number += 1
 
     # split list into dict according to RDC types
-
     new_RDC_list = []
     for list_num, RDC_list in enumerate(RDC_lists):
         prev_type = ""
@@ -370,10 +363,8 @@ def parseJcoup_STR(parsed_value):
 
 
 def parseChemShift_STR(parsed_value):
-    """
-    Returns ChemShift lists as dictonaries containing ChemShift_Record objects,
-    grouped by Atom_name (keys())
-    """
+    """Returns ChemShift lists as dictonaries containing ChemShift_Record objects,
+       grouped by Atom_name (keys())"""
     list_number = 1
     ChemShift_lists   = []
 
@@ -437,10 +428,8 @@ def parseChemShift_STR(parsed_value):
 
 @timeit
 def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
-    """
-    Writes pales dummy from the given RDC values, and call Pales with the
-    given parameters
-    """
+    """Writes pales dummy from the given RDC values, and call Pales with the
+    given parameters"""
     try:
         os.remove("pales.out")                  # remove output file if present
     except OSError:
@@ -500,9 +489,6 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
         "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
         )
 
-        # for RDC_record in RDC_dict:
-        #     # print aligned dummy dipole output if present
-
         lists = []
         for RDC_list in RDC_dict.keys():
             lists.append(RDC_dict[RDC_list])
@@ -527,7 +513,6 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
               str(o + 1) + '/' + str(len(pdb_files)), end="\r")
         sys.stdout.flush()
 
-
         if SVD_enable:                          # if SVD is enabled
             subprocess.call([__main__.pales,
                             "-inD", my_path + "pales_dummy.txt",
@@ -551,7 +536,7 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
 
 @timeit
 def callShiftxOn(my_path, pdb_files):
-
+    """Call ShiftX on PDB models. Each output is appended to 'out_name'"""
     for i, pdb_file in enumerate(pdb_files):
         pdb_file = my_path + pdb_file
         out_name = my_path + "/modell_" + str(i+1) + ".out"
@@ -626,12 +611,10 @@ def callShiftxOn(my_path, pdb_files):
 
 
 def avgPalesRDCs(pales_out, my_RDC_type):
-    """
-    Returns a dictonary with the average RDCs for a given RDC type:
-    averageRDC[residue] = value
-    and calculated model data as a list of dictonaries
-    model_data_list[{1: value}, ...]
-    """
+    """Returns a dictonary with the average RDCs for a given RDC type:
+       averageRDC[residue] = value
+       and calculated model data as a list of dictonaries
+       model_data_list[{1: value}, ...]"""
     pales_out       = open(pales_out)
     n_of_structures = 0
     averageRDC      = {}
@@ -676,10 +659,8 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
 @timeit
 def calcS2(PDB_file, S2_records, fit, fit_range):
-    """
-    Returns a dictonary with the average S2 values:
-    S2_calced[residue] = value
-    """
+    """Returns a dictonary with the average S2 values:
+    S2_calced[residue] = value"""
     model_list = PDB_model.model_list
 
     # fitting models
@@ -788,10 +769,8 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
 
 @timeit
 def calcDihedAngles(PDB_file):
-    """
-    Calculates backbone diherdral angles
-    note: all returned angle values are in radian
-    """
+    """Calculates backbone diherdral angles
+       note: all returned angle values are in radian"""
     model_list = PDB_model.model_list
 
     JCoup_dicts = []
@@ -809,16 +788,11 @@ def calcDihedAngles(PDB_file):
                 if (prev_C is not None and my_N is not None and
                     my_CA is not None and my_C is not None):
 
-                    # my $V23=Vector3D->Diff2($a2,$a3);
                     NCA_vec = my_N - my_CA
-                    # my $V12=Vector3D->Diff2($a1,$a2);
                     CN_vec  = prev_C - my_N
-                    # my $V43=Vector3D->Diff2($a4,$a3);
                     CCA_vec = my_C - my_CA
 
-                    # my $P1=Vector3D->VectorialProduct2($V12,$V23);
                     first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
-                    # my $P2=Vector3D->VectorialProduct2($V43,$V23);
                     second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
 
                     angle = Vec_3D.dihedAngle(first_cross, second_cross)
@@ -838,7 +812,6 @@ def calcDihedAngles(PDB_file):
                 prev_C = my_C
                 my_N, my_CA, my_C = None, None, None
 
-
             if atom_res == current_Resindex:
                 if atom.getName() == 'N':
                     my_N = Vec_3D(atom.getCoords())
@@ -853,10 +826,8 @@ def calcDihedAngles(PDB_file):
 
 
 def calcJCoup(calced, experimental, Jcoup_type):
-    """
-    Calculates J-coupling values from dihedral angles
-    note: all angles must be in radian
-    """
+    """Calculates J-coupling values from dihedral angles
+       note: all angles must be in radian"""
     JCoup_calced    = {}
 
     for record in experimental: # resnums
@@ -879,8 +850,8 @@ def calcJCoup(calced, experimental, Jcoup_type):
             phi = Jcoup_dict[record.resnum]
 
             J = (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
-                  B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
-                  C[Jcoup_type])
+                 B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
+                 C[Jcoup_type])
 
             model_data_dict[record.resnum] = J
 
@@ -888,15 +859,12 @@ def calcJCoup(calced, experimental, Jcoup_type):
         model_data_dict = {}
 
     return JCoup_calced, model_data_list
-    # return JCoup_calced
 
 
 def calcCorrel(calced, experimental):
-    """
-    Calculates correlation between calculated and experimental data
-    "calced" is a dict containing values for residues (as keys)
-    "experimental" is a list containing STR record objects
-    """
+    """Calculates correlation between calculated and experimental data
+       "calced" is a dict containing values for residues (as keys)
+       "experimental" is a list containing STR record objects"""
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
 
@@ -931,11 +899,9 @@ def calcCorrel(calced, experimental):
 
 
 def calcQValue(calced, experimental):
-    """
-    Calculates Q-value for calculated and experimental data
-    "calced" is a dict containing values for residues (as keys)
-    "experimental" is a list containing STR record objects
-    """
+    """Calculates Q-value for calculated and experimental data
+       "calced" is a dict containing values for residues (as keys)
+       "experimental" is a list containing STR record objects"""
     D2, E2, C2 = 0, 0, 0
 
     for i, j in enumerate(calced.keys()):
@@ -946,16 +912,13 @@ def calcQValue(calced, experimental):
         E2 += exp ** 2
 
     Q = 100 * math.sqrt(D2) / math.sqrt(E2)
-
     return round(Q, 6)
 
 
 def calcRMSD(calced, experimental):
-    """
-    Calculates RMSD for calculated and experimental data
-    "calced" is a dict containing values for residues (as keys)
-    "experimental" is a list containing STR record objects
-    """
+    """Calculates RMSD for calculated and experimental data
+       "calced" is a dict containing values for residues (as keys)
+       "experimental" is a list containing STR record objects"""
     D2 = 0
 
     for i, j in enumerate(calced.keys()):
@@ -965,11 +928,11 @@ def calcRMSD(calced, experimental):
         D2 += (calc - exp) ** 2
 
     RMSD = math.sqrt(D2 / len(experimental))
-
     return round(RMSD, 6)
 
 
 def pdb2coords(PDB_file):
+    """Loads PDB coordinates into a dictonary, per model"""
     model_list = PDB_model.model_list
 
     prev_resnum = -1
@@ -994,11 +957,9 @@ def pdb2coords(PDB_file):
 
 
 def makeGraph(my_path, calced, my_experimental, graph_name):
-    """
-    X axis -> residue numbers, Y axis -> values
-    "calced" is a dict containing values for residues (as keys)
-    "experimental" is a list containing STR record objects
-    """
+    """X axis -> residue numbers, Y axis -> values
+       "calced" is a dict containing values for residues (as keys)
+       "experimental" is a list containing STR record objects"""
     experimental = copy.deepcopy(my_experimental)
 
     min_calc = min(calced.values())
@@ -1011,9 +972,8 @@ def makeGraph(my_path, calced, my_experimental, graph_name):
 
     min_exp = min(exp_values)
     max_exp = max(exp_values)
-
-    miny = min(min_calc, min_exp)               # get minimum value
-    maxy = max(max_calc, max_exp)               # get maximum value
+    miny    = min(min_calc, min_exp)               # get minimum value
+    maxy    = max(max_calc, max_exp)               # get maximum value
 
     exp_line, calc_line = [], []
 
@@ -1053,19 +1013,15 @@ def makeGraph(my_path, calced, my_experimental, graph_name):
     plt.legend(loc='lower left')
     plt.xlabel('residue number')
     plt.ylabel('value')
-    # plt.title(title)
     plt.tight_layout(pad=1.08)
     plt.savefig(my_path + "/" + graph_name, format="svg")
     plt.close()
-    # plt.clf()   # clear figure
 
 
 def makeCorrelGraph(my_path, calced, experimental, graph_name):
-    """
-    X axis -> experimental values, Y axis -> calculated values
-    "calced" is a dict containing values for residues (as keys)
-    "experimental" is a list containing STR record objects
-    """
+    """X axis -> experimental values, Y axis -> calculated values
+       "calced" is a dict containing values for residues (as keys)
+       "experimental" is a list containing STR record objects"""
     min_calc = min(calced.values())
     max_calc = max(calced.values())
 
@@ -1075,9 +1031,8 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
 
     min_exp = min(exp_values)
     max_exp = max(exp_values)
-
-    miny = min(min_calc, min_exp)               # get minimum value
-    maxy = max(max_calc, max_exp)               # get maximum value
+    miny    = min(min_calc, min_exp)            # get minimum value
+    maxy    = max(max_calc, max_exp)            # get maximum value
 
     exp_line, calc_line = [], []
 
@@ -1105,12 +1060,11 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
 
 
 def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
-    """
-    Y axis -> correlation values
-    X axis -> ensemble correlation, model avg. correlation,
-              per modeel correlation
-    parameter 'model_corrs' is a list containing per model correlation values
-    """
+    """Y axis -> correlation values
+       X axis -> ensemble correlation, model avg. correlation,
+                 per modeel correlation
+       parameter 'model_corrs' is a list containing per model correlation values
+       """
     plt.figure(figsize=(6, 5), dpi=80)
 
     plt.plot(range(0, len(model_corrs)), [correl] * len(model_corrs),
@@ -1130,7 +1084,6 @@ def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
 
 
 def makeNOEHist(my_path, violations):
-
     plt.figure(figsize=(6, 5), dpi=80)
     n_groups = len(violations)
 
@@ -1143,7 +1096,6 @@ def makeNOEHist(my_path, violations):
     ticks = ['0-0.5', '0.5-1', '1-1.5', '1.5-2', '2-2.5', '2.5-3', '3<']
     index = np.arange(n_groups)
     bar_width = 0.7
-
     rects1 = plt.bar(index, means_men, bar_width, alpha=1, color='b')
 
     plt.xlabel(u"Violation (Å)")
@@ -1159,7 +1111,6 @@ def makeNOEHist(my_path, violations):
 
 
 def makeNMRPrideGraph(my_path, graph_data, avg_score):
-
     graph_data.sort()
 
     plt.figure(figsize=(6, 5), dpi=80)
