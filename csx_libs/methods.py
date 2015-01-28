@@ -868,6 +868,8 @@ def calcCorrel(calced, experimental):
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
 
+    # print(len(experimental), len(calced))
+
     for i, j in enumerate(calced.keys()):
         calc = calced[j]
         exp  = experimental[i].value
