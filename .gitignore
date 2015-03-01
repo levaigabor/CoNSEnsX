@@ -1,7 +1,5 @@
-2NR2.pdb
-ubiquitin_test.str
-dummy.str
-bmr16746.str
+*.pdb
+*.str
 pales.out
 calculations/
 lib/
