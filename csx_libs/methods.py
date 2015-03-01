@@ -167,10 +167,13 @@ def pdb_splitter(my_path, PDB_file):
             my_name = line.strip().split()[1]
         elif line.startswith("ATOM") or line.startswith("TER"):
             # replace oxygen names in line
-            if line.split()[2] == "OC1":
-                line = line.replace('OC1', 'O  ')
-            elif line.split()[2] == "OC2":
-                line = line.replace('OC2', 'OXT')
+            try:
+                if line.split()[2] == "OC1":
+                    line = line.replace('OC1', 'O  ')
+                elif line.split()[2] == "OC2":
+                    line = line.replace('OC2', 'OXT')
+            except IndexError:
+                pass
             my_data.append(line.strip())
         elif line.startswith("ENDMDL"):
             model_names.append(my_name)
