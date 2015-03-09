@@ -31,11 +31,18 @@ shortcodes = {
 
 # Equation and coefficients from:
 # Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
-A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
-B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
-C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
-THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
-         "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+# A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
+# B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
+# C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
+# THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
+#          "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+
+# J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution
+A     = {"3JHNCB":3.06,  "3JHNHA":7.09,  "3JHNC":4.29,  "3JHAC":3.72}
+B     = {"3JHNCB":-0.74, "3JHNHA":-1.42, "3JHNC":-1.01, "3JHAC":-2.18}
+C     = {"3JHNCB":0.13,  "3JHNHA":1.55,  "3JHNC":0.00,  "3JHAC":1.28}
+THETA = {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
+         "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
 
 
 
@@ -111,14 +118,15 @@ def pdb_cleaner(PDB_file):
 
     for line in input_pdb:
         line = line.strip()
-        line = re.sub('[+-] ', '  ', line)
+        # line = re.sub('[+-] ', '  ', line)
 
         if line.startswith("ATOM"):
 
             name = line.split()[2].strip()
 
-            if name is "Q": continue
-            if name is "NH": name = "H"
+            if name == "Q":  continue
+            if name == "NH": name = "H"
+            if name == "HN": name = "H"
 
             chars, numbers = [], []
             for i in name:
