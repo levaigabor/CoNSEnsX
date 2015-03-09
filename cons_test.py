@@ -17,7 +17,7 @@ import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
 
 version  = "0.9_python"
-pales    = "/home/daniel/Dokumente/önlab/gz_pack/pales/linux/pales"
+pales    = "/home/daniel/Programme/linux/pales"
 shiftx   = "/home/daniel/Programme/shiftx/shiftx"
 pridedb  = "/home/daniel/Programme/prideNMR/pdb2hhbindbM"
 pridenmr = "/home/daniel/Programme/prideNMR/mrhisthhbindbM"
