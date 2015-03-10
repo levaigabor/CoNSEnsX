@@ -73,7 +73,7 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
       <tr>
         <td id="head-td">NOE restraint file:</td>
         <td><i>{3}</i></td>
-        <td>{4} distance restdaints found</td>
+        <td>{4} distance restraints found</td>
       </tr>
       <tr>
         <td id="head-td">BMRB file:</td>
