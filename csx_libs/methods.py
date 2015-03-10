@@ -850,11 +850,11 @@ def calcPeptideBonds(PDB_file):
             if atom_res != current_Resindex:
 
                 if (prev_CA is not None and my_N is not None and
-                    my_CA is not None and my_C is not None):
+                    my_CA is not None and prev_C is not None):
 
                     NCA_vec = my_N - my_CA
                     CN_vec  = prev_CA - my_N
-                    CCA_vec = my_C - my_CA
+                    CCA_vec = prev_C - my_CA
 
                     first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
                     second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
@@ -874,6 +874,7 @@ def calcPeptideBonds(PDB_file):
 
                 current_Resindex = atom_res
                 prev_CA = my_CA
+                prev_C  = my_C
                 my_N, my_CA, my_C = None, None, None
 
             if atom_res == current_Resindex:
