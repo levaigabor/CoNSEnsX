@@ -67,6 +67,7 @@ for file in os.listdir(my_path):
     if file.endswith(".pdb"):
         pdb_models.append(file)
 
+csx_func.calcPeptideBonds(my_PDB)
 
 #------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)

@@ -836,6 +836,55 @@ def calcDihedAngles(PDB_file):
     return JCoup_dicts
 
 
+def calcPeptideBonds(PDB_file):
+    """Calculates backbone diherdral angles (OMEGA) CA-N-C'-CA"""
+    model_list = PDB_model.model_list
+
+    for model_num, model in enumerate(model_list):
+        current_Resindex = 1
+        prev_CA, my_N, my_CA, my_C = None, None, None, None
+
+        for atom in model:
+            atom_res = atom.getResindex() + 1
+
+            if atom_res != current_Resindex:
+
+                if (prev_CA is not None and my_N is not None and
+                    my_CA is not None and my_C is not None):
+
+                    NCA_vec = my_N - my_CA
+                    CN_vec  = prev_CA - my_N
+                    CCA_vec = my_C - my_CA
+
+                    first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
+                    second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
+
+                    angle = Vec_3D.dihedAngle(first_cross, second_cross)
+
+                    # reference for setting sign of angle
+                    reference = Vec_3D.cross(first_cross, second_cross)
+
+                    r1 = reference.normalize()
+                    r2 = NCA_vec.normalize()
+
+                    if ((r1 - r2).magnitude() < r2.magnitude()):
+                        angle *= -1
+
+                    print(angle)
+
+                current_Resindex = atom_res
+                prev_CA = my_CA
+                my_N, my_CA, my_C = None, None, None
+
+            if atom_res == current_Resindex:
+                if atom.getName() == 'N':
+                    my_N = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'CA':
+                    my_CA = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'C':
+                    my_C = Vec_3D(atom.getCoords())
+
+
 def calcJCoup(calced, experimental, Jcoup_type):
     """Calculates J-coupling values from dihedral angles
        note: all angles must be in radian"""
