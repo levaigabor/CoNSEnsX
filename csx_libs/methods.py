@@ -38,11 +38,18 @@ shortcodes = {
 #          "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
 
 # J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution
-A     = {"3JHNCB":3.06,  "3JHNHA":7.09,  "3JHNC":4.29,  "3JHAC":3.72}
-B     = {"3JHNCB":-0.74, "3JHNHA":-1.42, "3JHNC":-1.01, "3JHAC":-2.18}
-C     = {"3JHNCB":0.13,  "3JHNHA":1.55,  "3JHNC":0.00,  "3JHAC":1.28}
+# A     = {"3JHNCB":3.06,  "3JHNHA":7.13,  "3JHNC":4.19, "3JHAC":3.84}
+# B     = {"3JHNCB":-0.74, "3JHNHA":1.31,  "3JHNC":0.99, "3JHAC":2.19}
+# C     = {"3JHNCB":0.10,  "3JHNHA":1.56,  "3JHNC":0.03, "3JHAC":1.20}
+# THETA = {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
+#          "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
+
+# https://x86.cs.duke.edu/~brd/Teaching/Bio/asmb/Papers/NMR/nilges-jmr05.pdf
+A     = {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84}
+B     = {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19}
+C     = {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20}
 THETA = {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
-         "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
+         "3JHNC" :math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
 
 
 
@@ -205,6 +212,69 @@ def pdb_splitter(my_path, PDB_file):
         temp_pdb.close()
 
     return len(model_names)
+
+
+@timeit
+def getNOE(NOE_file):
+    NOE_key   = "_Gen_dist_constraint_list.Constraint_type"
+    NOE_value = "NOE"
+    in_frame  = False
+    in_loop   = False
+    loops     = []
+    NOE_data  = []
+
+    for line in open(NOE_file):
+        tok = line.strip().split()
+
+        if not tok:
+            continue
+
+        if tok[0] == NOE_key and tok[1] == NOE_value:
+            in_frame = True
+            continue
+
+        if in_frame and tok[0] == "save_":
+            break
+
+        if tok[0] == "loop_":
+            loop_keys = []
+            loop_data = []
+            in_loop = True
+            continue
+
+        if in_loop == True and tok[0] == "stop_":
+            in_loop = False
+            loops.append([loop_keys, loop_data])
+
+        if in_loop:
+            if tok[0].startswith('_'):
+                loop_keys.append(tok[0])
+            else:
+                loop_data.append(tok)
+
+    for loop in loops:
+        try:
+            ind_ID    = loop[0].index("_Gen_dist_constraint.ID")
+            ind_seg1  = loop[0].index("_Gen_dist_constraint.Seq_ID_1")
+            ind_seg2  = loop[0].index("_Gen_dist_constraint.Seq_ID_2")
+            ind_comp1 = loop[0].index("_Gen_dist_constraint.Comp_ID_1")
+            ind_comp2 = loop[0].index("_Gen_dist_constraint.Comp_ID_2")
+            ind_atom1 = loop[0].index("_Gen_dist_constraint.Atom_ID_1")
+            ind_atom2 = loop[0].index("_Gen_dist_constraint.Atom_ID_2")
+            ind_bnd   = loop[0].index(
+                                "_Gen_dist_constraint.Distance_upper_bound_val")
+        except ValueError:
+            continue
+
+        for data in loop[1]:
+            # print(data[ind_ID], data[ind_seg1], data[ind_seg2],
+            #       data[ind_comp1], data[ind_comp2], data[ind_atom1],
+            #       data[ind_atom2], data[ind_bnd])
+            NOE_data.append([data[ind_ID],    data[ind_seg1],  data[ind_seg2],
+                             data[ind_comp1], data[ind_comp2], data[ind_atom1],
+                             data[ind_atom2], data[ind_bnd]])
+
+    return NOE_data
 
 
 @timeit
@@ -839,6 +909,8 @@ def calcDihedAngles(PDB_file):
 def calcPeptideBonds(PDB_file):
     """Calculates backbone diherdral angles (OMEGA) CA-N-C'-CA"""
     model_list = PDB_model.model_list
+    dihedral_angles = {"<2"    : 0, "2-5" : 0, "5-10" : 0,
+                       "10-20" : 0, ">20" : 0}
 
     for model_num, model in enumerate(model_list):
         current_Resindex = 1
@@ -870,7 +942,16 @@ def calcPeptideBonds(PDB_file):
                     if ((r1 - r2).magnitude() < r2.magnitude()):
                         angle *= -1
 
-                    print(angle)
+                    if abs(angle) < 2:
+                        dihedral_angles["<2"] += 1
+                    elif abs(angle) < 5:
+                        dihedral_angles["2-5"] += 1
+                    elif abs(angle) < 10:
+                        dihedral_angles["5-10"] += 1
+                    elif abs(angle) < 20:
+                        dihedral_angles["10-20"] += 1
+                    else:
+                        dihedral_angles[">20"] += 1
 
                 current_Resindex = atom_res
                 prev_CA = my_CA
@@ -884,6 +965,13 @@ def calcPeptideBonds(PDB_file):
                     my_CA = Vec_3D(atom.getCoords())
                 elif atom.getName() == 'C':
                     my_C = Vec_3D(atom.getCoords())
+
+    print("Peptide bond angle distribution:")
+    print("   <2 -> " + str(dihedral_angles["<2"]))
+    print("  2-5 -> " + str(dihedral_angles["2-5"]))
+    print(" 5-10 -> " + str(dihedral_angles["5-10"]))
+    print("10-20 -> " + str(dihedral_angles["10-20"]))
+    print("  >20 -> " + str(dihedral_angles[">20"]))
 
 
 def calcJCoup(calced, experimental, Jcoup_type):
