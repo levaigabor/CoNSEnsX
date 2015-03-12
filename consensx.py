@@ -81,14 +81,7 @@ def pypyProcess(conn, restain_file):
     conn.close()
 
 if args.NOE_file:
-    parent_conn, child_conn = Pipe()
-    p = Process(target = pypyProcess, args = (child_conn, args.NOE_file,))
-    p.start()
-#------------------------  NOE distance violation calc  -----------------------#
-# SEPARATE HERE TO JOIN PROCESS LATER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# if args.NOE_file:
-    saveShifts = parent_conn.recv()
-    p.join()
+    saveShifts = csx_func.getNOE(args.NOE_file)
     NOE_violations = csx_calc.calcNOEviolations(args, saveShifts,
                                                 my_path, args.r3_averaging)
     PRIDE_data = csx_calc.calcNMR_Pride(pdb_models, my_path)
@@ -96,7 +89,6 @@ if args.NOE_file:
                            model_count, args.NOE_file,
                            csx_obj.Restraint_Record.getRestraintCount())
     csx_out.write_bottom_table(my_path, NOE_violations, PRIDE_data)
-# SEPARATE HERE TO JOIN PROCESS LATER xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 else:
     csx_out.writeFileTable(my_path, args, my_PDB, my_id, model_count)
 
