@@ -260,7 +260,7 @@ def write_bottom_table(path, NOE_violations, PRIDE_data):
           <td width="30"></td>
 
           <td><table class="NOE_PRIME_table">
-          <tr><td><strong>NPRIDE-NMR</strong></td></tr>
+          <tr><td><strong>PRIDE-NMR</strong></td></tr>
           <tr><td>Model with best score:</td><td>{1}</td></tr>
           <tr><td>Model with worst score:</td><td>{2}</td></tr>
           <tr><td>Average score:</td><td>{3}</td></tr>
