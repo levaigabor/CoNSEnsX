@@ -364,7 +364,8 @@ def calcNMR_Pride(pdb_models, my_path):
     hhdb_log   = open(my_path + "hhdb.log", 'w')
     model_list = open(my_path + "model_list.txt", 'r')
     subprocess.call([__main__.pridedb,
-                    "-D", my_path + "hhdb"  # model list
+                    # BITCH FIX - TODO
+                    "-D", "HHDB",  # model list
                     ],
                     stdin  = model_list,
                     stdout = DEVNULL,
@@ -379,7 +380,8 @@ def calcNMR_Pride(pdb_models, my_path):
     pride_input  = open(my_path + "pride_input.txt", 'r')
     pride_output = open(my_path + "pride_output.txt", 'w')
     subprocess.call([__main__.pridenmr,
-                     "-D", my_path + "hhdb",
+                     # BITCH FIX - TODO
+                     "-D", "HHDB",
                      "-d", str(56),
                      "-b", str(len(pdb_models)),
                      "-m", str(3)],
