@@ -42,7 +42,7 @@
         <div class="row">
             <div class="span12">
                 <div class="title-page">
-                    <h2 class="title">CoNSENsX</h2>
+                    <h2 class="title">CoNSEnsX</h2>
                     <h3 class="title-description"><b><font>Co</font></b>mpliance of <b><font>N</font></b>MR-derived <b><font>S</font></b>tructural <b><font>Ens</font></b>embles with e<b><font>x</font></b>perimental data</h3>
                 </div>
             </div>
@@ -71,8 +71,10 @@
                             <td><input id="bmbr_file" name="bmrb_upload" size="20" type="file"></td>
                         </tr>
                     </table>
-                    <br><br>
-
+                    <br><br>Karplus equation parameter set: <select name="KARPLUS">
+                    <option selected="selected" value="1">Wang &amp; Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data</option>
+                    <option value="2">J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution</option>
+                    </select><br>
                     <input id="fit_box" name="superimpose" value="1" type="checkbox">  Fit models in PDB<br>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on range:
                     <input id="fit_range" placeholder="1-72" type="text">&nbsp;(optional)<br>
