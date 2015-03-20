@@ -3,11 +3,9 @@
 
 # standard modules
 from __future__ import print_function
-from multiprocessing import Process, Pipe
 import os
 import time
 import subprocess
-import ast
 
 # own modules
 import csx_libs.calc    as csx_calc
@@ -19,8 +17,8 @@ import csx_libs.objects as csx_obj
 version  = "0.9_python"
 pales    = "/home/daniel/Programme/linux/pales"
 shiftx   = "/home/daniel/Programme/shiftx/shiftx"
-pridedb  = "/home/daniel/Programme/prideNMR/pdb2hhbindbM"
-pridenmr = "/home/daniel/Programme/prideNMR/mrhisthhbindbM"
+pridedb  = "/home/daniel/Programme/pridenmr_thingol/pdb2hhbindbM"
+pridenmr = "/home/daniel/Programme/pridenmr_thingol/mrhisthhbindbM"
 
 
 ts = time.time()
@@ -71,14 +69,6 @@ csx_func.calcPeptideBonds(my_PDB)
 
 #------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)
-
-def pypyProcess(conn, restain_file):
-    """function called in seperate process to parse mr file"""
-    pypy_command      = ["pypy", "pypyParse.py", args.NOE_file]
-    restraints_parsed = subprocess.check_output(pypy_command)
-    restraints_parsed = ast.literal_eval(restraints_parsed)
-    conn.send(restraints_parsed)
-    conn.close()
 
 if args.NOE_file:
     saveShifts = csx_func.getNOE(args.NOE_file)
