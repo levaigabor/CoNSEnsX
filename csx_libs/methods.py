@@ -287,7 +287,7 @@ def parseSTR(STR_file):
         myString += line
 
     star_file.close()
-    parsed = nmrpystar.parse(myString)      # parsing, access data -> parsed.value
+    parsed = nmrpystar.parse(myString)      # parsing -> parsed.value
 
     if parsed.status != 'success':          # check if parsing was successful
         print('Error during STR parsing: ', parsed)
@@ -444,8 +444,8 @@ def parseJcoup_STR(parsed_value):
 
 
 def parseChemShift_STR(parsed_value):
-    """Returns ChemShift lists as dictonaries containing ChemShift_Record objects,
-       grouped by Atom_name (keys())"""
+    """Returns ChemShift lists as dictonaries containing ChemShift_Record
+    objects, grouped by Atom_name (keys())"""
     list_number = 1
     ChemShift_lists   = []
 
@@ -604,7 +604,7 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
                             stderr = DEVNULL)
         else:                               # if SVD is disabled (default)
             subprocess.call([__main__.pales,
-                            "-inD", my_path + "pales_dummy.txt",  # pales dummy file
+                            "-inD", my_path + "pales_dummy.txt",
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model],            # rdc lc model
                             stdout = outfile,
@@ -967,6 +967,76 @@ def calcPeptideBonds(PDB_file):
                     my_C = Vec_3D(atom.getCoords())
 
     print("Peptide bond angle distribution:")
+    print("   <2 -> " + str(dihedral_angles["<2"]))
+    print("  2-5 -> " + str(dihedral_angles["2-5"]))
+    print(" 5-10 -> " + str(dihedral_angles["5-10"]))
+    print("10-20 -> " + str(dihedral_angles["10-20"]))
+    print("  >20 -> " + str(dihedral_angles[">20"]))
+
+
+def calcNH_Angles(PDB_file):
+    """Calculates backbone diherdral angles (OMEGA) H-N-C=O"""
+    model_list = PDB_model.model_list
+    dihedral_angles = {"<2"    : 0, "2-5" : 0, "5-10" : 0,
+                       "10-20" : 0, ">20" : 0}
+
+    for model_num, model in enumerate(model_list):
+        current_Resindex = 1
+        prev_O, prev_C, my_N, my_H = None, None, None, None
+
+        for atom in model:
+            atom_res = atom.getResindex() + 1
+
+            if atom_res != current_Resindex:
+
+                if (prev_O is not None and prev_C is not None and
+                    my_N   is not None and my_H   is not None):
+
+                    NCA_vec = my_H - my_N
+                    CN_vec  = my_N - prev_C
+                    CCA_vec = prev_C - prev_O
+
+                    first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
+                    second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
+
+                    angle = Vec_3D.dihedAngle(first_cross, second_cross)
+
+                    # reference for setting sign of angle
+                    reference = Vec_3D.cross(first_cross, second_cross)
+
+                    r1 = reference.normalize()
+                    r2 = NCA_vec.normalize()
+
+                    if ((r1 - r2).magnitude() < r2.magnitude()):
+                        angle *= -1
+
+                    if abs(angle) < 2:
+                        dihedral_angles["<2"] += 1
+                    elif abs(angle) < 5:
+                        dihedral_angles["2-5"] += 1
+                    elif abs(angle) < 10:
+                        dihedral_angles["5-10"] += 1
+                    elif abs(angle) < 20:
+                        dihedral_angles["10-20"] += 1
+                    else:
+                        dihedral_angles[">20"] += 1
+
+                current_Resindex = atom_res
+                prev_O = my_O
+                prev_C = my_C
+                my_N, my_H = None, None
+
+            if atom_res == current_Resindex:
+                if atom.getName() == 'N':
+                    my_N = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'H':
+                    my_H = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'C':
+                    my_C = Vec_3D(atom.getCoords())
+                elif atom.getName() == 'O':
+                    my_O = Vec_3D(atom.getCoords())
+
+    print("Peptide (N-H) bond angle distribution:")
     print("   <2 -> " + str(dihedral_angles["<2"]))
     print("  2-5 -> " + str(dihedral_angles["2-5"]))
     print(" 5-10 -> " + str(dihedral_angles["5-10"]))
