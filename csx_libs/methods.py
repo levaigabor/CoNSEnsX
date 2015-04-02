@@ -966,7 +966,7 @@ def calcPeptideBonds(PDB_file):
                 elif atom.getName() == 'C':
                     my_C = Vec_3D(atom.getCoords())
 
-    print("Peptide bond angle distribution:")
+    print("Peptide (CA-N-C'-CA) bond angle distribution:")
     print("   <2 -> " + str(dihedral_angles["<2"]))
     print("  2-5 -> " + str(dihedral_angles["2-5"]))
     print(" 5-10 -> " + str(dihedral_angles["5-10"]))
@@ -992,12 +992,12 @@ def calcNH_Angles(PDB_file):
                 if (prev_O is not None and prev_C is not None and
                     my_N   is not None and my_H   is not None):
 
-                    NCA_vec = my_H - my_N
-                    CN_vec  = my_N - prev_C
-                    CCA_vec = prev_C - prev_O
+                    NH_vec = my_H - my_N
+                    CN_vec = my_N - prev_C
+                    OC_vec = prev_C - prev_O
 
-                    first_cross  = Vec_3D.cross(CN_vec, NCA_vec)
-                    second_cross = Vec_3D.cross(CCA_vec, NCA_vec)
+                    first_cross  = Vec_3D.cross(NH_vec, CN_vec)
+                    second_cross = Vec_3D.cross(OC_vec, CN_vec)
 
                     angle = Vec_3D.dihedAngle(first_cross, second_cross)
 
@@ -1005,7 +1005,7 @@ def calcNH_Angles(PDB_file):
                     reference = Vec_3D.cross(first_cross, second_cross)
 
                     r1 = reference.normalize()
-                    r2 = NCA_vec.normalize()
+                    r2 = NH_vec.normalize()
 
                     if ((r1 - r2).magnitude() < r2.magnitude()):
                         angle *= -1
@@ -1036,7 +1036,7 @@ def calcNH_Angles(PDB_file):
                 elif atom.getName() == 'O':
                     my_O = Vec_3D(atom.getCoords())
 
-    print("Peptide (N-H) bond angle distribution:")
+    print("Peptide (H-N-C=O) bond angle distribution:")
     print("   <2 -> " + str(dihedral_angles["<2"]))
     print("  2-5 -> " + str(dihedral_angles["2-5"]))
     print(" 5-10 -> " + str(dihedral_angles["5-10"]))
