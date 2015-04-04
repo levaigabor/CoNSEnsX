@@ -1,7 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 import __main__
 import os
 import sys
@@ -322,23 +318,23 @@ def get_RDC_lists(parsed_value):
             row = loopShifts.getRowAsDict(ix)
 
             for my_resnum1 in rdc_res1_keys:     # fetch 1. residue number
-                if my_resnum1 in row.keys():
+                if my_resnum1 in list(row.keys()):
                     resnum1 = row[my_resnum1]
 
             for my_atom1 in rdc_atom1_keys:      # fetch 1. atom name
-                if my_atom1 in row.keys():
+                if my_atom1 in list(row.keys()):
                     atom1 = row[my_atom1]
 
             for my_resnum2 in rdc_res2_keys:     # fetch 2. residue number
-                if my_resnum2 in row.keys():
+                if my_resnum2 in list(row.keys()):
                     resnum2 = row[my_resnum2]
 
             for my_atom2 in rdc_atom2_keys:      # fetch 2. atom name
-                if my_atom2 in row.keys():
+                if my_atom2 in list(row.keys()):
                     atom2 = row[my_atom2]
 
             for my_RDC_value in rdc_value_keys:  # fetch RDC value
-                if my_RDC_value in row.keys():
+                if my_RDC_value in list(row.keys()):
                     RDC_value = row[my_RDC_value]
 
             # check if all parameters are fetched
@@ -496,7 +492,7 @@ def parseChemShift_STR(parsed_value):
 
         for record in ChemShift_list:
 
-            if record.atom_name in ChemShift_dict.keys():
+            if record.atom_name in list(ChemShift_dict.keys()):
                 ChemShift_dict[record.atom_name].append(record)
             else:
                 ChemShift_dict[record.atom_name] = []
@@ -571,7 +567,7 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
         )
 
         lists = []
-        for RDC_list in RDC_dict.keys():
+        for RDC_list in list(RDC_dict.keys()):
             lists.append(RDC_dict[RDC_list])
 
         for RDC_set in lists:
@@ -657,22 +653,22 @@ def callShiftxOn(my_path, pdb_files):
                     modN[resnum]  = N
                     modCA[resnum] = CA
 
-                    if resnum in averageHA.keys():
+                    if resnum in list(averageHA.keys()):
                         averageHA[resnum] += HA
                     else:
                         averageHA[resnum] = HA
 
-                    if resnum in averageH.keys():
+                    if resnum in list(averageH.keys()):
                         averageH[resnum] += H
                     else:
                         averageH[resnum] = H
 
-                    if resnum in averageN.keys():
+                    if resnum in list(averageN.keys()):
                         averageN[resnum] += N
                     else:
                         averageN[resnum] = N
 
-                    if resnum in averageCA.keys():
+                    if resnum in list(averageCA.keys()):
                         averageCA[resnum] += CA
                     else:
                         averageCA[resnum] = CA
@@ -723,7 +719,7 @@ def avgPalesRDCs(pales_out, my_RDC_type):
             if my_RDC_type != RDCtype:
                 continue
 
-            if resnum in averageRDC.keys():
+            if resnum in list(averageRDC.keys()):
                 averageRDC[resnum] += D
             else:
                 averageRDC[resnum] = D
@@ -732,7 +728,7 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
     pales_out.close()
 
-    for res_num in averageRDC.keys():
+    for res_num in list(averageRDC.keys()):
         averageRDC[res_num] /= n_of_structures
 
     return averageRDC, model_data_list
@@ -1197,7 +1193,7 @@ def makeGraph(my_path, calced, my_experimental, graph_name):
     exp_line, calc_line = [], []
 
     for k in range(0, max(calced.keys()) + 0):  # fetch data from arguments
-        if k in calced.keys():
+        if k in list(calced.keys()):
             calc = calced[k]
             exp  = experimental.pop(0).value
 
@@ -1286,11 +1282,11 @@ def modCorrelGraph(my_path, correl, avg_corr, model_corrs, corr_graph_name):
        """
     plt.figure(figsize=(6, 5), dpi=80)
 
-    plt.plot(range(0, len(model_corrs)), [correl] * len(model_corrs),
+    plt.plot(list(range(0, len(model_corrs))), [correl] * len(model_corrs),
              linewidth=2.0, color='green', label='Ensemble corr.')
-    plt.plot(range(0, len(model_corrs)), [avg_corr] * len(model_corrs),
+    plt.plot(list(range(0, len(model_corrs))), [avg_corr] * len(model_corrs),
              linewidth=2.0, color='red', label='Avg. corr. per model')
-    plt.plot(range(0, len(model_corrs)), sorted(model_corrs),
+    plt.plot(list(range(0, len(model_corrs))), sorted(model_corrs),
              linewidth=2.0, color='blue', label='Corr. per model')
 
     plt.legend(loc='lower left')
@@ -1317,7 +1313,7 @@ def makeNOEHist(my_path, violations):
     bar_width = 0.7
     rects1 = plt.bar(index, means_men, bar_width, alpha=1, color='b')
 
-    plt.xlabel(u"Violation (Å)")
+    plt.xlabel("Violation (Å)")
     plt.ylabel("# of NOE distance violations")
     plt.title("NOE distance violations")
     plt.xticks(index + bar_width / 2, ticks)
@@ -1334,7 +1330,7 @@ def makeNMRPrideGraph(my_path, graph_data, avg_score):
 
     plt.figure(figsize=(6, 5), dpi=80)
     plt.plot(graph_data, linewidth=2.0, color='blue', label='Model scores')
-    plt.plot(range(0, len(graph_data)), [avg_score] * len(graph_data),
+    plt.plot(list(range(0, len(graph_data))), [avg_score] * len(graph_data),
              linewidth=2.0, color='green', label='Average score')
     plt.axis([-1, len(graph_data), 0, 1])
     plt.xlabel('models by score (worse to best)')

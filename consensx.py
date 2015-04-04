@@ -1,8 +1,6 @@
-#!/usr/bin/python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 
 # standard modules
-from __future__ import print_function
 import os
 import time
 import subprocess
@@ -14,7 +12,7 @@ import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
 
-version  = "0.9_python"
+version  = "0.1_python3"
 pales    = "/home/daniel/Programme/linux/pales"
 shiftx   = "/home/daniel/Programme/shiftx/shiftx"
 pridedb  = "/home/daniel/Programme/pridenmr_thingol/pdb2hhbindbM"
@@ -66,6 +64,7 @@ for file in os.listdir(my_path):
         pdb_models.append(file)
 
 csx_func.calcPeptideBonds(my_PDB)
+csx_func.calcNH_Angles(my_PDB)
 
 #------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)

@@ -1,16 +1,12 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 import __main__
 import math
 import subprocess
 import os
 import matplotlib.pyplot as plt
 
-import methods as csx_func
-import objects as csx_obj
-import output  as csx_out
+from . import methods as csx_func
+from . import objects as csx_obj
+from . import output  as csx_out
 
 
 def calcRDC(RDC_lists, pdb_models, my_path, args):
@@ -22,7 +18,7 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
 
         csx_out.writeRDC_table_open(my_path, "RDC list", list_num + 1)
 
-        for RDC_type in RDC_dict.keys():
+        for RDC_type in list(RDC_dict.keys()):
             print("RDC list", list_num + 1, RDC_type)
 
             # get averaged RDC values -> averageRDC[residue] = value
@@ -75,7 +71,7 @@ def calcS2(S2_dict, my_PDB, my_path, args):
     """Back calculate order paramteres from given S2 dict and PDB models"""
     csx_out.write_table_open(my_path, "Order parameters (S<sup>2</sup>)")
 
-    for S2_type in S2_dict.keys():
+    for S2_type in list(S2_dict.keys()):
         S2_calced = csx_func.calcS2(my_PDB, S2_dict[S2_type],
                                     args.fit, args.fit_range)
 
@@ -109,7 +105,7 @@ def calcJCouplings(Jcoup_dict, my_PDB, my_path):
     dihed_lists = csx_func.calcDihedAngles(my_PDB)
     csx_out.write_table_open(my_path, "Coupling constants (J-coupling)")
 
-    for Jcoup_type in Jcoup_dict.keys():
+    for Jcoup_type in list(Jcoup_dict.keys()):
 
         JCoup_calced, model_data = csx_func.calcJCoup(dihed_lists,
                                                       Jcoup_dict[Jcoup_type],
@@ -162,7 +158,7 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
         csx_out.writeRDC_table_open(my_path, "Chemical shift list",
                                     list_num + 1)
 
-        for CS_type in CS_list.keys():
+        for CS_type in list(CS_list.keys()):
             model_corrs = []
 
             for model in model_data:
@@ -228,7 +224,7 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
     measured_avg  = {}
     str_distaces  = {}
 
-    for model in PDB_coords.keys():
+    for model in list(PDB_coords.keys()):
         avg_distances[model] = {}
 
         for restraint in restraints:
@@ -258,7 +254,7 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
 
     prev_id  = -1
 
-    for model in PDB_coords.keys():
+    for model in list(PDB_coords.keys()):
         for restraint in restraints:
             curr_id = int(restraint.curr_distID)
 
@@ -289,16 +285,16 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
         curr_id = int(restraint.curr_distID)
         avg     = 0.0
 
-        for model in PDB_coords.keys():
+        for model in list(PDB_coords.keys()):
             avg += math.pow(avg_distances[model][curr_id], -6)
 
-        avg /= len(PDB_coords.keys())
+        avg /= len(list(PDB_coords.keys()))
         measured_avg[curr_id] = math.pow(avg, -1.0/6)
 
     # at this point measured_avg[curr_id] is a simple dictonary containing the
     # model averaged distances for the given "curr_distID" number
 
-    avg_dist_keys = measured_avg.keys()
+    avg_dist_keys = list(measured_avg.keys())
     avg_dist_keys.sort()
     violations = {"0-0.5" : 0, "0.5-1" : 0, "1-1.5" : 0,
                   "1.5-2" : 0, "2-2.5" : 0, "2.5-3" : 0, "3<" : 0}
@@ -349,7 +345,7 @@ def calcNMR_Pride(pdb_models, my_path):
 
     pride_input.write("HEADER\n")
 
-    prime_distances = restraints.keys()
+    prime_distances = list(restraints.keys())
     prime_distances.sort()
 
     for distance in prime_distances:
@@ -402,10 +398,10 @@ def calcNMR_Pride(pdb_models, my_path):
             model_score = float(line.split()[1])
             pride_scores[model_num] = model_score
 
-    scores = pride_scores.values()
+    scores = list(pride_scores.values())
 
     avg = sum(scores) * 1.0 / len(scores)
-    variance = map(lambda x: (x - avg) ** 2, scores)
+    variance = [(x - avg) ** 2 for x in scores]
     standard_deviation = math.sqrt(sum(variance) * 1.0 / len(variance))
 
     PRIDE_data = []
