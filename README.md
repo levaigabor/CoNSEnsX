@@ -42,7 +42,7 @@ You find the current working (Perl) version [here](http://himalia.chem.elte.hu/c
 * Residual dipolar couplings (RDC)
     * Correspondence of experimental RDC data with the alignments predicted by PALES (Prediction of ALignmEnt from Structure)
     * RDC data sets are now aligned separately (one list -> one alignment)
-    * separate alignments have separate section in HTML output
+    * Separate alignments have separate section in HTML output
 
 * Scalar coupling
     * User can select the used set of Karplus equation constant
