@@ -40,7 +40,7 @@ class ChemShift_Record(object):
 
 
 class PDB_model(object):
-    """Class for storing chemical shift data"""
+    """Class for storing PDB model data"""
     model_list = []
 
     def __init__(self, atomgroup,):
