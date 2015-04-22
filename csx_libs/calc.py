@@ -85,6 +85,7 @@ def calcS2(S2_dict, my_PDB, my_path, args):
         print("RMSD:   ", rmsd)
         print()
 
+        # oh-oh this shouldn't be named like this!
         graph_name = "RDC_" + S2_type + ".svg"
         csx_func.makeGraph(my_path, S2_calced, S2_dict[S2_type], graph_name)
 
