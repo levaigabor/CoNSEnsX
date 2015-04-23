@@ -1084,10 +1084,6 @@ def calcCorrel(calced, experimental):
     D = [0.0, 0.0]
     match_count = 0
 
-    # for i, j in enumerate(calced.keys()):
-    #     calc = calced[j]
-    #     exp  = experimental[i].value
-
     for i in experimental:
         exp  = i.value
         try:
@@ -1132,9 +1128,12 @@ def calcQValue(calced, experimental):
        "experimental" is a list containing STR record objects"""
     D2, E2, C2 = 0, 0, 0
 
-    for i, j in enumerate(calced.keys()):
-        calc = calced[j]
-        exp  = experimental[i].value
+    for i in experimental:
+        exp  = i.value
+        try:
+            calc = calced[i.resnum]
+        except KeyError:
+            continue
 
         D2 += (calc - exp) ** 2
         E2 += exp ** 2
@@ -1148,14 +1147,21 @@ def calcRMSD(calced, experimental):
        "calced" is a dict containing values for residues (as keys)
        "experimental" is a list containing STR record objects"""
     D2 = 0
+    match_count = 0
 
-    for i, j in enumerate(calced.keys()):
-        calc = calced[j]
-        exp  = experimental[i].value
+
+    for i in experimental:
+        exp  = i.value
+        try:
+            calc = calced[i.resnum]
+        except KeyError:
+            continue
 
         D2 += (calc - exp) ** 2
 
-    RMSD = math.sqrt(D2 / len(experimental))
+        match_count += 1
+
+    RMSD = math.sqrt(D2 / match_count)
     return round(RMSD, 6)
 
 
