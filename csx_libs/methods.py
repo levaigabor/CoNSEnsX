@@ -575,8 +575,8 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
 
                 pales_dummy.write(
                     "%5s  %6s  %6s  %5s  %6s  %6s  %9.3f  %9.3f  %.2f\n" % (
-                    str(RDC_record.resnum1) + 'A', seg[RDC_record.resnum1 - 1],
-                    str(RDC_record.atom1),
+                    str(RDC_record.resnum) + 'A', seg[RDC_record.resnum - 1],
+                    str(RDC_record.atom),
                     str(RDC_record.resnum2) + 'A', seg[RDC_record.resnum2 - 1],
                     str(RDC_record.atom2),
                     RDC_record.value, 1.000,  1.00))
@@ -1082,29 +1082,42 @@ def calcCorrel(calced, experimental):
        "experimental" is a list containing STR record objects"""
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
+    match_count = 0
 
-    for i, j in enumerate(calced.keys()):
-        calc = calced[j]
-        exp  = experimental[i].value
+    # for i, j in enumerate(calced.keys()):
+    #     calc = calced[j]
+    #     exp  = experimental[i].value
+
+    for i in experimental:
+        exp  = i.value
+        try:
+            calc = calced[i.resnum]
+        except KeyError:
+            continue
 
         M[0] += calc
         M[1] += exp
         M[2] += calc * exp
 
-    M[0] /= len(experimental)
-    M[1] /= len(experimental)
-    M[2] /= len(experimental)
+        match_count += 1
 
-    for i, j in enumerate(calced.keys()):
-        calc = calced[j]
-        exp  = experimental[i].value
+    M[0] /= match_count
+    M[1] /= match_count
+    M[2] /= match_count
+
+    for i in experimental:
+        exp  = i.value
+        try:
+            calc = calced[i.resnum]
+        except KeyError:
+            continue
 
         D[0] += (calc - M[0]) ** 2
         D[1] += (exp  - M[1]) ** 2
 
-    D[0] /= len(experimental)
+    D[0] /= match_count
     D[0] = math.sqrt(D[0])
-    D[1] /= len(experimental)
+    D[1] /= match_count
     D[1] = math.sqrt(D[1])
 
     if D[0] * D[1] == 0:

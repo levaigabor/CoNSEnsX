@@ -36,7 +36,7 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             my_averageRDC = {}
 
             for record in RDC_dict[RDC_type]:
-                my_averageRDC[record.resnum1] = averageRDC[record.resnum1]
+                my_averageRDC[record.resnum] = averageRDC[record.resnum]
 
             correl  = csx_func.calcCorrel(my_averageRDC, RDC_dict[RDC_type])
             q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
