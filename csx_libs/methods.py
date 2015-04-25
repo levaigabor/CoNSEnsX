@@ -507,11 +507,6 @@ def parseChemShift_STR(parsed_value):
 def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
     """Writes pales dummy from the given RDC values, and call Pales with the
     given parameters"""
-    try:
-        os.remove("pales.out")                  # remove output file if present
-    except OSError:
-        pass
-
     for o, pdb_file in enumerate(pdb_files):
         #-------------------  Open file and read PDB data  -------------------#
         try:
