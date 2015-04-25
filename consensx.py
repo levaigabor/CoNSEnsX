@@ -1,5 +1,19 @@
 #!/usr/bin/python3
 
+"""
+              _____      _   _  _____ ______          __   __
+             / ____|    | \ | |/ ____|  ____|         \ \ / /
+            | |     ___ |  \| | (___ | |__   _ __  ___ \ V /
+            | |    / _ \| . ` |\___ \|  __| | '_ \/ __| > <
+            | |___| (_) | |\  |____) | |____| | | \__ \/ . \
+             \_____\___/|_| \_|_____/|______|_| |_|___/_/ \_\
+
+     Compliance of NMR-derived Structural Ensembles with experimental data
+
+Authors:    Zoltán Gáspári, Dániel Dudola
+Fork me at: https://github.com/derPuntigamer/CoNSEnsX
+"""
+
 # standard modules
 import os
 import time
