@@ -362,7 +362,6 @@ def calcNMR_Pride(pdb_models, my_path):
     hhdb_log   = open(my_path + "hhdb.log", 'w')
     model_list = open(my_path + "model_list.txt", 'r')
     subprocess.call([__main__.pridedb,
-                    # BITCH FIX - TODO
                     "-D", "HHDB",  # model list
                     ],
                     stdin  = model_list,
@@ -378,7 +377,6 @@ def calcNMR_Pride(pdb_models, my_path):
     pride_input  = open(my_path + "pride_input.txt", 'r')
     pride_output = open(my_path + "pride_output.txt", 'w')
     subprocess.call([__main__.pridenmr,
-                     # BITCH FIX - TODO
                      "-D", "HHDB",
                      "-d", str(56),
                      "-b", str(len(pdb_models)),
@@ -392,7 +390,6 @@ def calcNMR_Pride(pdb_models, my_path):
     DEVNULL.close()
 
     pride_scores = {}
-
     pride_output = open(my_path + "pride_output.txt", 'r')
     for line in pride_output:
         if line.startswith("PRIDENMR:"):
@@ -409,9 +406,9 @@ def calcNMR_Pride(pdb_models, my_path):
     PRIDE_data = []
 
     print("PRIDE-NMR calculation")
-    print("MAX: ", max(pride_scores, key=pride_scores.get))
+    print("MAX: ",    max(pride_scores, key=pride_scores.get))
     PRIDE_data.append(max(pride_scores, key=pride_scores.get))
-    print("MIN: ", min(pride_scores, key=pride_scores.get))
+    print("MIN: ",    min(pride_scores, key=pride_scores.get))
     PRIDE_data.append(min(pride_scores, key=pride_scores.get))
     print("AVG: ", avg)
     PRIDE_data.append(avg)
