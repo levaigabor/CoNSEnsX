@@ -102,14 +102,15 @@ def calcS2(S2_dict, my_path, args):
     csx_out.write_table_close(my_path)
 
 
-def calcJCouplings(Jcoup_dict, my_PDB, my_path):
+def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
     """Back calculate skalar coupling from given RDC lists and PDB models"""
     dihed_lists = csx_func.calcDihedAngles(my_PDB)
     csx_out.write_table_open(my_path, "Coupling constants (J-coupling)")
 
     for Jcoup_type in list(Jcoup_dict.keys()):
 
-        JCoup_calced, model_data = csx_func.calcJCoup(dihed_lists,
+        JCoup_calced, model_data = csx_func.calcJCoup(param_set,
+                                                      dihed_lists,
                                                       Jcoup_dict[Jcoup_type],
                                                       Jcoup_type)
 

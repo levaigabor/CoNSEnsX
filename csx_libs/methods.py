@@ -27,26 +27,30 @@ shortcodes = {
 
 # Equation and coefficients from:
 # Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
-# A     = {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75}
-# B     = {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19}
-# C     = {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28}
-# THETA = {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
-#          "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+Jcoup_dict1 = {
+    'A'     : {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75},
+    'B'     : {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19},
+    'C'     : {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28},
+    'THETA' : {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
+               "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+}
 
 # J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution
-# A     = {"3JHNCB":3.06,  "3JHNHA":7.13,  "3JHNC":4.19, "3JHAC":3.84}
-# B     = {"3JHNCB":-0.74, "3JHNHA":1.31,  "3JHNC":0.99, "3JHAC":2.19}
-# C     = {"3JHNCB":0.10,  "3JHNHA":1.56,  "3JHNC":0.03, "3JHAC":1.20}
-# THETA = {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
-#          "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
-
+Jcoup_dict2 = {
+    'A'     : {"3JHNCB":3.06,  "3JHNHA":7.13,  "3JHNC":4.19, "3JHAC":3.84},
+    'B'     : {"3JHNCB":-0.74, "3JHNHA":1.31,  "3JHNC":0.99, "3JHAC":2.19},
+    'C'     : {"3JHNCB":0.10,  "3JHNHA":1.56,  "3JHNC":0.03, "3JHAC":1.20},
+    'THETA' : {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
+               "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
+}
 # https://x86.cs.duke.edu/~brd/Teaching/Bio/asmb/Papers/NMR/nilges-jmr05.pdf
-A     = {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84}
-B     = {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19}
-C     = {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20}
-THETA = {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
-         "3JHNC" :math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
-
+Jcoup_dict3 = {
+    'A'     : {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84},
+    'B'     : {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19},
+    'C'     : {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20},
+    'THETA' : {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
+               "3JHNC" :math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+}
 
 
 def timeit(method):
@@ -728,7 +732,6 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
     return averageRDC, model_data_list
 
-#TODO PDB file parameter is no more necessary?
 
 @timeit
 def calcS2(S2_records, S2_type, fit, fit_range):
@@ -739,23 +742,14 @@ def calcS2(S2_records, S2_type, fit, fit_range):
     # fitting models
     reference = model_list[0]
 
-    #TODO -> fitting should happen only once
-    if fit:
+    if fit and not PDB_model.is_fitted:
         print("Start FITTING")
         for i in range(1, len(model_list)):
-            mobile = model_list[i]
-
-            # with suppress_output():
-            #     matches = prody.matchChains(reference, mobile)
-
-            matches = prody.matchChains(reference, mobile)
-
-            match = matches[0]
-
+            mobile    = model_list[i]
+            matches   = prody.matchChains(reference, mobile)
+            match     = matches[0]
             ref_chain = match[0]
             mob_chain = match[1]
-
-            # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
 
             if fit_range:
                 weights = np.zeros((len(ref_chain), 1), dtype=np.int)
@@ -768,11 +762,10 @@ def calcS2(S2_records, S2_type, fit, fit_range):
             else:
                 weights = np.ones((len(ref_chain), 1), dtype=np.int)
 
-
             t = prody.calcTransformation(mob_chain, ref_chain, weights)
             t.apply(mobile)
 
-            # print(prody.calcRMSD(ref_chain, mob_chain).round(2))
+        PDB_model.is_fitted = True
 
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
@@ -1039,10 +1032,22 @@ def calcNH_Angles(PDB_file):
     print("  >20 -> " + str(dihedral_angles[">20"]))
 
 
-def calcJCoup(calced, experimental, Jcoup_type):
+def calcJCoup(param_set, calced, experimental, Jcoup_type):
     """Calculates J-coupling values from dihedral angles
        note: all angles must be in radian"""
     JCoup_calced    = {}
+
+    if param_set == '1':
+        my_karplus = Jcoup_dict1
+    elif param_set == '2':
+        my_karplus = Jcoup_dict2
+    elif param_set == '3':
+        my_karplus = Jcoup_dict3
+
+    A     = my_karplus['A']
+    B     = my_karplus['B']
+    C     = my_karplus['C']
+    THETA = my_karplus['THETA']
 
     for record in experimental: # resnums
         J = 0

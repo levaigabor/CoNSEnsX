@@ -77,8 +77,10 @@ for file in os.listdir(my_path):
     if file.endswith(".pdb"):
         pdb_models.append(file)
 
-csx_func.calcPeptideBonds(my_PDB)
-csx_func.calcNH_Angles(my_PDB)
+if args.a:
+    csx_func.calcPeptideBonds(my_PDB)
+    csx_func.calcNH_Angles(my_PDB)
+
 
 #------------------------  Read  and parse STR file   -------------------------#
 parsed = csx_func.parseSTR(args.STR_file)
@@ -114,7 +116,7 @@ if S2_dict:
 Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
 
 if Jcoup_dict:
-    csx_calc.calcJCouplings(Jcoup_dict, my_PDB, my_path)
+    csx_calc.calcJCouplings(args.d, Jcoup_dict, my_PDB, my_path)
 
 
 #----------------------------  Chemical shift calc  ---------------------------#

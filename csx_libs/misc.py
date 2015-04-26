@@ -17,8 +17,13 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
                         violation calculations
   -s, --fit             superimpoze models listed in input PDF file
   --fit_range           range for model fitting (first-last)
-  -l {bic,pf1}          rdc lc model: <bic|pf1>
-  -R                    causes to do SVD for back-calculating RDC data
+  -l {bic (def),pf1}          rdc lc model: <bic|pf1>
+  -R                    do SVD for back-calculating RDC data
+  -a                    calculate peptide bond angles
+  -d {1 (def),2,3}      select Karplus equation parameter set, options are:
+      (1) Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
+      (2) J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution
+      (3) x86.cs.duke.edu/~brd/Teaching/Bio/asmb/Papers/NMR/nilges-jmr05.pdf
 
 
 CoNSEnsX: assessing the compliance of varios NMR data with a protein
@@ -72,6 +77,10 @@ def createParser():
                        default="bic", help="rdc lc model: <bic|pf1>")
     parser.add_argument("-R", action='store_true', default=False,
                        help="causes to do SVD for back-calculating RDC data")
+    parser.add_argument("-a", action='store_true',
+                       default=False, help="calculate peptide bond angles")
+    parser.add_argument("-d", choices=['1', '2', '3'],
+                       default='1', help="Karplus equation parameter set")
 
     return parser       # return created parser object
 

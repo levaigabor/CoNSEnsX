@@ -42,6 +42,7 @@ class ChemShift_Record(object):
 class PDB_model(object):
     """Class for storing PDB model data"""
     model_list = []
+    is_fitted  = False
 
     def __init__(self, atomgroup,):
         self.atomgroup = atomgroup
