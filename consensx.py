@@ -107,7 +107,7 @@ if RDC_lists:
 S2_dict = csx_func.parseS2_STR(parsed.value)
 
 if S2_dict:
-    csx_calc.calcS2(S2_dict, my_PDB, my_path, args)
+    csx_calc.calcS2(S2_dict, my_path, args)
 
 
 #-----------------------------  J-coupling calc  ------------------------------#

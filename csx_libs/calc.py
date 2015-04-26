@@ -68,19 +68,19 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
         csx_out.writeRDC_table_close(my_path)
 
 
-def calcS2(S2_dict, my_PDB, my_path, args):
+def calcS2(S2_dict, my_path, args):
     """Back calculate order paramteres from given S2 dict and PDB models"""
     csx_out.write_table_open(my_path, "Order parameters (S<sup>2</sup>)")
 
     for S2_type in list(S2_dict.keys()):
-        S2_calced = csx_func.calcS2(my_PDB, S2_dict[S2_type],
+        S2_calced = csx_func.calcS2(S2_dict[S2_type], S2_type,
                                     args.fit, args.fit_range)
 
         correl  = csx_func.calcCorrel(S2_calced, S2_dict[S2_type])
         q_value = csx_func.calcQValue(S2_calced, S2_dict[S2_type])
         rmsd    = csx_func.calcRMSD(S2_calced, S2_dict[S2_type])
 
-        print("N-H Order Parameters")
+        print(S2_type + " Order Parameters")
         print("Correl: ", correl)
         print("Q-val:  ", q_value)
         print("RMSD:   ", rmsd)

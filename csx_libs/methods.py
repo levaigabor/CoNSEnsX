@@ -728,9 +728,10 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
     return averageRDC, model_data_list
 
+#TODO PDB file parameter is no more necessary?
 
 @timeit
-def calcS2(PDB_file, S2_records, fit, fit_range):
+def calcS2(S2_records, S2_type, fit, fit_range):
     """Returns a dictonary with the average S2 values:
     S2_calced[residue] = value"""
     model_list = PDB_model.model_list
@@ -738,6 +739,7 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
     # fitting models
     reference = model_list[0]
 
+    #TODO -> fitting should happen only once
     if fit:
         print("Start FITTING")
         for i in range(1, len(model_list)):
@@ -774,6 +776,8 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
 
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
+    s2_pairs   = {'N'  : 'H',
+                  'CA' : 'C'}
 
     for model in model_list:
         current_Resindex = 1
@@ -788,11 +792,11 @@ def calcS2(PDB_file, S2_records, fit, fit_range):
                 has_H, has_N = False, False
 
             if atom_res == current_Resindex:
-                if atom.getName() == 'N':
+                if atom.getName() == S2_type:
                     has_N = True
                     N_coords = Vec_3D(atom.getCoords())
 
-                elif atom.getName() == 'H':
+                elif atom.getName() == s2_pairs[S2_type]:
                     has_H = True
                     H_coords = Vec_3D(atom.getCoords())
 
