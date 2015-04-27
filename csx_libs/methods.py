@@ -770,7 +770,7 @@ def calcS2(S2_records, S2_type, fit, fit_range):
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
     s2_pairs   = {'N'  : 'H',
-                  'CA' : 'C'}
+                  'CA' : 'HA'}
 
     for model in model_list:
         current_Resindex = 1
