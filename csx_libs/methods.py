@@ -774,7 +774,7 @@ def calcS2(S2_records, S2_type, fit, fit_range):
 
     for model in model_list:
         current_Resindex = 1
-        has_H, has_N = False, False
+        has_first, has_second = False, False
         vectors = {}
 
         for atom in model:
@@ -782,19 +782,19 @@ def calcS2(S2_records, S2_type, fit, fit_range):
 
             if atom_res != current_Resindex:
                 current_Resindex = atom_res
-                has_H, has_N = False, False
+                has_first, has_second = False, False
 
             if atom_res == current_Resindex:
                 if atom.getName() == S2_type:
-                    has_N = True
+                    has_second = True
                     N_coords = Vec_3D(atom.getCoords())
 
                 elif atom.getName() == s2_pairs[S2_type]:
-                    has_H = True
+                    has_first = True
                     H_coords = Vec_3D(atom.getCoords())
 
-                if has_H and has_N:
-                    has_H, has_N = False, False
+                if has_first and has_second:
+                    has_first, has_second = False, False
                     vectors[atom_res] = Vec_3D(N_coords -
                                                H_coords).normalize()
 
