@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Consensx by derPuntigamer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Consensx</h1>
+      <h2 class="project-tagline">Compliance of NMR-derived Structural Ensembles with experimental data</h2>
+      <a href="https://github.com/derPuntigamer/CoNSEnsX" class="btn">View on GitHub</a>
+      <a href="https://github.com/derPuntigamer/CoNSEnsX/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/derPuntigamer/CoNSEnsX/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="consensx" class="anchor" href="#consensx" aria-hidden="true"><span class="octicon octicon-link"></span></a>CoNSEnsX</h1>
+
+<p>You find the current working (Perl) version <a href="http://himalia.chem.elte.hu/cgi-bin/consensx.cgi">here</a>.</p>
+
+<h2>
+<a id="new-functions" class="anchor" href="#new-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>New functions:</h2>
+
+<h4>
+<a id="io-modifications" class="anchor" href="#io-modifications" aria-hidden="true"><span class="octicon octicon-link"></span></a>I/O modifications:</h4>
+
+<h5>
+<a id="client-side" class="anchor" href="#client-side" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client side</h5>
+
+<ul>
+<li>Completely rewritten HTML5 client side</li>
+<li>JavaScript form checking in client side</li>
+<li>PDB file is automaticly downdloaded if PDB ID specified on client side</li>
+<li>Optional PDB model alignment
+
+<ul>
+<li>All models will be fitted to the first model with an RMSD minimazing transformation</li>
+<li>Fitting range is now selecteble on client side</li>
+</ul>
+</li>
+</ul>
+
+<h5>
+<a id="cli" class="anchor" href="#cli" aria-hidden="true"><span class="octicon octicon-link"></span></a>CLI</h5>
+
+<ul>
+<li>BMBR restraint file format for NOE distances</li>
+</ul>
+
+<h5>
+<a id="html-output" class="anchor" href="#html-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>HTML output</h5>
+
+<ul>
+<li>All calculation data goes to a working directory, each calculation has its own ID and HTML page</li>
+<li>All images are now scalable (SVG)</li>
+</ul>
+
+<h2>
+<a id="implemented-back-calculations" class="anchor" href="#implemented-back-calculations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implemented back-calculations:</h2>
+
+<h5>
+<a id="structural-parameters" class="anchor" href="#structural-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Structural parameters</h5>
+
+<ul>
+<li>
+<p>NOE distance restraint violations</p>
+
+<ul>
+<li>NOE distances are calculated and averaged for the whole ensemble</li>
+<li>Count of total violations</li>
+<li>The distribution of violation distances is visualized by histogram</li>
+<li>[new] Optional r-6 averaging</li>
+</ul>
+</li>
+<li>
+<p>PRIDE-NMR</p>
+
+<ul>
+<li>Scores similarity between the NOE pattern and the back-calculated H-H distance distribution</li>
+<li>Model with best/worst score</li>
+<li>Average score of the models and standard deviation</li>
+<li>Informative diagram</li>
+</ul>
+</li>
+</ul>
+
+<h5>
+<a id="dynamical-parameters" class="anchor" href="#dynamical-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dynamical parameters</h5>
+
+<ul>
+<li>
+<p>Residual dipolar couplings (RDC)</p>
+
+<ul>
+<li>Correspondence of experimental RDC data with the alignments predicted by PALES (Prediction of ALignmEnt from Structure)</li>
+<li>RDC data sets are now aligned separately (one list -&gt; one alignment)</li>
+<li>Separate alignments have separate section in HTML output</li>
+</ul>
+</li>
+<li>
+<p>Scalar coupling</p>
+
+<ul>
+<li>User can select the used set of Karplus equation constant</li>
+</ul>
+</li>
+<li>
+<p>Chemical shifts</p>
+
+<ul>
+<li>Correspondence of experimental chemical shifts data with the chemical shifts predicted by SHIFTX</li>
+</ul>
+</li>
+<li>
+<p>Order parameter (S<sup>2</sup>)</p>
+
+<ul>
+<li>Correspondence of experimental order parameter data with order parameters back-calculated from the input PDB models</li>
+<li>Only N-H order parameter is implemented</li>
+</ul>
+</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/derPuntigamer/CoNSEnsX">Consensx</a> is maintained by <a href="https://github.com/derPuntigamer">derPuntigamer</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-63150960-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
+
