@@ -408,6 +408,40 @@ def parseS2_STR(parsed_value):
         return None
 
 
+def parse_sidechain_S2_STR(parsed_value):
+    """Returns a dictonary with the parsed S2 data"""
+    try:
+        saveShifts = parsed_value.saves["sidechain_order_param"]
+
+        loopShifts = saveShifts.loops[-1]
+        S2_records = []
+
+        for ix in range(len(loopShifts.rows)):   # fetch values from STR file
+            row = loopShifts.getRowAsDict(ix)
+
+            S2_records.append(S2_Record(row["Residue_seq_code"],
+                                        row["Atom_name"],
+                                        row["S2_value"]))
+
+        # # split list into dict according to S2 types
+        # S2_dict = {}
+        # prev_type = ""
+
+        # for record in S2_records:
+        #     if prev_type != record.type:
+        #         S2_dict[record.type] = []
+        #         S2_dict[record.type].append(record)
+        #     else:
+        #         S2_dict[record.type].append(record)
+
+        #     prev_type = record.type
+
+        return S2_records
+
+    except KeyError:
+        return None
+
+
 def parseJcoup_STR(parsed_value):
     """Returns a dictonary with the parsed J-coupling data"""
     try:
@@ -778,6 +812,7 @@ def calcS2(S2_records, S2_type, fit, fit_range):
         vectors = {}
 
         for atom in model:
+            # why not .getResnum() ???
             atom_res = atom.getResindex() + 1
 
             if atom_res != current_Resindex:
@@ -1152,7 +1187,6 @@ def calcRMSD(calced, experimental):
        "experimental" is a list containing STR record objects"""
     D2 = 0
     match_count = 0
-
 
     for i in experimental:
         exp  = i.value

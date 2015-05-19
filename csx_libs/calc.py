@@ -102,6 +102,129 @@ def calcS2(S2_dict, my_path, args):
     csx_out.write_table_close(my_path)
 
 
+def calcS2_sidechain(S2_sidechain, my_path, args):
+    """Back calculate order paramteres from given S2 dict and PDB models"""
+
+    sc_LOT = {
+        'VAL' : {'CG1':'CB', 'CG2':'CB'},
+        'ILE' : {'CG1':'CB', 'CG2':'CB', 'CD':'CG1'},
+        'THR' : {'CG2':'CB'},
+        'LEU' : {'CD1':'CG', 'CD2':'CG'},
+        'ALA' : {'CB':'CA'},
+        'MET' : {'CE':'SD'}
+    }
+
+    model_list = csx_obj.PDB_model.model_list
+
+    for record in S2_sidechain:
+        vectors = []
+        resnum  = record.resnum
+        my_type = record.type
+        resname = model_list[0].select('resnum ' + str(resnum) +
+                                       ' name '  + my_type)
+
+        # extract residue name from Selection
+        for _ in resname:
+            my_res = _.getResname()
+
+        # find pair for measured aa
+        pair = sc_LOT[my_res][my_type]
+
+        # print(resnum, my_res, my_type, '\t-> ', pair)
+
+        for model in model_list:
+            this_aa = model.select('resnum ' + str(resnum) +
+                                    ' name ' + my_type)
+            pair_aa = model.select('resnum ' + str(resnum) +
+                                    ' name ' + pair)
+
+            for _ in this_aa:
+                this_coords = csx_obj.Vec_3D(_.getCoords())
+
+            for _ in pair_aa:
+                pair_coords = csx_obj.Vec_3D(_.getCoords())
+
+            vectors.append(csx_obj.Vec_3D(this_coords - pair_coords).normalize())
+
+        x2, y2, z2, xy, xz, yz = 0, 0, 0, 0, 0, 0
+
+        for vector in vectors:
+            x, y, z = vector.v[0], vector.v[1], vector.v[2]
+
+            x2 += x ** 2
+            y2 += y ** 2
+            z2 += z ** 2
+            xy += x * y
+            xz += x * z
+            yz += y * z
+
+        x2 /= len(vectors)
+        y2 /= len(vectors)
+        z2 /= len(vectors)
+        xy /= len(vectors)
+        xz /= len(vectors)
+        yz /= len(vectors)
+
+        s2 = 3 / 2.0 * (x2 ** 2     + y2 ** 2     + z2 ** 2 +
+                        2 * xy ** 2 + 2 * xz ** 2 + 2 * yz ** 2) - 0.5
+
+        record.calced = s2
+
+    # correlation calculation
+    M = [0.0, 0.0, 0.0]
+    D = [0.0, 0.0]
+
+    for record in S2_sidechain:
+        exp  = record.value
+        calc = record.calced
+
+        M[0] += calc
+        M[1] += exp
+        M[2] += calc * exp
+
+    M[0] /= len(S2_sidechain)
+    M[1] /= len(S2_sidechain)
+    M[2] /= len(S2_sidechain)
+
+    for record in S2_sidechain:
+        exp  = record.value
+        calc = record.calced
+
+        D[0] += (calc - M[0]) ** 2
+        D[1] += (exp  - M[1]) ** 2
+
+    D[0] /= len(S2_sidechain)
+    D[0] = math.sqrt(D[0])
+    D[1] /= len(S2_sidechain)
+    D[1] = math.sqrt(D[1])
+
+    print("Corr: ", (M[2] - (M[0] * M[1])) / (D[0] * D[1]))
+
+    # Q-value calculation
+    D2, E2, C2 = 0, 0, 0
+
+    for record in S2_sidechain:
+        exp  = record.value
+        calc = record.calced
+
+        D2 += (calc - exp) ** 2
+        E2 += exp ** 2
+
+    Q = 100 * math.sqrt(D2) / math.sqrt(E2)
+    print("Q-value: ", round(Q, 6))
+
+    # RMDS calculation
+    D2 = 0
+
+    for record in S2_sidechain:
+        exp  = record.value
+        calc = record.calced
+
+        D2 += (calc - exp) ** 2
+
+    RMSD = math.sqrt(D2 / len(S2_sidechain))
+    print("RMSD: ", round(RMSD, 6))
+
 def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
     """Back calculate skalar coupling from given RDC lists and PDB models"""
     dihed_lists = csx_func.calcDihedAngles(my_PDB)

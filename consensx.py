@@ -111,6 +111,11 @@ S2_dict = csx_func.parseS2_STR(parsed.value)
 if S2_dict:
     csx_calc.calcS2(S2_dict, my_path, args)
 
+S2_sidechain = csx_func.parse_sidechain_S2_STR(parsed.value)
+
+if S2_sidechain:
+    csx_calc.calcS2_sidechain(S2_sidechain, my_path, args)
+
 
 #-----------------------------  J-coupling calc  ------------------------------#
 Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)

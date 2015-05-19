@@ -20,6 +20,7 @@ class S2_Record(object):
         self.resnum = int(resnum)
         self.type   = S2_type
         self.value  = float(S2_value)
+        self.calced = None
 
 
 class JCoup_Record(object):
