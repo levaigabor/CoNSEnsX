@@ -423,19 +423,6 @@ def parse_sidechain_S2_STR(parsed_value):
                                         row["Atom_name"],
                                         row["S2_value"]))
 
-        # # split list into dict according to S2 types
-        # S2_dict = {}
-        # prev_type = ""
-
-        # for record in S2_records:
-        #     if prev_type != record.type:
-        #         S2_dict[record.type] = []
-        #         S2_dict[record.type].append(record)
-        #     else:
-        #         S2_dict[record.type].append(record)
-
-        #     prev_type = record.type
-
         return S2_records
 
     except KeyError:
