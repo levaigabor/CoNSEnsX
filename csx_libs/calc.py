@@ -42,6 +42,10 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             q_value = csx_func.calcQValue(my_averageRDC, RDC_dict[RDC_type])
             rmsd    = csx_func.calcRMSD(my_averageRDC, RDC_dict[RDC_type])
 
+            csx_obj.CSV_buffer("RDC_" + str(list_num + 1) +
+                               "(" + RDC_type + ")",
+                               my_averageRDC, RDC_dict[RDC_type])
+
             print("Correl: ", correl)
             print("Q-val:  ", q_value)
             print("RMSD:   ", rmsd)
@@ -80,6 +84,9 @@ def calcS2(S2_dict, my_path, args):
         q_value = csx_func.calcQValue(S2_calced, S2_dict[S2_type])
         rmsd    = csx_func.calcRMSD(S2_calced, S2_dict[S2_type])
 
+        csx_obj.CSV_buffer("S2 (" + S2_type + ")",
+                           S2_calced, S2_dict[S2_type])
+
         print(S2_type + " Order Parameters")
         print("Correl: ", correl)
         print("Q-val:  ", q_value)
@@ -107,6 +114,7 @@ def calcS2_sidechain(S2_sidechain, my_path, args):
 
     sc_LOT = {
         'VAL' : {'CG1':'CB', 'CG2':'CB'},
+        # TODO ILE CG1-et kivenni
         'ILE' : {'CG1':'CB', 'CG2':'CB', 'CD':'CG1'},
         'THR' : {'CG2':'CB'},
         'LEU' : {'CD1':'CG', 'CD2':'CG'},
@@ -249,6 +257,9 @@ def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
         q_value = csx_func.calcQValue(JCoup_calced, Jcoup_dict[Jcoup_type])
         rmsd    = csx_func.calcRMSD(JCoup_calced, Jcoup_dict[Jcoup_type])
 
+        csx_obj.CSV_buffer("J-couplings (" + Jcoup_type + ")",
+                   JCoup_calced, Jcoup_dict[Jcoup_type])
+
         print("Correl: ", correl)
         print("Q-val:  ", q_value)
         print("RMSD:   ", rmsd)
@@ -306,6 +317,9 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
             correl  = csx_func.calcCorrel(exp_dict, CS_list[CS_type])
             q_value = csx_func.calcQValue(exp_dict, CS_list[CS_type])
             rmsd    = csx_func.calcRMSD(exp_dict, CS_list[CS_type])
+
+            csx_obj.CSV_buffer("ChemShifts (" + CS_type + ")",
+                               exp_dict, CS_list[CS_type])
 
             print("CHEM SHIFT", CS_type)
             print("Correl: ", correl)

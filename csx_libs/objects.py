@@ -2,6 +2,44 @@ import math
 import os
 import copy
 
+class CSV_buffer(object):
+    working_dir = ""
+    max_resnum  = -1
+    min_resnum  = 100000
+    csv_data    = []
+
+    def __init__(self, name, calced, experimental):
+        self.name   = name
+        self.calced = calced
+        self.exp    = {}
+
+        for i in experimental:
+            self.exp[i.resnum] = i.value
+
+        CSV_buffer.csv_data.append(self)
+
+    @staticmethod
+    def writeCSV():
+        filename = working_dir + "values.csv"
+        # filename = "values.csv"
+        output_csv = open(filename, 'w')
+        output_csv.write(',')
+        for data in CSV_buffer.csv_data:
+            output_csv.write(data.name + " EXP, " + data.name + " CALC,")
+        output_csv.write("\n")
+        for resnum in range(CSV_buffer.min_resnum, CSV_buffer.max_resnum):
+            output_csv.write(str(resnum) + ',')
+            for data in CSV_buffer.csv_data:
+                try:
+                    output_csv.write("{0:.2f}".format(data.exp[resnum]) + ',' +
+                                     "{0:.2f}".format(data.calced[resnum])
+                                     + ',')
+                except KeyError:
+                   output_csv.write('')
+
+            output_csv.write("\n")
+
+
 class RDC_Record(object):
     """Class for storing RDC data"""
     def __init__(self, resnum1, atom1, resnum2, atom2, RDC_value):

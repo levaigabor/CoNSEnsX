@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 """
               _____      _   _  _____ ______          __   __
@@ -62,6 +62,7 @@ if args.PDB_fetch and args.PDB_file:
 #----------------  Setting up working directory and results HTML  -------------#
 my_id, my_path = csx_func.getID()
 os.makedirs(my_path)
+csx_obj.working_dir = my_path
 
 csx_out.writeHeaderHTML(my_path, version)
 
@@ -130,6 +131,7 @@ ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 if ChemShift_lists:
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
+csx_obj.CSV_buffer.writeCSV()
 
 te = time.time()
 print("total runtime", te-ts)

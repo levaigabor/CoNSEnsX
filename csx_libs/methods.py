@@ -122,6 +122,8 @@ def pdb_cleaner(PDB_file):
         raise SystemExit
 
     my_pdb = open("my_pdb.pdb", 'w')
+    max_resnum = 0
+    min_resnum = 100000
 
     for line in input_pdb:
         line = line.strip()
@@ -129,7 +131,13 @@ def pdb_cleaner(PDB_file):
 
         if line.startswith("ATOM"):
 
-            name = line.split()[2].strip()
+            name   = line.split()[2].strip()
+            resnum = int(line.split()[5].strip())
+
+            if resnum >= max_resnum:
+                max_resnum = resnum
+            if resnum < min_resnum:
+                min_resnum = resnum
 
             if name == "Q":  continue
             if name == "NH": name = "H"
@@ -160,6 +168,10 @@ def pdb_cleaner(PDB_file):
 
     os.remove(PDB_file)
     os.rename("my_pdb.pdb", PDB_file)
+
+    # set max resnum value for CSV_buffer class
+    CSV_buffer.max_resnum = max_resnum
+    CSV_buffer.min_resnum = min_resnum
 
 
 def pdb_splitter(my_path, PDB_file):
