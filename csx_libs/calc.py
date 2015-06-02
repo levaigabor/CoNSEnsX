@@ -178,6 +178,29 @@ def calcS2_sidechain(S2_sidechain, my_path, args):
 
         record.calced = s2
 
+    # prepare data for CSV object inicialization
+    sidechain_exp1, sidechain_exp2   = [], []
+    sidechain_calc1, sidechain_calc2 = {}, {}
+
+    prev_resnum = -100000
+
+    for record in S2_sidechain:
+        if record.resnum != prev_resnum:
+            sidechain_exp1.append(record)
+            sidechain_calc1[record.resnum] = record.calced
+            prev_resnum = record.resnum
+
+            print(">>> RESNUM: ", record.resnum)
+
+        else:
+            sidechain_exp2.append(record)
+            sidechain_calc2[record.resnum] = record.calced
+
+    csx_obj.CSV_buffer("S2_meth", sidechain_calc1, sidechain_exp1)
+
+    if sidechain_exp2:
+        csx_obj.CSV_buffer("S2_meth (cont)", sidechain_calc2, sidechain_exp2)
+
     # correlation calculation
     M = [0.0, 0.0, 0.0]
     D = [0.0, 0.0]
