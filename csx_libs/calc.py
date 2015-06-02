@@ -189,9 +189,6 @@ def calcS2_sidechain(S2_sidechain, my_path, args):
             sidechain_exp1.append(record)
             sidechain_calc1[record.resnum] = record.calced
             prev_resnum = record.resnum
-
-            print(">>> RESNUM: ", record.resnum)
-
         else:
             sidechain_exp2.append(record)
             sidechain_calc2[record.resnum] = record.calced

@@ -423,7 +423,7 @@ def parseS2_STR(parsed_value):
 def parse_sidechain_S2_STR(parsed_value):
     """Returns a dictonary with the parsed S2 data"""
     try:
-        saveShifts = parsed_value.saves["sidechain_order_param"]
+        saveShifts = parsed_value.saves["side-chain_methyl_order_parameters"]
 
         loopShifts = saveShifts.loops[-1]
         S2_records = []
