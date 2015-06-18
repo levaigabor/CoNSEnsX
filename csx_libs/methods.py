@@ -73,16 +73,21 @@ def natural_sort(l):
     return sorted(l, key = alphanum_key)
 
 
-def getID(size=6, chars=string.ascii_uppercase + string.digits):
+def getID(args):
     """Generates unique ID for calculation"""
-    if os.path.exists("calculations"):
-        while True:
-            my_id    = ''.join(random.choice(chars) for _ in range(size))
-            used_IDs = os.listdir("calculations")
-            if my_id not in used_IDs:
-                break
+    chars = string.ascii_uppercase + string.digits
+
+    if args.i:
+        my_id = args.i
     else:
-        my_id = ''.join(random.choice(chars) for _ in range(size))
+        if os.path.exists("calculations"):
+            while True:
+                my_id    = ''.join(random.choice(chars) for _ in range(6))
+                used_IDs = os.listdir("calculations")
+                if my_id not in used_IDs:
+                    break
+        else:
+            my_id = ''.join(random.choice(chars) for _ in range(6))
     my_path = "calculations/" + my_id + '/'
     print("Job started with ID: \033[0;35m" + my_id + "\033[0m")
     return my_id, my_path

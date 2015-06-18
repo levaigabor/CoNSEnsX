@@ -13,11 +13,12 @@ usage: cons_test.py -b <STR_file> -f <PDB_file>
   -p PDB_id             PDB file to fetch from rcsb.org
   -r NOE_file           NOE restraint file (BMRB format)
 
+  -i [ID]               give ID for the calculation
   -r3, --r3_averaging   use r-3 averaging in model data in NOE
                         violation calculations
   -s, --fit             superimpoze models listed in input PDF file
   --fit_range           range for model fitting (first-last)
-  -l {bic (def),pf1}          rdc lc model: <bic|pf1>
+  -l {bic (def),pf1}    rdc lc model: <bic|pf1>
   -R                    do SVD for back-calculating RDC data
   -a                    calculate peptide bond angles
   -d {1 (def),2,3}      select Karplus equation parameter set, options are:
@@ -61,13 +62,14 @@ def createParser():
     parser.add_argument("-f", "--PDB_file",  help = "PDB file")
     parser.add_argument("-p", "--PDB_fetch", help = "PDB file to fetch")
     parser.add_argument("-r", "--NOE_file", default="",
-                       help = "X-PLOR restraint file")
+                       help = "NOE restraint file")
 
     parser.add_argument("-h", "--help", help="show help and exit",
                        action='store_true')
     parser.add_argument('-c', action='store_true',
                        help="show credits")
 
+    parser.add_argument("-i", help="give ID for the calculation")
     parser.add_argument("-r3", "--r3-averaging", action='store_true',
                        default=False, help="use r-3 averaging in model data")
     parser.add_argument("-s", "--fit", action='store_true', default=False,

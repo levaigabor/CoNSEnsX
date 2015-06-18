@@ -60,7 +60,7 @@ if args.PDB_fetch and args.PDB_file:
 
 
 #----------------  Setting up working directory and results HTML  -------------#
-my_id, my_path = csx_func.getID()
+my_id, my_path = csx_func.getID(args)
 os.makedirs(my_path)
 csx_obj.working_dir = my_path
 
