@@ -23,7 +23,7 @@ var app = express();
 
 app.use(express.static('public'));
 app.use('/calculations', express.static('calculations'));
-app.use('/csx_ClientSide', express.static('../csx_ClientSide'));
+app.use('/public', express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({ dest: 'uploads/'}));
 
