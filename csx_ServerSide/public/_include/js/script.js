@@ -18,7 +18,6 @@ $(document).ready(function() {
             alert("Please deselect one of the PDF inputs");
         }
 
-        return false;
     });
 
     $('#fit_box').change(function() {
