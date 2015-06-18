@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<head>
+
+<!-- Meta Tags -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<title>CoNSENsX</title>
+
+<meta name="description" content="COmpliance of NMR Structural
+                                  ENSembles with eXperimental data" />
+
+<!-- Bootstrap -->
+<link href="_include/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Main Style -->
+<link href="_include/css/main.css" rel="stylesheet">
+
+<!-- Supersized -->
+<link href="_include/css/supersized.css" rel="stylesheet">
+
+<!-- Responsive -->
+<link href="_include/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="_include/css/responsive.css" rel="stylesheet">
+
+<!-- Google Font -->
+<link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
+
+<link rel="shortcut icon" href="_include/favicon.ico" type="image/x-icon">
+<link rel="icon" href="_include/favicon.ico" type="image/x-icon">
+
+</head>
+
+
+<body>
+
+<!-- Our Shortcodes Section -->
+<div id="shortcodes" class="page" style="padding: 30px 0 0 0;">
+    <div class="container">
+
+        <!-- Title Page -->
+        <div class="row">
+            <div class="span12">
+                <div class="title-page">
+                    <h2 class="title">CoNSEnsX</h2>
+                    <h3 class="title-description"><b><font>Co</font></b>mpliance of <b><font>N</font></b>MR-derived <b><font>S</font></b>tructural <b><font>Ens</font></b>embles with e<b><font>x</font></b>perimental data</h3>
+                </div>
+            </div>
+        </div>
+        <!-- End Title Page -->
+
+        <!-- Start Accordion/Toggle Section -->
+        <div class="row">
+
+            <div class="span6">
+                <h3 class="spec">Start calculation</h3>
+
+                <div class="accordion" id="accordionArea">
+                    <form name="myform" action="http://127.0.0.1:8081/CSX_start" method="post" enctype="multipart/form-data">
+                    <table  border="0">
+                        <tr class="form_param"><td>PDB file: &nbsp;</td>
+                            <td><input id="pdb_file" name="pdb_upload" size="20" type="file"></td>
+                        </tr>
+                        <tr class="form_param"><td>&nbsp;</td>
+                            <td>or PDB ID: &nbsp;<input id="pdb_id" name="pdb_web" placeholder="1D3Z" type="text"></td>
+                        </tr>
+                        <tr class="form_param"><td>NOE restraints file: &nbsp;</td>
+                            <td><input id="NOE_file" name="NOE_upload" size="20" type="file"></td>
+                        </tr>
+                        <tr class="form_param"><td>BMBR file: &nbsp;</td>
+                            <td><input id="bmbr_file" name="bmrb_upload" size="20" type="file"></td>
+                        </tr>
+                    </table>
+                    <br><br>Karplus equation parameter set: <select name="KARPLUS">
+                    <option selected="selected" value="1">Wang &amp; Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data</option>
+                    <option value="2">J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution</option>
+                    </select><br>
+                    <input id="fit_box" name="superimpose" value="1" type="checkbox">  Fit models in PDB<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on range:
+                    <input id="fit_range" name="fit_range" placeholder="1-72" type="text">&nbsp;(optional)<br>
+                    <input name="RDCSVD" value="1" type="checkbox">  Use SVD for RDC back-calculation<br><br>
+                    <input name="noeviolanal" value="1" type="checkbox">  Perfom NOE violation analysis<br><br>
+                    <input name="r3average" value="1" type="checkbox">  Use r-3 averaging between models (NOE)
+
+                    <br><br>RDC LC model:   <select name="RDCLC">
+                    <option selected="selected" value="bic">bicelles</option>
+                    <option value="pf1">Pf1 phages</option>
+                    </select><br><br>
+                    <table id="bottom_table" border="0">
+                        <tr><td><input id="reset_button" type="reset" value="Reset form", style="width: 16em;  height: 4em;"></td>
+                            <td><input id="submit_button" type="submit" value="Ready and fire!", style="width: 16em;  height: 4em;"></td>
+                        </tr>
+                    </table>
+                    </form>
+                </div>
+                <!-- End Accordion -->
+            </div>
+
+            <div class="span6">
+                <h3 class="spec">Info</h3>
+
+                <!-- Start Toggle -->
+                <div class="accordion" id="toggleArea">
+
+                    <div class="accordion-group">
+                        <div class="accordion-heading togglize">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseOne">
+                                Usage
+                                <span class="font-icon-plus"></span>
+                                <span class="font-icon-minus"></span>
+                            </a>
+                        </div>
+                        <div id="collapseOne" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                Input a
+                                multi-model PDB file, a BMRB format NOE distance restraint file (optional, V2 NMR Restraints at the <a href="http://www.rcsb.org">Protein Data Bank</a>) and a
+                                BMRB restraint file to check the accuracy of the protein structural ensemble
+                                against experimental data. For more details on the method and usage of
+                                the service, please consult the
+                                <a href="http://himalia.chem.elte.hu/consensx/help.html">CoNSEnsX help page</a>
+                                <br><br>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-group">
+                        <div class="accordion-heading togglize">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseTwo">
+                            Citing
+                            <span class="font-icon-plus"></span>
+                            <span class="font-icon-minus"></span>
+                        </a>
+                        </div>
+                        <div id="collapseTwo" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                When publishing results obtained with CoNSEnsX, you are kindly asked to cite the relevant references from these:
+                        <ul>
+                        <li>Ángyán et al. (2010):  <a href="http://www.biomedcentral.com/1472-6807/10/39">CoNSEnsX: an ensemble view of protein structures and NMR-derived experimental data.</a> BMC Struct. Biol. 10:39</li>
+                        <li>Ángyán et al. (2008):  <a href="http://bioinformatics.oxfordjournals.org/content/24/2/272.long">Fast protein fold estimation from NMR-derived distance restraints</a>. Bioinformatics 24:272. (PRIDE-NMR reference)</li>
+                        <li>Neal et al. (2003): Rapid and accurate calculation of protein 1H. 13C amd 15N chemical shifts. J. Biomol. NMR 26:215.</li>
+                        <li>Zweckstetter &amp; Bax (2000): Prediction of
+                        sterically induced alignment in a dilute liquid crystalline phase: aid
+                        to protein strcuture determination by NMR. J. Am. Chem. Soc. 122:3791
+                                                                               </li>
+                        </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-group">
+                        <div class="accordion-heading togglize">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseThird">
+                            Contact
+                            <span class="font-icon-plus"></span>
+                            <span class="font-icon-minus"></span>
+                        </a>
+                        </div>
+                        <div id="collapseThird" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                Questions and suggestions regarding the CoNSEnsX server should
+                                go to <a href="mailto:someone@example.com?Subject=CoNSEnsX" target="_top">Zoltán Gáspári</a>
+                                (szpari at chem.elte.hu)
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End Toggle -->
+            </div>
+
+        </div>
+        <!-- End Accordion/Toggle Section -->
+
+    </div>
+</div>
+<!-- End Shortcodes Section -->
+
+
+<!-- Js -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> <!-- jQuery Core -->
+<script src="_include/js/bootstrap.min.js"></script> <!-- Bootstrap -->
+<script src="_include/js/supersized.3.2.7.min.js"></script> <!-- Slider -->
+<script src="_include/js/script.js"></script>
+<!-- End Js -->
+
+</body>
+</html>
