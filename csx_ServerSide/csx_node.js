@@ -1,3 +1,15 @@
+//               _____      _   _  _____ ______          __   __
+//              / ____|    | \ | |/ ____|  ____|         \ \ / /
+//             | |     ___ |  \| | (___ | |__   _ __  ___ \ V /
+//             | |    / _ \| . ` |\___ \|  __| | '_ \/ __| > <
+//             | |___| (_) | |\  |____) | |____| | | \__ \/ . \
+//              \_____\___/|_| \_|_____/|______|_| |_|___/_/ \_\
+//
+//      Compliance of NMR-derived Structural Ensembles with experimental data
+//
+// Authors:    Zoltán Gáspári, Dániel Dudola
+// Fork me at: https://github.com/derPuntigamer/CoNSEnsX
+
 
 // Node.js goodies <3
 
@@ -10,6 +22,8 @@ var multer     = require('multer');
 var app = express();
 
 app.use(express.static('public'));
+app.use('/calculations', express.static('calculations'));
+app.use('/csx_ClientSide', express.static('../csx_ClientSide'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({ dest: 'uploads/'}));
 
@@ -34,7 +48,7 @@ app.post('/CSX_start', function (req, res) {
   var calculation_ID = makeid();
 
   // CSX console command, will be make up according to the posted form
-  var csx_call = "consensx.py -i " + calculation_ID + " ";
+  var csx_call = "../consensx.py -i " + calculation_ID + " ";
 
   var upLoadFile = function(file){
     fs.readFile(file.path, function(error, data) {
@@ -62,7 +76,7 @@ app.post('/CSX_start', function (req, res) {
   }
 
   // append STAR-NMR file to the CSX command
-  csx_call += "-b " + req.files.bmrb_upload.name + " ";
+  csx_call += "-b uploads/" + req.files.bmrb_upload.name + " ";
 
   var NOE_upload = req.files.NOE_upload
 
@@ -103,19 +117,30 @@ app.post('/CSX_start', function (req, res) {
 
   console.log(csx_call);
 
+  // loading the child_process module
+  var child_process = require('child_process');
 
-  res.end( JSON.stringify(  ) );
+  child_process.execSync(csx_call, function (err, stdout, stderr){
+    console.log(stdout);
+    if (err) {
+        console.log("child processes failed with error code: " +
+            err.code);
+    }
+    console.log(stdout);
+  });
+
+  res.redirect("calculations/" + calculation_ID + "/result_sheet.html");
+  res.end();
 })
 
 
 
-
-
+// start server on the given port
 var server = app.listen(8081, function () {
 
   var host = server.address().address
   var port = server.address().port
 
-  console.log("Example app listening at http://%s:%s", host, port)
+  console.log("CoNSEnsX is listening at http://%s:%s", host, port)
 
 })
