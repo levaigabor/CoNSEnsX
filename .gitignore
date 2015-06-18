@@ -4,6 +4,7 @@ HHDB
 pales.out
 calculations/
 lib/
+csx_ServerSide/uploads
 # Sphinx documentation
 bin/
 .Python
