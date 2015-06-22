@@ -11,9 +11,8 @@ import prody
 import time
 import numpy as np
 import matplotlib
-import matplotlib.pyplot as plt
-
 matplotlib.use('SVG')
+import matplotlib.pyplot as plt
 
 # installed modules
 import nmrpystar
