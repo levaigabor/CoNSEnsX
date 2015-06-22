@@ -11,7 +11,7 @@ import prody
 import time
 import numpy as np
 import matplotlib
-matplotlib.use('SVG')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # installed modules
@@ -30,28 +30,31 @@ shortcodes = {
 # Equation and coefficients from:
 # Wang & Bax (1996) JACS 118:2483-2494. Table 1, NMR + X-ray data
 Jcoup_dict1 = {
-    'A'     : {"3JHNCB":3.39,  "3JHNHA":6.98,  "3JHNC":4.32, "3JHAC":3.75},
-    'B'     : {"3JHNCB":-0.94, "3JHNHA":-1.38, "3JHNC":0.84, "3JHAC":2.19},
-    'C'     : {"3JHNCB":0.07,  "3JHNHA":1.72,  "3JHNC":0.00, "3JHAC":1.28},
-    'THETA' : {"3JHNCB":math.radians(60), "3JHNHA":math.radians(-60),
-               "3JHNC" : math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+    'A': {"3JHNCB": 3.39,  "3JHNHA": 6.98,  "3JHNC": 4.32, "3JHAC": 3.75},
+    'B': {"3JHNCB": -0.94, "3JHNHA": -1.38, "3JHNC": 0.84, "3JHAC": 2.19},
+    'C': {"3JHNCB": 0.07,  "3JHNHA": 1.72,  "3JHNC": 0.00, "3JHAC": 1.28},
+    'THETA': {
+        "3JHNCB": math.radians(60), "3JHNHA": math.radians(-60),
+        "3JHNC":  math.radians(0),  "3JHAC":  math.radians(-60)}  # RAD!
 }
 
 # J. Am. Chem. Soc., Vol. 119, No. 27, 1997; Table 2 -> solution
 Jcoup_dict2 = {
-    'A'     : {"3JHNCB":3.06,  "3JHNHA":7.13,  "3JHNC":4.19, "3JHAC":3.84},
-    'B'     : {"3JHNCB":-0.74, "3JHNHA":1.31,  "3JHNC":0.99, "3JHAC":2.19},
-    'C'     : {"3JHNCB":0.10,  "3JHNHA":1.56,  "3JHNC":0.03, "3JHAC":1.20},
-    'THETA' : {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
-               "3JHNC" :math.radians(180), "3JHAC" :math.radians(120)} # RAD!
+    'A': {"3JHNCB": 3.06,  "3JHNHA": 7.13, "3JHNC": 4.19, "3JHAC": 3.84},
+    'B': {"3JHNCB": -0.74, "3JHNHA": 1.31, "3JHNC": 0.99, "3JHAC": 2.19},
+    'C': {"3JHNCB": 0.10,  "3JHNHA": 1.56, "3JHNC": 0.03, "3JHAC": 1.20},
+    'THETA': {
+        "3JHNCB": math.radians(60),  "3JHNHA": math.radians(-60),
+        "3JHNC":  math.radians(180), "3JHAC":  math.radians(120)}  # RAD!
 }
 # https://x86.cs.duke.edu/~brd/Teaching/Bio/asmb/Papers/NMR/nilges-jmr05.pdf
 Jcoup_dict3 = {
-    'A'     : {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84},
-    'B'     : {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19},
-    'C'     : {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20},
-    'THETA' : {"3JHNCB":math.radians(60),  "3JHNHA":math.radians(-60),
-               "3JHNC" :math.radians(0), "3JHAC" :math.radians(-60)} # RAD!
+    'A': {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84},
+    'B': {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19},
+    'C': {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20},
+    'THETA': {
+        "3JHNCB": math.radians(60), "3JHNHA": math.radians(-60),
+        "3JHNC":  math.radians(0),  "3JHAC":  math.radians(-60)}  # RAD!
 }
 
 
@@ -63,7 +66,7 @@ def timeit(method):
         te = time.time()
 
         print('\x1b[31m%r -> %2.2f sec\x1b[0m' % (method.__name__, te-ts),
-              file = sys.stderr)
+              file=sys.stderr)
         return result
 
     return timed
@@ -72,7 +75,7 @@ def timeit(method):
 def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    return sorted(l, key = alphanum_key)
+    return sorted(l, key=alphanum_key)
 
 
 def getID(args):
@@ -160,7 +163,7 @@ def pdb_cleaner(PDB_file):
             name = (''.join(str(i) for i in chars) +    # characters
                     ''.join(str(i) for i in numbers))   # numbers
 
-            if   len(name) == 1: name = " " + name + "  "
+            if len(name) == 1: name = " " + name + "  "
             elif len(name) == 2: name = " " + name + " "
             elif len(name) == 3: name = " " + name
 
@@ -261,7 +264,7 @@ def getNOE(NOE_file):
             in_loop = True
             continue
 
-        if in_loop == True and tok[0] == "stop_":
+        if in_loop is True and tok[0] == "stop_":
             in_loop = False
             loops.append([loop_keys, loop_data])
 
@@ -281,7 +284,7 @@ def getNOE(NOE_file):
             ind_atom1 = loop[0].index("_Gen_dist_constraint.Atom_ID_1")
             ind_atom2 = loop[0].index("_Gen_dist_constraint.Atom_ID_2")
             ind_bnd   = loop[0].index(
-                                "_Gen_dist_constraint.Distance_upper_bound_val")
+                "_Gen_dist_constraint.Distance_upper_bound_val")
         except ValueError:
             continue
 
@@ -510,21 +513,22 @@ def parseChemShift_STR(parsed_value):
             if row["Atom_name"] == "HA3":
                 HA_sum += float(row["Chem_shift_value"])
 
-                ChemShift_records.append(ChemShift_Record(
-                                            row["Residue_seq_code"],
-                                            row["Residue_label"],
-                                            "HA",
-                                            HA_sum / 2))
+                ChemShift_records.append(
+                    ChemShift_Record(
+                        row["Residue_seq_code"], row["Residue_label"],
+                        "HA", HA_sum / 2)
+                )
                 HA_sum = 0.0
                 continue
 
             if row["Atom_name"] in ["HA", "CA", "N", "H"]:
-
-                ChemShift_records.append(ChemShift_Record(
-                                            row["Residue_seq_code"],
-                                            row["Residue_label"],
-                                            row["Atom_name"],
-                                            row["Chem_shift_value"]))
+                ChemShift_records.append(
+                    ChemShift_Record(
+                        row["Residue_seq_code"],
+                        row["Residue_label"],
+                        row["Atom_name"],
+                        row["Chem_shift_value"])
+                )
 
         ChemShift_lists.append(ChemShift_records)
         list_number += 1
@@ -597,12 +601,11 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
 
         pales_dummy.write(my_line + "\n")    # write last line of aa output
 
-
         #-----------------------  Write dummy dipoles  -----------------------#
         pales_dummy.write(
-        "\nVARS RESID_I RESNAME_I ATOMNAME_I " +
-        "RESID_J RESNAME_J ATOMNAME_J D DD W\n" +
-        "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
+            "\nVARS RESID_I RESNAME_I ATOMNAME_I " +
+            "RESID_J RESNAME_J ATOMNAME_J D DD W\n" +
+            "FORMAT %5d  %6s  %6s  %5d  %6s  %6s  %9.3f  %9.3f  %.2f \n\n"
         )
 
         lists = []
@@ -635,15 +638,15 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model,             # rdc lc model
                             "-bestFit"],                # SVD
-                            stdout = outfile,
-                            stderr = DEVNULL)
+                            stdout=outfile,
+                            stderr=DEVNULL)
         else:                               # if SVD is disabled (default)
             subprocess.call([__main__.pales,
                             "-inD", my_path + "pales_dummy.txt",
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model],            # rdc lc model
-                            stdout = outfile,
-                            stderr = DEVNULL)
+                            stdout=outfile,
+                            stderr=DEVNULL)
         outfile.close()
         DEVNULL.close()
 
@@ -717,13 +720,12 @@ def callShiftxOn(my_path, pdb_files):
                                     "N":modN, "CA":modCA})
             modHA, modH, modN, modCA = {}, {}, {}, {}
 
-
     for avg_dict in [averageHA, averageH, averageN, averageCA]:
         for key in avg_dict:
             avg_dict[key] /= len(pdb_files)
 
-    return {"HA" : averageHA, "H"  : averageH,
-            "N"  : averageN,  "CA" : averageCA}, model_data_list
+    return {"HA": averageHA, "H":  averageH,
+            "N":  averageN,  "CA": averageCA}, model_data_list
 
 
 def avgPalesRDCs(pales_out, my_RDC_type):
@@ -734,7 +736,6 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     pales_out       = open(pales_out)
     n_of_structures = 0
     averageRDC      = {}
-    npair           = 0
     model_data_list = []
     model_data_dict = {}
 
@@ -744,7 +745,8 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
             model_data_list.append(model_data_dict)
 
-            if model_data_dict: model_data_dict = {}
+            if model_data_dict:
+                model_data_dict = {}
 
         elif re.match("\s+ \d+", line):
             resnum  = int(line.split()[0])
@@ -809,8 +811,8 @@ def calcS2(S2_records, S2_type, fit, fit_range):
 
     # get NH vectors from models (model_data[] -> vectors{resnum : vector})
     model_data = []
-    s2_pairs   = {'N'  : 'H',
-                  'CA' : 'HA'}
+    s2_pairs   = {'N':  'H',
+                  'CA': 'HA'}
 
     for model in model_list:
         current_Resindex = 1
@@ -896,7 +898,7 @@ def calcDihedAngles(PDB_file):
             if atom_res != current_Resindex:
 
                 if (prev_C is not None and my_N is not None and
-                    my_CA is not None and my_C is not None):
+                        my_CA is not None and my_C is not None):
 
                     NCA_vec = my_N - my_CA
                     CN_vec  = prev_C - my_N
@@ -938,8 +940,8 @@ def calcDihedAngles(PDB_file):
 def calcPeptideBonds(PDB_file):
     """Calculates backbone diherdral angles (OMEGA) CA-N-C'-CA"""
     model_list = PDB_model.model_list
-    dihedral_angles = {"<2"    : 0, "2-5" : 0, "5-10" : 0,
-                       "10-20" : 0, ">20" : 0}
+    dihedral_angles = {"<2":    0, "2-5": 0, "5-10": 0,
+                       "10-20": 0, ">20": 0}
 
     for model_num, model in enumerate(model_list):
         current_Resindex = 1
@@ -951,7 +953,7 @@ def calcPeptideBonds(PDB_file):
             if atom_res != current_Resindex:
 
                 if (prev_CA is not None and my_N is not None and
-                    my_CA is not None and prev_C is not None):
+                        my_CA is not None and prev_C is not None):
 
                     NCA_vec = my_N - my_CA
                     CN_vec  = prev_CA - my_N
@@ -984,7 +986,7 @@ def calcPeptideBonds(PDB_file):
 
                 current_Resindex = atom_res
                 prev_CA = my_CA
-                prev_C  = my_C
+                prev_C =  my_C
                 my_N, my_CA, my_C = None, None, None
 
             if atom_res == current_Resindex:
@@ -1006,8 +1008,8 @@ def calcPeptideBonds(PDB_file):
 def calcNH_Angles(PDB_file):
     """Calculates backbone diherdral angles (OMEGA) H-N-C=O"""
     model_list = PDB_model.model_list
-    dihedral_angles = {"<2"    : 0, "2-5" : 0, "5-10" : 0,
-                       "10-20" : 0, ">20" : 0}
+    dihedral_angles = {"<2":    0, "2-5": 0, "5-10": 0,
+                       "10-20": 0, ">20": 0}
 
     for model_num, model in enumerate(model_list):
         current_Resindex = 1
@@ -1019,7 +1021,7 @@ def calcNH_Angles(PDB_file):
             if atom_res != current_Resindex:
 
                 if (prev_O is not None and prev_C is not None and
-                    my_N   is not None and my_H   is not None):
+                        my_N is not None and my_H is not None):
 
                     NH_vec = my_H - my_N
                     CN_vec = my_N - prev_C
@@ -1090,14 +1092,14 @@ def calcJCoup(param_set, calced, experimental, Jcoup_type):
     C     = my_karplus['C']
     THETA = my_karplus['THETA']
 
-    for record in experimental: # resnums
+    for record in experimental:  # resnums
         J = 0
 
         for my_dict in calced:  # lists (with models as dicts)
             phi = my_dict[record.resnum]
 
             J += (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
-                  B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
+                  B[Jcoup_type] * math.cos(phi + THETA[Jcoup_type]) +
                   C[Jcoup_type])
 
         JCoup_calced[record.resnum] = J / len(calced)
@@ -1109,9 +1111,10 @@ def calcJCoup(param_set, calced, experimental, Jcoup_type):
         for record in experimental:
             phi = Jcoup_dict[record.resnum]
 
-            J = (A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
-                 B[Jcoup_type] *  math.cos(phi + THETA[Jcoup_type]) +
-                 C[Jcoup_type])
+            J = (
+                A[Jcoup_type] * (math.cos(phi + THETA[Jcoup_type])) ** 2 +
+                B[Jcoup_type] * math.cos(phi + THETA[Jcoup_type]) +
+                C[Jcoup_type])
 
             model_data_dict[record.resnum] = J
 
@@ -1171,7 +1174,7 @@ def calcQValue(calced, experimental):
     """Calculates Q-value for calculated and experimental data
        "calced" is a dict containing values for residues (as keys)
        "experimental" is a list containing STR record objects"""
-    D2, E2, C2 = 0, 0, 0
+    D2, E2 = 0, 0
 
     for i in experimental:
         exp  = i.value
@@ -1309,12 +1312,12 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
 
     min_exp = min(exp_values)
     max_exp = max(exp_values)
-    miny    = min(min_calc, min_exp)            # get minimum value
-    maxy    = max(max_calc, max_exp)            # get maximum value
+    miny    = min(min_calc, min_exp)             # get minimum value
+    maxy    = max(max_calc, max_exp)             # get maximum value
 
     exp_line, calc_line = [], []
 
-    for i, j in enumerate(calced.keys()):       # fetch data from arguments
+    for i, j in enumerate(calced.keys()):        # fetch data from arguments
         calc = calced[j]
         exp  = experimental[i].value
 
@@ -1323,7 +1326,7 @@ def makeCorrelGraph(my_path, calced, experimental, graph_name):
 
     diag = []
 
-    for i in np.arange(miny, maxy * 1.42, 0.1): # draw graph diagonal
+    for i in np.arange(miny, maxy * 1.42, 0.1):  # draw graph diagonal
         diag.append(i)
 
     plt.figure(figsize=(6, 5), dpi=80)

@@ -17,7 +17,6 @@ Fork me at: https://github.com/derPuntigamer/CoNSEnsX
 # standard modules
 import os
 import time
-import subprocess
 
 # own modules
 import csx_libs.calc    as csx_calc

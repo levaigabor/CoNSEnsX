@@ -1,17 +1,17 @@
 import math
-import os
 import copy
+
 
 class CSV_buffer(object):
     working_dir = ""
-    max_resnum  = -1
-    min_resnum  = 100000
-    csv_data    = []
+    max_resnum = -1
+    min_resnum = 100000
+    csv_data = []
 
     def __init__(self, name, calced, experimental):
-        self.name   = name
+        self.name = name
         self.calced = calced
-        self.exp    = {}
+        self.exp = {}
 
         for i in experimental:
             self.exp[i.resnum] = i.value
@@ -20,7 +20,7 @@ class CSV_buffer(object):
 
     @staticmethod
     def writeCSV():
-        filename = working_dir + "values.csv"
+        filename = CSV_buffer.working_dir + "values.csv"
         # filename = "values.csv"
         output_csv = open(filename, 'w')
         output_csv.write(',')
@@ -35,7 +35,7 @@ class CSV_buffer(object):
                                      "{0:.2f}".format(data.calced[resnum])
                                      + ',')
                 except KeyError:
-                   output_csv.write('')
+                    output_csv.write('')
 
             output_csv.write("\n")
 
@@ -102,60 +102,60 @@ class Restraint_Record(object):
         self.seq_name2   = str(seq_name2)
         self.dist_max    = float(dist_max)
         resol = {
-                "MET" : {
-                            "ME"  : ["HE1",  "HE2",  "HE3"],
-                            "MD"  : ["HD11", "HD12", "HD13"],
-                            "MG"  : ["HG11", "HG12", "HG13"],
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MD2" : ["HD21", "HD22", "HD23"],
-                            "MG1" : ["HG11", "HG12", "HG13"],
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "ILE" : {
-                            "MD"  : ["HD11", "HD12", "HD13"],
-                            "MG"  : ["HG21", "HG22", "HG23"],
-                            "MB"  : ["HB1",  "HB2",  "HB3"],
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "LYS" : {
-                            "MB"  : ["HB1",  "HB2",  "HB3"],
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MD2" : ["HD21", "HD22", "HD23"],
-                            "MD"  : ["HD11", "HD12", "HD13"],
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "ALA" : {
-                            "MD"  : ["HD11", "HD12", "HD13"],
-                            "MB"  : ["HB1",  "HB2",  "HB3"],
-                            "MG1" : ["HG11", "HG12", "HG13"],
-                            "MG2" : ["HG21", "HG22", "HG23"],
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MD2" : ["HD21", "HD22", "HD23"]
-                        },
-                "LEU" : {
-                            "MD1" : ["HD11", "HD12", "HD13"],
-                            "MD2" : ["HD21", "HD22", "HD23"]
-                        },
-                "VAL" : {
-                            "MG1" : ["HG11", "HG12", "HG13"],
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "GLN" : {
-                            "MG"  : ["HG11", "HG12", "HG13"],
-                            "MG1" : ["HG11", "HG12", "HG13"],
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "HIS" : {
-                            "MG"  : ["HG11", "HG12", "HG13"],
-                            "MG1" : ["HG11", "HG12", "HG13"]
-                        },
-                "PHE" : {
-                            "MG2" : ["HG21", "HG22", "HG23"]
-                        },
-                "THR" : {
-                            "MG"  : ["HG21", "HG22", "HG23"]
-                        }
+            "MET": {
+                "ME":  ["HE1",  "HE2",  "HE3"],
+                "MD":  ["HD11", "HD12", "HD13"],
+                "MG":  ["HG11", "HG12", "HG13"],
+                "MD1": ["HD11", "HD12", "HD13"],
+                "MD2": ["HD21", "HD22", "HD23"],
+                "MG1": ["HG11", "HG12", "HG13"],
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "ILE": {
+                "MD":  ["HD11", "HD12", "HD13"],
+                "MG":  ["HG21", "HG22", "HG23"],
+                "MB":  ["HB1",  "HB2",  "HB3"],
+                "MD1": ["HD11", "HD12", "HD13"],
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "LYS": {
+                "MB":  ["HB1",  "HB2",  "HB3"],
+                "MD1": ["HD11", "HD12", "HD13"],
+                "MD2": ["HD21", "HD22", "HD23"],
+                "MD":  ["HD11", "HD12", "HD13"],
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "ALA": {
+                "MD":  ["HD11", "HD12", "HD13"],
+                "MB":  ["HB1",  "HB2",  "HB3"],
+                "MG1": ["HG11", "HG12", "HG13"],
+                "MG2": ["HG21", "HG22", "HG23"],
+                "MD1": ["HD11", "HD12", "HD13"],
+                "MD2": ["HD21", "HD22", "HD23"]
+            },
+            "LEU": {
+                "MD1": ["HD11", "HD12", "HD13"],
+                "MD2": ["HD21", "HD22", "HD23"]
+            },
+            "VAL": {
+                "MG1": ["HG11", "HG12", "HG13"],
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "GLN": {
+                "MG":  ["HG11", "HG12", "HG13"],
+                "MG1": ["HG11", "HG12", "HG13"],
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "HIS": {
+                "MG":  ["HG11", "HG12", "HG13"],
+                "MG1": ["HG11", "HG12", "HG13"]
+            },
+            "PHE": {
+                "MG2": ["HG21", "HG22", "HG23"]
+            },
+            "THR": {
+                "MG": ["HG21", "HG22", "HG23"]
+            }
         }
 
         if atom_ID1.startswith('M'):
