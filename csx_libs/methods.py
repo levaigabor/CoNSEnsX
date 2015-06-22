@@ -9,8 +9,11 @@ import string
 import random
 import prody
 import time
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.use('SVG')
 
 # installed modules
 import nmrpystar

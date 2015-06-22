@@ -2,7 +2,6 @@ import __main__
 import math
 import subprocess
 import os
-import matplotlib.pyplot as plt
 
 from . import methods as csx_func
 from . import objects as csx_obj
