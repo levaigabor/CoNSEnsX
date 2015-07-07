@@ -20,7 +20,7 @@ import time
 
 # own modules
 import csx_libs.calc    as csx_calc
-import csx_libs.misc    as csx_misc
+import csx_libs.parser  as csx_parser
 import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
@@ -32,18 +32,19 @@ pridedb  = "/home/daniel/Programme/pridenmr_thingol/pdb2hhbindbM"
 pridenmr = "/home/daniel/Programme/pridenmr_thingol/mrhisthhbindbM"
 
 
+
 ts = time.time()
 
 #------------------  Setting up parser and parse CLI arguments  ---------------#
-parser = csx_misc.createParser()            # get parser from module
+parser = csx_parser.createParser()            # get parser from module
 args   = parser.parse_args()                # parsing CLI arguments
 
 if args.c:                                  # show credit
-    print(csx_misc.cred)
+    print(csx_parser.cred)
     raise SystemExit
 
 if args.help:                               # show help
-    print(csx_misc.help_text)
+    print(csx_parser.help_text)
     raise SystemExit
 
 if args.STR_file and (args.PDB_file or args.PDB_fetch):
