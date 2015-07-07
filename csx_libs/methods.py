@@ -49,9 +49,9 @@ Jcoup_dict2 = {
 }
 # https://x86.cs.duke.edu/~brd/Teaching/Bio/asmb/Papers/NMR/nilges-jmr05.pdf
 Jcoup_dict3 = {
-    'A': {"3JHNCB":3.26, "3JHNHA":7.13, "3JHNC":4.19, "3JHAC":3.84},
-    'B': {"3JHNCB":-0.87, "3JHNHA":-1.31, "3JHNC":0.99, "3JHAC":2.19},
-    'C': {"3JHNCB":0.10, "3JHNHA":1.56, "3JHNC":0.03, "3JHAC":1.20},
+    'A': {"3JHNCB": 3.26,  "3JHNHA": 7.13,  "3JHNC": 4.19, "3JHAC": 3.84},
+    'B': {"3JHNCB": -0.87, "3JHNHA": -1.31, "3JHNC": 0.99, "3JHAC": 2.19},
+    'C': {"3JHNCB": 0.10,  "3JHNHA": 1.56,  "3JHNC": 0.03, "3JHAC": 1.20},
     'THETA': {
         "3JHNCB": math.radians(60), "3JHNHA": math.radians(-60),
         "3JHNC":  math.radians(0),  "3JHAC":  math.radians(-60)}  # RAD!
