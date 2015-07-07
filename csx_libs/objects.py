@@ -2,7 +2,32 @@ import math
 import copy
 
 
+class ThirdParty(object):
+    """Class to store 3rd party software information"""
+    pales    = ""
+    shiftx   = ""
+    prideDB  = ""
+    prideNMR = ""
+
+    @staticmethod
+    def get_thirdparty(config_file):
+        cfg = open(config_file)
+        for line in cfg:
+            if line.startswith("#"):
+                continue
+            if line.startswith("pales"):
+                ThirdParty.pales = line.split("'")[1]
+            elif line.startswith("shiftx"):
+                ThirdParty.shiftx = line.split("'")[1]
+            elif line.startswith("prideDB"):
+                ThirdParty.prideDB = line.split("'")[1]
+            elif line.startswith("prideNMR"):
+                ThirdParty.prideNMR = line.split("'")[1]
+
+        print(ThirdParty.pales)
+
 class CSV_buffer(object):
+    """Class which stores data for values.CSV"""
     working_dir = ""
     max_resnum = -1
     min_resnum = 100000

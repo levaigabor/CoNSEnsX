@@ -98,6 +98,23 @@ def getID(args):
     return my_id, my_path
 
 
+def check_3rd_party():
+    if os.path.isfile(".config"):
+        ThirdParty.get_thirdparty(".config")
+    else:
+        init_conf = (
+                        "# CoNSEnsX config file\n" +
+                        "# Please provide full paths\n" +
+                        "pales=''\n" + "shiftx=''\n" +
+                        "prideDB=''\n" + "prideNMR=''"
+                    )
+
+        init_conf_file = open(".config", "w")
+        init_conf_file.write(init_conf)
+        print("Please edit '.config' in the CoNSEnsX install directory")
+        raise SystemExit
+
+
 def get_PDB(args):
     """Gets PDB file or downloads PDF file from rcsb.org"""
     if args.PDB_file:
@@ -633,7 +650,7 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
         sys.stdout.flush()
 
         if SVD_enable:                          # if SVD is enabled
-            subprocess.call([__main__.pales,
+            subprocess.call([ThirdParty.pales,
                             "-inD", my_path + "pales_dummy.txt",
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model,             # rdc lc model
@@ -641,7 +658,7 @@ def callPalesOn(my_path, pdb_files, RDC_dict, lc_model, SVD_enable):
                             stdout=outfile,
                             stderr=DEVNULL)
         else:                               # if SVD is disabled (default)
-            subprocess.call([__main__.pales,
+            subprocess.call([ThirdParty.pales,
                             "-inD", my_path + "pales_dummy.txt",
                             "-pdb", pdb_file,           # pdb file
                             '-' + lc_model],            # rdc lc model
@@ -659,7 +676,7 @@ def callShiftxOn(my_path, pdb_files):
     for i, pdb_file in enumerate(pdb_files):
         pdb_file = my_path + pdb_file
         out_name = my_path + "/modell_" + str(i+1) + ".out"
-        subprocess.call([__main__.shiftx, '1', pdb_file, out_name])
+        subprocess.call([ThirdParty.shiftx, '1', pdb_file, out_name])
 
     averageHA, averageH, averageN, averageCA = {}, {}, {}, {}
     modHA, modH, modN, modCA                 = {}, {}, {}, {}

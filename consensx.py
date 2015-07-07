@@ -25,15 +25,11 @@ import csx_libs.methods as csx_func
 import csx_libs.output  as csx_out
 import csx_libs.objects as csx_obj
 
-version  = "0.1_python3"
-pales    = "/home/daniel/Programme/linux/pales"
-shiftx   = "/home/daniel/Programme/shiftx/shiftx"
-pridedb  = "/home/daniel/Programme/pridenmr_thingol/pdb2hhbindbM"
-pridenmr = "/home/daniel/Programme/pridenmr_thingol/mrhisthhbindbM"
-
-
+version = 0.4
 
 ts = time.time()
+
+csx_func.check_3rd_party()
 
 #------------------  Setting up parser and parse CLI arguments  ---------------#
 parser = csx_parser.createParser()            # get parser from module
