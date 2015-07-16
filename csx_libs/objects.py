@@ -24,7 +24,6 @@ class ThirdParty(object):
             elif line.startswith("prideNMR"):
                 ThirdParty.prideNMR = line.split("'")[1]
 
-        print(ThirdParty.pales)
 
 class CSV_buffer(object):
     """Class which stores data for values.CSV"""
