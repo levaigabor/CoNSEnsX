@@ -159,7 +159,10 @@ def pdb_cleaner(PDB_file):
         if line.startswith("ATOM"):
 
             name   = line.split()[2].strip()
-            resnum = int(line.split()[5].strip())
+            try:
+                resnum = int(line.split()[5].strip())
+            except ValueError:
+                resnum = int(line.split()[4].strip())
 
             if resnum >= max_resnum:
                 max_resnum = resnum
