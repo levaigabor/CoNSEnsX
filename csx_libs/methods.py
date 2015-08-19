@@ -1,4 +1,3 @@
-import __main__
 import os
 import sys
 import re
@@ -13,18 +12,16 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 # installed modules
 import nmrpystar
-
 from .objects import *
 
 
 shortcodes = {
-    'ALA':'A',  'ASP':'D',  'ASN':'N',  'ARG':'R',  'CYS':'C',  'GLY':'G',
-    'GLU':'E',  'GLN':'Q',  'HIS':'H',  'ILE':'I',  'LEU':'L',  'LYS':'K',
-    'MET':'M',  'PHE':'F',  'PRO':'P',  'SER':'S',  'THR':'T',  'TRP':'W',
-    'TYR':'Y',  'VAL':'V'
+    'ALA': 'A',  'ASP': 'D',  'ASN': 'N',  'ARG': 'R',  'CYS': 'C',  'GLY': 'G',
+    'GLU': 'E',  'GLN': 'Q',  'HIS': 'H',  'ILE': 'I',  'LEU': 'L',  'LYS': 'K',
+    'MET': 'M',  'PHE': 'F',  'PRO': 'P',  'SER': 'S',  'THR': 'T',  'TRP': 'W',
+    'TYR': 'Y',  'VAL': 'V'
 }
 
 # Equation and coefficients from:
@@ -169,9 +166,12 @@ def pdb_cleaner(PDB_file):
             if resnum < min_resnum:
                 min_resnum = resnum
 
-            if name == "Q":  continue
-            if name == "NH": name = "H"
-            if name == "HN": name = "H"
+            if name == "Q":
+                continue
+            if name == "NH":
+                name = "H"
+            if name == "HN":
+                name = "H"
 
             chars, numbers = [], []
             for i in name:
@@ -183,9 +183,12 @@ def pdb_cleaner(PDB_file):
             name = (''.join(str(i) for i in chars) +    # characters
                     ''.join(str(i) for i in numbers))   # numbers
 
-            if len(name) == 1: name = " " + name + "  "
-            elif len(name) == 2: name = " " + name + " "
-            elif len(name) == 3: name = " " + name
+            if len(name) == 1:
+                name = " " + name + "  "
+            elif len(name) == 2:
+                name = " " + name + " "
+            elif len(name) == 3:
+                name = " " + name
 
             my_pdb.write(line[:11] + " %4s" % name + line[16:21] +
                          'A' + line[22:] + "\n")
@@ -736,8 +739,8 @@ def callShiftxOn(my_path, pdb_files):
                         averageCA[resnum] = CA
 
             out_file.close()
-            model_data_list.append({"HA":modHA, "H":modH,
-                                    "N":modN, "CA":modCA})
+            model_data_list.append({"HA": modHA, "H": modH,
+                                    "N":  modN, "CA": modCA})
             modHA, modH, modN, modCA = {}, {}, {}, {}
 
     for avg_dict in [averageHA, averageH, averageN, averageCA]:
@@ -1397,7 +1400,7 @@ def makeNOEHist(my_path, violations):
     ticks = ['0-0.5', '0.5-1', '1-1.5', '1.5-2', '2-2.5', '2.5-3', '3<']
     index = np.arange(n_groups)
     bar_width = 0.7
-    rects1 = plt.bar(index, means_men, bar_width, alpha=1, color='b')
+    plt.bar(index, means_men, bar_width, alpha=1, color='b')
 
     plt.xlabel("Violation (Å)")
     plt.ylabel("# of NOE distance violations")
