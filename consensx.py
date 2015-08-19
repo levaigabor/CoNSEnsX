@@ -65,7 +65,7 @@ csx_out.writeHeaderHTML(my_path, version)
 
 #-----------------------------  Prepare PDB data  -----------------------------#
 my_PDB = csx_func.get_PDB(args)
-csx_func.pdb_cleaner(my_PDB)                   # bringing PDB to format
+#csx_func.pdb_cleaner(my_PDB)                   # bringing PDB to format
 csx_func.get_model_list(my_PDB)
 model_count = csx_func.pdb_splitter(my_path, my_PDB)
 
