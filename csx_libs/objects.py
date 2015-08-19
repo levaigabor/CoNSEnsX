@@ -3,6 +3,7 @@ import copy
 
 
 class ThirdParty(object):
+
     """Class to store 3rd party software information"""
     pales    = ""
     shiftx   = ""
@@ -26,6 +27,7 @@ class ThirdParty(object):
 
 
 class CSV_buffer(object):
+
     """Class which stores data for values.CSV"""
     working_dir = ""
     max_resnum = -1
@@ -65,7 +67,9 @@ class CSV_buffer(object):
 
 
 class RDC_Record(object):
+
     """Class for storing RDC data"""
+
     def __init__(self, resnum1, atom1, resnum2, atom2, RDC_value):
         self.RDC_type = (str(int(resnum1) - int(resnum2))
                          + '_' + atom1 + '_' + atom2)
@@ -77,7 +81,9 @@ class RDC_Record(object):
 
 
 class S2_Record(object):
+
     """Class for storing S2 data"""
+
     def __init__(self, resnum, S2_type, S2_value):
         self.resnum = int(resnum)
         self.type   = S2_type
@@ -86,7 +92,9 @@ class S2_Record(object):
 
 
 class JCoup_Record(object):
+
     """Class for storing J-Coupling data"""
+
     def __init__(self, resnum, jcoup_type, JCoup_value):
         self.resnum = int(resnum)
         self.type   = jcoup_type
@@ -94,7 +102,9 @@ class JCoup_Record(object):
 
 
 class ChemShift_Record(object):
+
     """Class for storing chemical shift data"""
+
     def __init__(self, resnum, res_name, atom_name, ChemShift_value):
         self.resnum    = int(resnum)
         self.res_name  = res_name
@@ -103,6 +113,7 @@ class ChemShift_Record(object):
 
 
 class PDB_model(object):
+
     """Class for storing PDB model data"""
     model_list = []
     is_fitted  = False
@@ -113,6 +124,7 @@ class PDB_model(object):
 
 
 class Restraint_Record(object):
+
     """Class for storing NOE restraint data"""
     all_restraints   = []
 
@@ -208,6 +220,7 @@ class Restraint_Record(object):
         PRIDE_restraints = {}
         prev_id = -1
         seq1_ok, seq2_ok, distance_ok = False, False, False
+        seq_dist = -1
 
         for restraint in Restraint_Record.all_restraints:
             curr_id  = restraint.curr_distID
@@ -242,7 +255,9 @@ class Restraint_Record(object):
 
 
 class Vec_3D(object):
+
     """Vector class for calculations"""
+
     def __init__(self, v):
         self.v = v
 
