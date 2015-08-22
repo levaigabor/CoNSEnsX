@@ -29,6 +29,8 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             for model in model_data:
                 model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
 
+            csx_obj.RDC_modell_data(model_corrs)
+
             avg_model_corr = sum(model_corrs) / len(model_corrs)
 
             # removing records from other RDC types
@@ -488,7 +490,6 @@ def calcNOEviolations(args, saveShifts, my_path, r3_averaging):
 def calcNMR_Pride(pdb_models, my_path):
     """Calculate NMR-PRIDE score on given PDB models"""
     # write model list text file
-    pdb_models = csx_func.natural_sort(pdb_models)
     model_list = open(my_path + "model_list.txt", 'w')
 
     for model in pdb_models:

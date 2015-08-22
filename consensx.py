@@ -74,6 +74,8 @@ for file in os.listdir(my_path):
     if file.endswith(".pdb"):
         pdb_models.append(file)
 
+pdb_models = csx_func.natural_sort(pdb_models)
+
 if args.a:
     csx_func.calcPeptideBonds(my_PDB)
     csx_func.calcNH_Angles(my_PDB)
@@ -132,3 +134,91 @@ csx_obj.CSV_buffer.writeCSV()
 te = time.time()
 print("total runtime", te-ts)
 print("Your ID was: \033[0;35m" + my_id + "\033[0m")
+
+
+
+
+
+
+best_num, best_val = csx_obj.RDC_modell_data.get_best_model(0)
+in_selection = [best_num] # int number
+
+pales_out = my_path + "pales.out"
+first_run = True
+prev_best = best_val
+
+while True:
+    values = {}
+
+    for num, pdb in enumerate(pdb_models):
+        if num in in_selection:
+            continue
+
+        pdb_sel = [pdb]
+
+        for selected in in_selection:
+            pdb_sel.append(pdb_models[selected])
+
+        print(pdb_sel)
+
+        try:
+            os.remove(pales_out)
+        except OSError:
+            pass
+
+        csx_func.callPalesOn(my_path, pdb_sel, RDC_lists[0], args.lc_model, args.R)
+
+        ts = time.time()
+
+        for RDC_type in list(RDC_lists[0].keys()):
+            #print("RDC list", RDC_type)
+
+            # get averaged RDC values -> averageRDC[residue] = value
+
+            averageRDC, model_data = csx_func.avgPalesRDCs(pales_out, RDC_type)
+
+            model_corrs = []
+
+            for model in model_data:
+                model_corrs.append(csx_func.calcCorrel(model, RDC_lists[0][RDC_type]))
+
+            csx_obj.RDC_modell_data(model_corrs)
+
+            avg_model_corr = sum(model_corrs) / len(model_corrs)
+
+            # removing records from other RDC types
+            my_averageRDC = {}
+
+            for record in RDC_lists[0][RDC_type]:
+                my_averageRDC[record.resnum] = averageRDC[record.resnum]
+
+            correl  = csx_func.calcCorrel(my_averageRDC, RDC_lists[0][RDC_type])
+
+            values[num] = correl
+
+        te = time.time()
+        print('\033[92m calc -> %2.2f sec\x1b[0m' % (te-ts))
+
+    best_num = -1
+    best_val = -1
+
+    for num in values.keys():
+        if values[num] > best_val:
+            best_val = values[num]
+            best_num = num
+
+    print("prev best is: " + str(prev_best) + ", current best is: " + str(best_val))
+
+    if first_run:
+        first_run = False
+        in_selection.append(best_num)
+        prev_best = -2
+    else:
+        if best_val > prev_best:
+            prev_best = best_val
+            in_selection.append(best_num)
+        else:
+            in_selection = [x+1 for x in in_selection]
+            in_selection.sort()
+            print(in_selection)
+            raise SystemExit

@@ -1,6 +1,26 @@
 import math
 import copy
 
+class RDC_modell_data(object):
+
+    """Class for per model RDC data"""
+    RDC_lists = []
+
+    def __init__(self, RDC_list_permodel):
+        RDC_modell_data.RDC_lists.append(RDC_list_permodel)
+
+    @staticmethod
+    def get_best_model(RDC_list_num):
+        best_value = -1
+        best_num   = -1
+
+        for num, value in enumerate(RDC_modell_data.RDC_lists[RDC_list_num]):
+            if value > best_value:
+                best_value = value
+                best_num   = num
+
+        return best_num, best_value
+
 
 class ThirdParty(object):
 
