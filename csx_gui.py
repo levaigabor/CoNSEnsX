@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from gi.repository import Gtk, Gio
-
+import os
 
 class CsxUI:
 
@@ -68,32 +68,39 @@ class CsxUI:
 
         self.PDB_FileChooser.connect("file-set", self.on_PDB_file_set)
         self.STR_FileChooser.connect("file-set", self.on_STR_file_set)
-        self.NOE_FileChooser.connect("file-set", self.on_NOE_file_set)
 
-        self.Karplus1Radio.connect("toggled", self.on_Karplus1_toggled, "1")
-        self.Karplus2Radio.connect("toggled", self.on_Karplus1_toggled, "2")
-        self.Karplus3Radio.connect("toggled", self.on_Karplus1_toggled, "3")
+        self.Karplus1Radio.connect("toggled", self.on_Karplus_toggled, "1")
+        self.Karplus2Radio.connect("toggled", self.on_Karplus_toggled, "2")
+        self.Karplus3Radio.connect("toggled", self.on_Karplus_toggled, "3")
 
-        self.PDB_idEntry.connect("changed", self.on_PDB_entry_edit)
+        #self.PDB_idEntry.connect("changed", self.on_PDB_entry_edit)
 
         self.fitSwitch.connect("notify::active", self.on_fitSwitch_activated)
 
         self.StartCsxButton.connect("clicked", self.on_start_clicked)
 
-#       self.window.set_default_size (280, 135)
+        self.BicellesRadio.connect("toggled", self.on_LCmodel_toggled, "bic")
+        self.PhagesRadio.connect("toggled", self.on_LCmodel_toggled, "pf1")
+
 
         self.window.show_all()
 
 
-    def on_PDB_entry_edit(self, widget):
-        global PDB_id
-        PDB_id = self.PDB_idEntry.get_text()
-        print("The selected PDB ID: ", PDB_id)
-        if PDB_id:
-            self.PDB_FileChooser.set_sensitive(False)
-            PDB_file = None
-        else:
-            self.PDB_FileChooser.set_sensitive(True)
+    #def on_PDB_entry_edit(self, widget):
+    #    global PDB_id
+    #    PDB_id = self.PDB_idEntry.get_text()
+    #    print("The selected PDB ID: ", PDB_id)
+    #    if PDB_id:
+    #        self.PDB_FileChooser.set_sensitive(False)
+    #        PDB_file = None
+    #    else:
+    #        self.PDB_FileChooser.set_sensitive(True)
+
+    #def on_fit_entry_edit(self, widget):
+    #    global fit_range
+    #    fit_range = self.FitRangeEntry.get_text()
+    #    print("The selected fit range: ", fit_range)
+
 
     def on_PDB_file_set(self, widget):
         global PDB_file
@@ -106,27 +113,76 @@ class CsxUI:
         STR_file = self.STR_FileChooser.get_filename()
         print("The selected STR file: ", STR_file)
 
-    def on_NOE_file_set(self, widget):
-        global NOE_file
-        NOE_file = self.NOE_FileChooser.get_filename()
-        print("The selected NOE file: ", NOE_file)
+    #def on_NOE_file_set(self, widget):
+    #    global NOE_file
+    #    NOE_file = self.NOE_FileChooser.get_filename()
+    #    print("The selected NOE file: ", NOE_file)
 
-    def on_Karplus1_toggled(self, widget, number):
+    karplus_param = 1
+
+    def on_Karplus_toggled(self, widget, number):
         if widget.get_active():
-            global karplus_param
-            karplus_param = number
-            print("Karplus parameter set: ", karplus_param)
+            CsxUI.karplus_param = number
+            print("Karplus parameter set: ", CsxUI.karplus_param)
+
+    lc_model = "bic"
+
+    def on_LCmodel_toggled(self, widget, my_lcmodel):
+        if widget.get_active():
+            CsxUIlcmodel = my_lcmodel
 
     def on_fitSwitch_activated(self, widget, gparam):
         if widget.get_active():
-            fit = True
-
+            self.FitRangeEntry.set_sensitive(True)
         else:
-            fit = False
-        print("Switch was turned to: ", fit)
+            self.FitRangeEntry.set_sensitive(False)
 
     def on_start_clicked(self, widget):
+        csx_command = "./consensx.py "
         print("./consensx.py ")
+
+        PDB_file = self.PDB_FileChooser.get_filename()
+        if PDB_file != None:
+            print("-f " + PDB_file)
+            csx_command += "-f " + PDB_file + " "
+        else:
+            print("-p " + self.PDB_idEntry.get_text())
+            csx_command += "-p " + self.PDB_idEntry.get_text() + " "
+
+        STR_file = self.STR_FileChooser.get_filename()
+        print("-b " + STR_file)
+        csx_command += "-b " + STR_file + " "
+
+        NOE_file = self.NOE_FileChooser.get_filename()
+        if NOE_file != None:
+            print("-r " + self.NOE_FileChooser.get_filename())
+            csx_command += "-r " + self.NOE_FileChooser.get_filename() + " "
+
+        print("-d ", CsxUI.karplus_param)
+        csx_command += "-d " + str(CsxUI.karplus_param) + " "
+
+        if self.fitSwitch.get_active():
+            print("-s ")
+            csx_command += "-s "
+
+        fit_range = self.FitRangeEntry.get_text()
+        if fit_range != "":
+            print("--fit_range " + fit_range)
+            csx_command += "--fit_range " + fit_range + " "
+
+        if self.SVD_Switch.get_active():
+            print("-R ")
+            csx_command += "-R "
+
+        if self.r3AVG_Switch.get_active():
+            print("-r3 ")
+            csx_command += "-r3 "
+
+        print("-l " + CsxUI.lc_model)
+        csx_command += "-l " + CsxUI.lc_model + " "
+
+        print(csx_command)
+        os.system(csx_command)
 
 if __name__ == "__main__":
     hwg = CsxUI()
