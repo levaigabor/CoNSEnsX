@@ -7,7 +7,7 @@ class CsxUI:
 
     def __init__(self):
         self.builder = Gtk.Builder()
-        self.uifile = "gui/csx_gtk.glade"
+        self.uifile = "csx_gui/csx_gtk.glade"
         self.builder.add_from_file(self.uifile)
         self.window = self.builder.get_object("main_window")
 
@@ -68,9 +68,17 @@ class CsxUI:
 
         self.PDB_FileChooser.connect("file-set", self.on_PDB_file_set)
         self.STR_FileChooser.connect("file-set", self.on_STR_file_set)
-        self.STR_FileChooser.connect("file-set", self.on_NOE_file_set)
+        self.NOE_FileChooser.connect("file-set", self.on_NOE_file_set)
+
+        self.Karplus1Radio.connect("toggled", self.on_Karplus1_toggled, "1")
+        self.Karplus2Radio.connect("toggled", self.on_Karplus1_toggled, "2")
+        self.Karplus3Radio.connect("toggled", self.on_Karplus1_toggled, "3")
 
         self.PDB_idEntry.connect("changed", self.on_PDB_entry_edit)
+
+        self.fitSwitch.connect("notify::active", self.on_fitSwitch_activated)
+
+        self.StartCsxButton.connect("clicked", self.on_start_clicked)
 
 #       self.window.set_default_size (280, 135)
 
@@ -81,11 +89,17 @@ class CsxUI:
         global PDB_id
         PDB_id = self.PDB_idEntry.get_text()
         print("The selected PDB ID: ", PDB_id)
+        if PDB_id:
+            self.PDB_FileChooser.set_sensitive(False)
+            PDB_file = None
+        else:
+            self.PDB_FileChooser.set_sensitive(True)
 
     def on_PDB_file_set(self, widget):
         global PDB_file
         PDB_file = self.PDB_FileChooser.get_filename()
         print("The selected PDB file: ", PDB_file)
+        self.PDB_idEntry.set_sensitive(False)
 
     def on_STR_file_set(self, widget):
         global STR_file
@@ -94,47 +108,25 @@ class CsxUI:
 
     def on_NOE_file_set(self, widget):
         global NOE_file
-        NOE_file = self.STR_FileChooser.get_filename()
+        NOE_file = self.NOE_FileChooser.get_filename()
         print("The selected NOE file: ", NOE_file)
 
+    def on_Karplus1_toggled(self, widget, number):
+        if widget.get_active():
+            global karplus_param
+            karplus_param = number
+            print("Karplus parameter set: ", karplus_param)
 
-    # def on_check1_toggled(self, widget):
-    #     if self.check1.get_active():
-    #         showresult = "on"
-    #     else:
-    #         showresult = "off"
-    #     print showresult
+    def on_fitSwitch_activated(self, widget, gparam):
+        if widget.get_active():
+            fit = True
 
-    # def on_check2_toggled(self, widget):
-    #     if self.check2.get_active():
-    #         showoriginal = "on"
-    #     else:
-    #         showoriginal = "off"
-    #     print showoriginal
+        else:
+            fit = False
+        print("Switch was turned to: ", fit)
 
-    # def on_check3_toggled(self, widget):
-    #     if self.check3.get_active():
-    #         save = "on"
-    #     else:
-    #         save = "off"
-    #     print save
-
-    # def on_radio_toggled(self, radio, name):
-    #     if radio.get_active():
-    #         state = "on"
-    #     else:
-    #         state = "off"
-    #     print "Button", name, "was turned", state
-
-    # def on_DoIt_clicked(self, widget):
-    #     global filename
-    #     print filename
-    #     if self.check1.get_active():
-    #         invert_module.invert(filename)
-
-    # def dialog_destroyed(self, dialog):
-    #     Gtk.main_quit()
-    #     print "Bye, bitch"
+    def on_start_clicked(self, widget):
+        print("./consensx.py ")
 
 if __name__ == "__main__":
     hwg = CsxUI()
