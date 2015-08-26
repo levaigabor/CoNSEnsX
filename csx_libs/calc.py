@@ -29,7 +29,8 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             for model in model_data:
                 model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
 
-            csx_obj.RDC_modell_data(model_corrs)
+            csx_obj.RDC_modell_data(list_num + 1, RDC_type, model_data)
+            csx_obj.RDC_modell_corr(model_corrs)
 
             avg_model_corr = sum(model_corrs) / len(model_corrs)
 

@@ -795,6 +795,8 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     for res_num in list(averageRDC.keys()):
         averageRDC[res_num] /= n_of_structures
 
+    # print(model_data_list)
+
     return averageRDC, model_data_list
 
 
