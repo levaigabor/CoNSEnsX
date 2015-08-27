@@ -761,9 +761,14 @@ def avgPalesRDCs(pales_out, my_RDC_type):
     averageRDC      = {}
     model_data_list = []
     model_data_dict = {}
+    first_run       = True
 
     for line in pales_out:
         if re.match("REMARK \d+ couplings", line):
+            if first_run:
+                first_run = False
+                continue
+
             n_of_structures += 1                # n_of_structures to divide by
 
             model_data_list.append(model_data_dict)
@@ -790,12 +795,12 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
             model_data_dict[resnum] = D
 
+    model_data_list.append(model_data_dict)
+    n_of_structures += 1
     pales_out.close()
 
     for res_num in list(averageRDC.keys()):
         averageRDC[res_num] /= n_of_structures
-
-    # print(model_data_list)
 
     return averageRDC, model_data_list
 
