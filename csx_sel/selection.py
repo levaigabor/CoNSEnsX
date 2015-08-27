@@ -29,13 +29,12 @@ class RDC_modell_data(object):
             my_data = RDC_modell_data.RDC_data[sel_data[1]][sel_data[2]]
 
             for model_num, model in enumerate(my_data):
-                correl  = csx_func.calcCorrel(model, RDC_lists[sel_data[1]][sel_data[2]])
+                correl  = csx_func.calcCorrel(model, RDC_lists[sel_data[1] - 1][sel_data[2]])
 
                 if model_num in model_scores.keys():
                     model_scores[model_num] += correl * sel_data[3]
                 else:
                     model_scores[model_num] = correl * sel_data[3]
-
 
             divide_by += sel_data[3]
 
@@ -48,8 +47,6 @@ class RDC_modell_data(object):
                 max_value = model_scores[key]
                 max_loc = loc
 
-        print(model_scores)
-        print(max_loc)
         return(max_loc)
 
 
@@ -60,7 +57,7 @@ def averageRDCs_on(models, RDC_num, RDC_type):
     averageRDC = {}
 
     # my_data is a list for models which contain dictonaries
-    my_data = csx_obj.RDC_modell_data.RDC_lists[RDC_num][RDC_type]
+    my_data = RDC_modell_data.RDC_data[RDC_num][RDC_type]
 
     for model_num, model in enumerate(my_data):
         if model_num not in models:
