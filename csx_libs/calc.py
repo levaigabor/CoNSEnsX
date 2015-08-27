@@ -7,6 +7,8 @@ from . import methods as csx_func
 from . import objects as csx_obj
 from . import output  as csx_out
 
+from csx_sel import selection as csx_sel
+
 
 def calcRDC(RDC_lists, pdb_models, my_path, args):
     """Back calculate RDC from given RDC lists and PDB models"""
@@ -29,7 +31,7 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
             for model in model_data:
                 model_corrs.append(csx_func.calcCorrel(model, RDC_dict[RDC_type]))
 
-            csx_obj.RDC_modell_data(list_num + 1, RDC_type, model_data)
+            csx_sel.RDC_modell_data(list_num + 1, RDC_type, model_data)
             csx_obj.RDC_modell_corr(model_corrs)
 
             avg_model_corr = sum(model_corrs) / len(model_corrs)
@@ -254,6 +256,7 @@ def calcS2_sidechain(S2_sidechain, my_path, args):
 
     RMSD = math.sqrt(D2 / len(S2_sidechain))
     print("RMSD: ", round(RMSD, 6))
+
 
 def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
     """Back calculate skalar coupling from given RDC lists and PDB models"""

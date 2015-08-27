@@ -1,18 +1,6 @@
 import math
 import copy
 
-class RDC_modell_data(object):
-
-    """Class for per model RDC data"""
-    RDC_lists = {}
-
-    def __init__(self, RDC_list_num, RDC_type, RDC_list_data):
-        if RDC_list_num in RDC_modell_data.RDC_lists.keys():
-            RDC_modell_data.RDC_lists[RDC_list_num][RDC_type] = RDC_list_data
-        else:
-            RDC_modell_data.RDC_lists[RDC_list_num] = {}
-            RDC_modell_data.RDC_lists[RDC_list_num][RDC_type] = RDC_list_data
-
 
 class RDC_modell_corr(object):
 

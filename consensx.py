@@ -140,7 +140,9 @@ print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
 
 
+user_sel = [["RDC", 1, "0_N_H", 1], ["RDC", 2, "0_N_H", 1]]
 
+csx_sel.RDC_modell_data.get_best_model(user_sel, RDC_lists)
 
 best_num, best_val = csx_obj.RDC_modell_corr.get_best_model(0)
 in_selection = [best_num] # int number
