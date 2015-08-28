@@ -140,72 +140,10 @@ print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
 
 
-user_sel = [["RDC", 2, "0_N_H", 1], ["RDC", 1, "0_N_H", 0.5], ["RDC", 3, "0_N_H", 0.5]]
+user_sel = [
+    ["RDC", 2, "0_N_H", 1],
+    ["RDC", 1, "0_N_H", 0.5],
+    ["RDC", 3, "0_N_H", 0.5]
+]
 
-
-#print(RDC_lists)
-
-best_num     = csx_sel.RDC_modell_data.get_best_model(user_sel, RDC_lists)
-in_selection = [best_num] # int number
-
-first_run = True
-prev_best = -2
-
-
-
-while True:
-    model_scores = {}
-
-    for num, pdb in enumerate(pdb_models):
-        if num in in_selection:
-            continue
-
-        divide_by = 0.0
-        pdb_sel = [num]
-
-        for selected in in_selection:
-            pdb_sel.append(selected)
-
-        print("current selection: ", pdb_sel)
-
-        for sel_data in user_sel:
-            if sel_data[0] != "RDC":
-                continue
-
-            RDC_num    = sel_data[1]
-            RDC_type   = sel_data[2]
-            RDC_weight = sel_data[3]
-
-            #my_data = csx_sel.RDC_modell_data.RDC_data[RDC_num][RDC_type][num]
-            #pdb_sel.append(my_data)
-
-            print(pdb_sel)
-
-            averageRDC = csx_sel.averageRDCs_on(pdb_sel, RDC_num, RDC_type)
-            correl  = csx_func.calcCorrel(averageRDC, RDC_lists[RDC_num - 1][RDC_type])
-
-            if num in model_scores.keys():
-                model_scores[num] += correl * RDC_weight
-            else:
-                model_scores[num] = correl * RDC_weight
-
-            divide_by += RDC_weight
-
-    best_num = -1
-    best_val = -1
-
-    for num in model_scores.keys():
-        if model_scores[num] / divide_by > best_val:
-            best_val = model_scores[num] / divide_by
-            best_num = num
-
-    print("prev best: " + str(prev_best) + ", current best: " + str(best_val))
-
-    if best_val > prev_best:
-        prev_best = best_val
-        in_selection.append(best_num)
-    else:
-        #in_selection = [x+1 for x in in_selection]
-        in_selection.sort()
-        print("numbered as in PDB file:\n", in_selection)
-        raise SystemExit
+csx_sel.selection_on(pdb_models, RDC_lists, user_sel, min_size=20)
