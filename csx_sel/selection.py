@@ -75,12 +75,14 @@ def averageRDCs_on(models, RDC_num, RDC_type):
     return averageRDC
 
 
-def selection_on(pdb_models, RDC_lists, user_sel, min_size=None, max_size=None):
+def selection_on(pdb_models, RDC_lists, user_sel,
+		 min_size=None, max_size=None, overdrive=None):
     best_num     = RDC_modell_data.get_best_model(user_sel, RDC_lists)
     in_selection = [best_num] # int number
 
-    first_run = True
-    prev_best = -2
+    first_run  = True
+    prev_best  = -2
+    above_best = 0
 
     while True:
         model_scores = {}
@@ -126,25 +128,55 @@ def selection_on(pdb_models, RDC_lists, user_sel, min_size=None, max_size=None):
 
         print("prev best: " + str(prev_best) + ", current best: " + str(best_val))
 
+        # if new selection results a higher score
         if best_val > prev_best:
-            prev_best = best_val
+            # reset above the best threshold
+            above_best     = 0
+            prev_best      = best_val
+            overdrive_best = -1
             in_selection.append(best_num)
 
+            # check if selection reached the desired maximal size (if any)
             if max_size and len(in_selection) == max_size:
                 print("size limit reached!")
-                #in_selection = [x+1 for x in in_selection]
+                in_selection = [x+1 for x in in_selection]
                 in_selection.sort()
                 print("numbered as in PDB file:\n", in_selection)
                 raise SystemExit
+
+        # if new selection results a lower score
         else:
+            # check if overdrive is enabled
+            if overdrive and overdrive > above_best:
+                above_best += 1
+                print("\x1b[31mwe are in overdrive with \x1b[0m" + str(above_best))
+                overdrive_best = best_val
+                print("overdrive_best: " + str(overdrive_best))
+                in_selection.append(best_num)
+
+                if overdrive_best > prev_best:
+                    prev_best  = overdrive_best
+                    above_best = 0
+
+                if overdrive == above_best and overdrive_best < prev_best:
+
+                    for _ in range(overdrive):
+                        print(in_selection)
+                        print("POP")
+                        in_selection.pop()
+                        print(in_selection)
+
+                continue
+
+            # check if selection reached the desired minimal size (if any)
             if min_size and len(in_selection) < min_size:
                 print("we are over the peak!")
-                print("hi, i am dori")
                 prev_best = best_val
                 in_selection.append(best_num)
                 continue
 
-            #in_selection = [x+1 for x in in_selection]
+
+            in_selection = [x+1 for x in in_selection]
             in_selection.sort()
             print("numbered as in PDB file:\n", in_selection)
             raise SystemExit

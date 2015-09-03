@@ -137,13 +137,10 @@ te = time.time()
 print("total runtime", te-ts)
 print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
-
-
-
 user_sel = [
     ["RDC", 2, "0_N_H", 1],
-    ["RDC", 1, "0_N_H", 0.5],
-    ["RDC", 3, "0_N_H", 0.5]
+    ["RDC", 1, "0_N_H", 0.0],
+    ["RDC", 3, "0_N_H", 0.25]
 ]
 
-csx_sel.selection_on(pdb_models, RDC_lists, user_sel, min_size=20)
+csx_sel.selection_on(pdb_models, RDC_lists, user_sel, overdrive=10)
