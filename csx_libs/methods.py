@@ -806,10 +806,9 @@ def avgPalesRDCs(pales_out, my_RDC_type):
 
 
 @timeit
-def calcS2(S2_records, S2_type, fit, fit_range):
+def calcS2(model_list, S2_records, S2_type, fit, fit_range):
     """Returns a dictonary with the average S2 values:
     S2_calced[residue] = value"""
-    model_list = PDB_model.model_list
 
     # fitting models
     reference = model_list[0]

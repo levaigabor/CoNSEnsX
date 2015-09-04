@@ -119,7 +119,7 @@ if S2_sidechain:
 
 
 #-----------------------------  J-coupling calc  ------------------------------#
-Jcoup_dict  = csx_func.parseJcoup_STR(parsed.value)
+Jcoup_dict = csx_func.parseJcoup_STR(parsed.value)
 
 if Jcoup_dict:
     csx_calc.calcJCouplings(args.d, Jcoup_dict, my_PDB, my_path)
@@ -139,8 +139,12 @@ print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
 user_sel = [
     ["RDC", 2, "0_N_H", 1],
-    ["RDC", 1, "0_N_H", 0.0],
-    ["RDC", 3, "0_N_H", 0.25]
+    ["RDC", 1, "0_N_H", 1],
+    ["RDC", 3, "0_N_H", 1],
+    ["S2", "N", 1]
 ]
 
-csx_sel.selection_on(pdb_models, RDC_lists, user_sel, overdrive=10)
+csx_sel.selection_on("S2", pdb_models, RDC_lists, user_sel,
+                     args=args, S2_dict=S2_dict, S2_type="N")
+
+#csx_sel.get_best_S2_pair(S2_dict, "N", args)

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from csx_libs import objects as csx_obj
 from csx_libs import methods as csx_func
 
@@ -16,7 +14,7 @@ class RDC_modell_data(object):
             RDC_modell_data.RDC_data[RDC_list_num][RDC_type] = RDC_list_data
 
     @staticmethod
-    def get_best_model(user_sel, RDC_lists):
+    def get_best_RDC_model(user_sel, RDC_lists):
         # user_sel = ["RDC", 1, "0_N_H", 1], ["RDC", 2, "0_N_H", 1]
 
         model_scores = {}
@@ -50,8 +48,30 @@ class RDC_modell_data(object):
         return(max_loc)
 
 
+def get_best_S2_pair(S2_dict, S2_type, args):
+    # def calcS2(S2_records, S2_type, args.fit, args.fit_range):
+
+    model_list = csx_obj.PDB_model.model_list
+
+    scores = {}
+
+    for i in range(len(model_list)):
+        for j in range(i + 1, len(model_list)):
+
+            csx_obj.PDB_model.is_fitted = False
+
+            my_models = [model_list[i], model_list[j]]
+
+            my_S2 = csx_func.calcS2(my_models, S2_dict[S2_type], S2_type,
+                                    args.fit, args.fit_range)
+            correl  = csx_func.calcCorrel(my_S2, S2_dict[S2_type])
+            scores[correl] = [i, j]
+
+    return scores[max(scores.keys())]
+
+
 def averageRDCs_on(models, RDC_num, RDC_type):
-    """Returns a dictonary with the average RDCs for a given RDC type:
+    """Returns a dictonary with the average RDCs for the given RDC type:
        averageRDC[residue] = value"""
 
     averageRDC = {}
@@ -75,10 +95,33 @@ def averageRDCs_on(models, RDC_num, RDC_type):
     return averageRDC
 
 
-def selection_on(pdb_models, RDC_lists, user_sel,
-		 min_size=None, max_size=None, overdrive=None):
-    best_num     = RDC_modell_data.get_best_model(user_sel, RDC_lists)
-    in_selection = [best_num] # int number
+def averageS2_on(models, S2_dict, S2_type, args):
+    """Returns a dictonary with the average S2 values for the given S2 type:
+       averageS2[residue] = value"""
+
+    model_list = csx_obj.PDB_model.model_list
+    my_models  = []
+    averageS2  = {}
+
+    for model_num in models:
+        my_models.append(model_list[model_num])
+
+    csx_obj.PDB_model.is_fitted = False
+
+    my_S2 = csx_func.calcS2(my_models, S2_dict[S2_type], S2_type,
+                            args.fit, args.fit_range)
+
+    return my_S2
+
+
+def selection_on(priority, pdb_models, RDC_lists, user_sel,
+                 S2_dict=None, S2_type=None, args=None,
+                 min_size=None, max_size=None, overdrive=None):
+
+    if priority == "RDC":
+        in_selection = [RDC_modell_data.get_best_RDC_model(user_sel, RDC_lists)]
+    elif priority == "S2":
+        in_selection = get_best_S2_pair(S2_dict, S2_type, args)
 
     first_run  = True
     prev_best  = -2
@@ -100,23 +143,36 @@ def selection_on(pdb_models, RDC_lists, user_sel,
             #print("current selection: ", pdb_sel)
 
             for sel_data in user_sel:
-                if sel_data[0] != "RDC":
-                    continue
+                if sel_data[0] == "RDC":
+                    RDC_num    = sel_data[1]
+                    RDC_type   = sel_data[2]
+                    RDC_weight = sel_data[3]
 
-                RDC_num    = sel_data[1]
-                RDC_type   = sel_data[2]
-                RDC_weight = sel_data[3]
+                    averageRDC = averageRDCs_on(pdb_sel, RDC_num, RDC_type)
+                    my_RDC     = RDC_lists[RDC_num - 1][RDC_type]
+                    correl     = csx_func.calcCorrel(averageRDC, my_RDC)
 
-                averageRDC = averageRDCs_on(pdb_sel, RDC_num, RDC_type)
-                my_RDC = RDC_lists[RDC_num - 1][RDC_type]
-                correl  = csx_func.calcCorrel(averageRDC, my_RDC)
+                    if num in model_scores.keys():
+                        model_scores[num] += correl * RDC_weight
+                    else:
+                        model_scores[num] = correl * RDC_weight
 
-                if num in model_scores.keys():
-                    model_scores[num] += correl * RDC_weight
-                else:
-                    model_scores[num] = correl * RDC_weight
+                    divide_by += RDC_weight
 
-                divide_by += RDC_weight
+                elif sel_data[0] == "S2":
+                    S2_type   = sel_data[1]
+                    S2_weight = sel_data[2]
+
+                    averageS2 = averageS2_on(pdb_sel, S2_dict, S2_type, args)
+                    correl    = csx_func.calcCorrel(averageS2, S2_dict[S2_type])
+
+                    if num in model_scores.keys():
+                        model_scores[num] += correl * S2_weight
+                    else:
+                        model_scores[num] = correl * S2_weight
+
+                    divide_by += S2_weight
+
 
         best_num = -1
         best_val = -1

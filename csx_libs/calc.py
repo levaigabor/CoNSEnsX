@@ -80,8 +80,10 @@ def calcS2(S2_dict, my_path, args):
     """Back calculate order paramteres from given S2 dict and PDB models"""
     csx_out.write_table_open(my_path, "Order parameters (S<sup>2</sup>)")
 
+    model_list = csx_obj.PDB_model.model_list
+
     for S2_type in list(S2_dict.keys()):
-        S2_calced = csx_func.calcS2(S2_dict[S2_type], S2_type,
+        S2_calced = csx_func.calcS2(model_list, S2_dict[S2_type], S2_type,
                                     args.fit, args.fit_range)
 
         correl  = csx_func.calcCorrel(S2_calced, S2_dict[S2_type])
