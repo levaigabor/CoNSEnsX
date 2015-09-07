@@ -142,6 +142,6 @@ user_sel = [
     ["RDC", 1, "0_N_H", 1]
 ]
 
-csx_sel.selection_on("RDC", "q-value", pdb_models, RDC_lists, user_sel,
+csx_sel.selection_on("RDC", "correlation", pdb_models, RDC_lists, user_sel,
                      args=args, S2_dict=S2_dict, S2_type="N", overdrive=2)
 

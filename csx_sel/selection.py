@@ -168,7 +168,7 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
             for selected in in_selection:
                 pdb_sel.append(selected)
 
-            #print("current selection: ", pdb_sel)
+            print("current selection: ", pdb_sel)
 
             for sel_data in user_sel:
                 if sel_data[0] == "RDC":
@@ -258,21 +258,40 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
             if overdrive and overdrive > above_best:
                 above_best += 1
                 print("\x1b[31mwe are in overdrive with \x1b[0m" + str(above_best))
-                overdrive_best = prev_best
+                overdrive_best = best_val
                 print("overdrive_best: " + str(overdrive_best))
+                print("prev_best: " + str(prev_best))
                 in_selection.append(best_num)
 
-                if overdrive_best > prev_best:
+                if measure == "correlation" and overdrive_best > prev_best:
+                    prev_best  = overdrive_best
+                    above_best = 0
+                elif measure in ["q-value", "rmsd"] and overdrive_best < prev_best:
                     prev_best  = overdrive_best
                     above_best = 0
 
-                if overdrive == above_best and overdrive_best < prev_best:
+                if overdrive == above_best:
+                    if measure == "correlation" and overdrive_best < prev_best:
+                        for _ in range(overdrive):
+                            print("POP")
+                            del in_selection[-1]
+                            print(in_selection)
 
-                    for _ in range(overdrive):
-                        print(in_selection)
-                        print("POP")
-                        in_selection.pop()
-                        print(in_selection)
+                        # in_selection = [x+1 for x in in_selection]
+                        # in_selection.sort()
+                        # print("numbered as in PDB file:\n", in_selection)
+                        raise SystemExit
+
+                    if measure in ["q-value", "rmsd"] and overdrive_best > prev_best:
+                        for _ in range(overdrive):
+                            print("POP")
+                            del in_selection[-1]
+                            print(in_selection)
+
+                        # in_selection = [x+1 for x in in_selection]
+                        # in_selection.sort()
+                        # print("numbered as in PDB file:\n", in_selection)
+                        raise SystemExit
 
                 continue
 
@@ -284,7 +303,7 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                 continue
 
 
-            in_selection = [x+1 for x in in_selection]
-            in_selection.sort()
-            print("numbered as in PDB file:\n", in_selection)
+            # in_selection = [x+1 for x in in_selection]
+            # in_selection.sort()
+            # print("numbered as in PDB file:\n", in_selection)
             raise SystemExit
