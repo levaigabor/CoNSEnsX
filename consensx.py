@@ -138,13 +138,10 @@ print("total runtime", te-ts)
 print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
 user_sel = [
-    ["RDC", 2, "0_N_H", 1],
-    ["RDC", 1, "0_N_H", 1],
-    ["RDC", 3, "0_N_H", 1],
-    ["S2", "N", 1]
+    ["RDC", 2, "0_N_H", 0.1],
+    ["RDC", 1, "0_N_H", 1]
 ]
 
-csx_sel.selection_on("S2", pdb_models, RDC_lists, user_sel,
-                     args=args, S2_dict=S2_dict, S2_type="N")
+csx_sel.selection_on("RDC", "q-value", pdb_models, RDC_lists, user_sel,
+                     args=args, S2_dict=S2_dict, S2_type="N", overdrive=2)
 
-#csx_sel.get_best_S2_pair(S2_dict, "N", args)
