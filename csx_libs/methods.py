@@ -909,7 +909,7 @@ def calcS2(model_list, S2_records, S2_type, fit, fit_range):
 
 
 @timeit
-def calcDihedAngles(PDB_file):
+def calcDihedAngles(model_list):
     """Calculates backbone diherdral angles
        note: all returned angle values are in radian"""
     model_list = PDB_model.model_list

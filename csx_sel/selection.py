@@ -23,14 +23,15 @@ class RDC_modell_data(object):
                 continue
 
             my_data = RDC_modell_data.RDC_data[sel_data[1]][sel_data[2]]
+            experimental = RDC_lists[sel_data[1] - 1][sel_data[2]]
 
             for model_num, model in enumerate(my_data):
                 if measure == "correlation":
-                    calced = csx_func.calcCorrel(model, RDC_lists[sel_data[1] - 1][sel_data[2]])
+                    calced = csx_func.calcCorrel(model, experimental)
                 elif measure == "q-value":
-                    calced = csx_func.calcQValue(model, RDC_lists[sel_data[1] - 1][sel_data[2]])
+                    calced = csx_func.calcQValue(model, experimental)
                 elif measure == "rmsd":
-                    calced = csx_func.calcRMSD(model, RDC_lists[sel_data[1] - 1][sel_data[2]])
+                    calced = csx_func.calcRMSD(model, experimental)
 
 
                 if model_num in model_scores.keys():
@@ -62,11 +63,8 @@ class RDC_modell_data(object):
 
 
 def get_best_S2_pair(measure, S2_dict, S2_type, args):
-    # def calcS2(S2_records, S2_type, args.fit, args.fit_range):
-
     model_list = csx_obj.PDB_model.model_list
-
-    scores = {}
+    scores     = {}
 
     for i in range(len(model_list)):
         for j in range(i + 1, len(model_list)):
@@ -91,7 +89,6 @@ def get_best_S2_pair(measure, S2_dict, S2_type, args):
         scores[max(scores.keys())]
     elif measure == "q-value":
         scores[min(scores.keys())]
-
 
 
 def averageRDCs_on(models, RDC_num, RDC_type):
@@ -143,7 +140,9 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                  min_size=None, max_size=None, overdrive=None):
 
     if priority == "RDC":
-        in_selection = [RDC_modell_data.get_best_RDC_model(measure, user_sel, RDC_lists)]
+        in_selection = [
+                RDC_modell_data.get_best_RDC_model(measure, user_sel, RDC_lists)
+            ]
     elif priority == "S2":
         in_selection = get_best_S2_pair(measure, S2_dict, S2_type, args)
 
@@ -168,7 +167,7 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
             for selected in in_selection:
                 pdb_sel.append(selected)
 
-            print("current selection: ", pdb_sel)
+            # print("current selection: ", pdb_sel)
 
             for sel_data in user_sel:
                 if sel_data[0] == "RDC":
@@ -198,13 +197,14 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                     S2_weight = sel_data[2]
 
                     averageS2 = averageS2_on(pdb_sel, S2_dict, S2_type, args)
+                    experimental = S2_dict[S2_type]
 
                     if measure == "correlation":
-                        calced = csx_func.calcCorrel(averageS2, S2_dict[S2_type])
+                        calced = csx_func.calcCorrel(averageS2, experimental)
                     elif measure == "q-value":
-                        calced = csx_func.calcQValue(averageS2, S2_dict[S2_type])
+                        calced = csx_func.calcQValue(averageS2, experimental)
                     elif measure == "rmsd":
-                        calced = csx_func.calcRMSD(averageS2, S2_dict[S2_type])
+                        calced = csx_func.calcRMSD(averageS2, experimental)
 
                     if num in model_scores.keys():
                         model_scores[num] += calced * S2_weight
@@ -213,7 +213,6 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
 
                     divide_by += S2_weight
 
-
         best_num = -1
 
         if measure == "correlation":
@@ -221,14 +220,13 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
         else:
             best_val = 1000
 
-
-
         for num in model_scores.keys():
-            if measure == "correlation" and model_scores[num] / divide_by > best_val:
-                best_val = model_scores[num] / divide_by
+            model_score = model_scores[num] / divide_by
+            if measure == "correlation" and model_score > best_val:
+                best_val = model_score
                 best_num = num
-            elif measure in ["q-value", "rmsd"] and model_scores[num] / divide_by < best_val:
-                best_val = model_scores[num] / divide_by
+            elif (measure in ["q-value", "rmsd"] and model_score < best_val):
+                best_val = model_score
                 best_num = num
 
         print("prev best: " + str(prev_best) + ", current best: " + str(best_val))
@@ -273,9 +271,10 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                 if overdrive == above_best:
                     if measure == "correlation" and overdrive_best < prev_best:
                         for _ in range(overdrive):
-                            print("POP")
+                            # print("POP")
                             del in_selection[-1]
-                            print(in_selection)
+
+                        print(in_selection)
 
                         # in_selection = [x+1 for x in in_selection]
                         # in_selection.sort()
@@ -284,9 +283,10 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
 
                     if measure in ["q-value", "rmsd"] and overdrive_best > prev_best:
                         for _ in range(overdrive):
-                            print("POP")
+                            # print("POP")
                             del in_selection[-1]
-                            print(in_selection)
+
+                        print(in_selection)
 
                         # in_selection = [x+1 for x in in_selection]
                         # in_selection.sort()

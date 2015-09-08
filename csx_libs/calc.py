@@ -262,7 +262,8 @@ def calcS2_sidechain(S2_sidechain, my_path, args):
 
 def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
     """Back calculate skalar coupling from given RDC lists and PDB models"""
-    dihed_lists = csx_func.calcDihedAngles(my_PDB)
+    model_list  = csx_obj.PDB_model.model_list
+    dihed_lists = csx_func.calcDihedAngles(model_list)
     csx_out.write_table_open(my_path, "Coupling constants (J-coupling)")
 
     for Jcoup_type in list(Jcoup_dict.keys()):
