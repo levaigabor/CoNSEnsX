@@ -42,7 +42,7 @@ table {
   background-color: #ABABAB;
 }
 
-#head-td {
+.files_table .head-td {
   background-color: #DE5E60;
   color: #FFF;
   font-weight: 600;
@@ -332,7 +332,7 @@ h3.spec {
 	margin: 0;
 }
 
-.title-description font{
+.title-description .red{
 	font-size: 24px;
 	font-weight: 230;
 	margin: 0;

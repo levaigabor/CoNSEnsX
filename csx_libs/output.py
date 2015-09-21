@@ -33,9 +33,7 @@ def writeHeaderHTML(path, version):
   <link href="../../public/_include/css/supersized.css" rel="stylesheet">
   <link href="../../public/_include/css/bootstrap-responsive.min.css" rel="stylesheet">
   <link href="../../public/_include/css/responsive.css" rel="stylesheet">
-  <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,
-              200italic,300,300italic,400italic,600,600italic,700,700italic,900'
-              rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
 </head>""")
 
     html.close()
@@ -54,26 +52,26 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
       <div class="span12">
         <div class="title-page">
         <h2 class="title">CoNSENsX</h2>
-        <h3 class="title-description"><b><font>Co</font></b>mpliance of <b>
-        <font>N</font></b>MR-derived <b><font>S</font></b>tructural <b><font>Ens</font></b>embles with e<b><font>x</font></b>perimental data</h3><br>
-        <h3 class="title-description">Results sheet ID: <font><b>{0}</b></font></h3>
+        <h3 class="title-description"><b class="red">Co</b>mpliance of <b class="red">
+        N</b>MR-derived <b class="red">S</b>tructural <b class="red">Ens</b>embles with e<b class="red">x</b>perimental data</h3><br>
+        <h3 class="title-description">Results sheet ID: <b class="red">{0}</b></h3>
         </div>
       </div>
     </div>
 
     <table class="files_table">
       <tr>
-        <td id="head-td">PDB file:</td>
+        <td class="head-td">PDB file:</td>
         <td><i>{1}</i></td>
         <td>{2} models found</td>
       </tr>
       <tr>
-        <td id="head-td">NOE restraint file:</td>
+        <td class="head-td">NOE restraint file:</td>
         <td><i>{3}</i></td>
         <td>{4} distance restraints found</td>
       </tr>
       <tr>
-        <td id="head-td">BMRB file:</td>
+        <td class="head-td">BMRB file:</td>
         <td><i>{5}</i></td>
         <td></td>
       </tr>
@@ -281,7 +279,7 @@ def close_HTML(path):
     html = open(html, 'a')
 
     html.write("""
-      </div>
+  </div>
 </div>
 </body>
 </html>""")
