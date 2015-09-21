@@ -44,6 +44,7 @@ class RDC_modell_data(object):
         max_value, max_loc = -1000, -1
         min_value, min_loc = 1000, -1
 
+        print("RDC based model scores:")
         print(model_scores)
 
         for loc, key in enumerate(model_scores.keys()):
@@ -60,6 +61,13 @@ class RDC_modell_data(object):
             return max_loc
         elif measure == "q-value" or measure == "rmsd":
             return min_loc
+
+
+class JCoup_modell_data(object):
+
+    """Class for per model J-Coupling data"""
+
+    type_dict = {}
 
 
 def get_best_S2_pair(measure, S2_dict, S2_type, args):
@@ -116,6 +124,31 @@ def averageRDCs_on(models, RDC_num, RDC_type):
     return averageRDC
 
 
+def averageJCoup_on(models, my_data):
+    """Returns a dictonary with the average J-Couplings for the given type:
+       averageJCoup[residue] = value"""
+
+    averageJCoup = {}
+
+    ## my_data is a list for models which contain dictonaries
+    #my_data = RDC_modell_data.RDC_data[RDC_num][RDC_type]
+
+    for model_num, model in enumerate(my_data):
+        if model_num not in models:
+            continue
+
+        for resnum in model:
+            if resnum in averageJCoup.keys():
+                averageJCoup[resnum] += model[resnum]
+            else:
+                averageJCoup[resnum] = model[resnum]
+
+    for resnum in list(averageJCoup.keys()):
+        averageJCoup[resnum] /= len(models)
+
+    return averageJCoup
+
+
 def averageS2_on(models, S2_dict, S2_type, args):
     """Returns a dictonary with the average S2 values for the given S2 type:
        averageS2[residue] = value"""
@@ -136,7 +169,7 @@ def averageS2_on(models, S2_dict, S2_type, args):
 
 
 def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
-                 S2_dict=None, S2_type=None, args=None,
+                 S2_dict=None, Jcoup_dict=None, S2_type=None, args=None,
                  min_size=None, max_size=None, overdrive=None):
 
     if priority == "RDC":
@@ -212,6 +245,32 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                         model_scores[num] = calced * S2_weight
 
                     divide_by += S2_weight
+
+                elif sel_data[0] == "JCoup":
+                    JCoup_type   = sel_data[1]
+                    JCoup_weight = sel_data[2]
+
+                    my_type = JCoup_modell_data.type_dict[JCoup_type]
+                    averageJCoup = averageJCoup_on(pdb_sel, my_type)
+
+
+
+                    my_JCoup     = Jcoup_dict[JCoup_type]
+
+                    if measure == "correlation":
+                        calced = csx_func.calcCorrel(averageJCoup, my_JCoup)
+                    elif measure == "q-value":
+                        calced = csx_func.calcQValue(averageJCoup, my_JCoup)
+                    elif measure == "rmsd":
+                        calced = csx_func.calcRMSD(averageJCoup, my_JCoup)
+
+                    if num in model_scores.keys():
+                        model_scores[num] += calced * JCoup_weight
+                    else:
+                        model_scores[num] = calced * JCoup_weight
+
+                    divide_by += JCoup_weight
+
 
         best_num = -1
 

@@ -273,6 +273,8 @@ def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
                                                       Jcoup_dict[Jcoup_type],
                                                       Jcoup_type)
 
+        csx_sel.JCoup_modell_data.type_dict[Jcoup_type] = model_data
+
         model_corrs = []
 
         for model in model_data:
@@ -288,6 +290,7 @@ def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
         csx_obj.CSV_buffer("J-couplings (" + Jcoup_type + ")",
                    JCoup_calced, Jcoup_dict[Jcoup_type])
 
+        print("J-couplings (" + Jcoup_type + ")")
         print("Correl: ", correl)
         print("Q-val:  ", q_value)
         print("RMSD:   ", rmsd)
