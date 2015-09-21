@@ -317,9 +317,11 @@ def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
 
 
 def calcChemShifts(ChemShift_lists, pdb_models, my_path):
-    """Back calculate cheical shigts from given chemical shift list and PDB
+    """Back calculate chemical shifts from given chemical shift list and PDB
        models"""
     CS_calced, model_data = csx_func.callShiftxOn(my_path, pdb_models)
+
+    print(model_data)
 
     for list_num, CS_list in enumerate(ChemShift_lists):
 
