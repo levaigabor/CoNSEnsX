@@ -1,0 +1,65 @@
+.btn {
+	transition: all .3s ease;
+	background-color: #ababab;
+	border:1px solid #DE5E60;
+	color: #000;
+}
+
+.btn:hover {
+	background-color: #DE5E60!important;
+	border-color: #DE5E60!important;
+	transition: all .3s ease!important;
+	color: #fff;
+}
+.btn.active {
+	background-color: #DE5E60!important;
+	border-color: #DE5E60!important;
+	color: #fff;
+}
+.btn-primary:focus {
+	background-color: #DE5E60!important;
+	border-color: #DE5E60!important;
+	color: #fff;
+}
+.is-hidden {
+	visibility: hidden;
+}
+.is-visible {
+	visibility: visible;
+}
+.btn-primary {
+	margin-left: 45%;
+	margin-bottom: 2em;
+}
+.selection-heading {
+	text-align: center;
+	font-size: 2em;
+}
+.group1 {
+	margin-left: 40%;
+}
+.group2 {
+	margin-left: 42%;
+}
+.well {
+	background-color: #C5C5C5;
+}
+.involve {
+	visibility: hidden;
+	display: none;
+}
+#textInput {
+	color: #000;
+	border:1px solid #000;
+	width: 20%;
+	border-radius: 4px;
+	text-align: center;
+}
+.range {
+	display: inline-block!important;
+	width: 30%!important;
+}
+.show {
+	border-radius: 4px!important;
+	margin-left: 5%!important;
+}
