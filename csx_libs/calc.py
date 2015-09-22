@@ -321,7 +321,7 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
        models"""
     CS_calced, model_data = csx_func.callShiftxOn(my_path, pdb_models)
 
-    print(model_data)
+    csx_sel.ChemShift_modell_data.type_dict = model_data
 
     for list_num, CS_list in enumerate(ChemShift_lists):
 

@@ -1,6 +1,7 @@
 from csx_libs import objects as csx_obj
 from csx_libs import methods as csx_func
 
+
 class RDC_modell_data(object):
 
     """Class for per model RDC data"""
@@ -70,6 +71,22 @@ class JCoup_modell_data(object):
     type_dict = {}
 
 
+class ChemShift_modell_data(object):
+
+    """Class for per model chemical shift data"""
+
+    type_dict = []
+
+    @staticmethod
+    def get_type_data(my_type):
+        type_data = []
+
+        for model in ChemShift_modell_data.type_dict:
+            type_data.append(model[my_type])
+
+        return type_data
+
+
 def get_best_S2_pair(measure, S2_dict, S2_type, args):
     model_list = csx_obj.PDB_model.model_list
     scores     = {}
@@ -130,9 +147,6 @@ def averageJCoup_on(models, my_data):
 
     averageJCoup = {}
 
-    ## my_data is a list for models which contain dictonaries
-    #my_data = RDC_modell_data.RDC_data[RDC_num][RDC_type]
-
     for model_num, model in enumerate(my_data):
         if model_num not in models:
             continue
@@ -147,6 +161,28 @@ def averageJCoup_on(models, my_data):
         averageJCoup[resnum] /= len(models)
 
     return averageJCoup
+
+
+def averageChemShift_on(models, my_data):
+    """Returns a dictonary with the average chemical shifts for the given type:
+       averageChemShift[residue] = value"""
+
+    averageChemShift = {}
+
+    for model_num, model in enumerate(my_data):
+        if model_num not in models:
+            continue
+
+        for resnum in model:
+            if resnum in averageChemShift.keys():
+                averageChemShift[resnum] += model[resnum]
+            else:
+                averageChemShift[resnum] = model[resnum]
+
+    for resnum in list(averageChemShift.keys()):
+        averageChemShift[resnum] /= len(models)
+
+    return averageChemShift
 
 
 def averageS2_on(models, S2_dict, S2_type, args):
@@ -169,13 +205,13 @@ def averageS2_on(models, S2_dict, S2_type, args):
 
 
 def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
-                 S2_dict=None, Jcoup_dict=None, S2_type=None, args=None,
+                 S2_dict=None, Jcoup_dict=None, ChemShifts=None, S2_type=None,
+                 args=None,
                  min_size=None, max_size=None, overdrive=None):
 
     if priority == "RDC":
         in_selection = [
-                RDC_modell_data.get_best_RDC_model(measure, user_sel, RDC_lists)
-            ]
+            RDC_modell_data.get_best_RDC_model(measure, user_sel, RDC_lists)]
     elif priority == "S2":
         in_selection = get_best_S2_pair(measure, S2_dict, S2_type, args)
 
@@ -250,11 +286,8 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                     JCoup_type   = sel_data[1]
                     JCoup_weight = sel_data[2]
 
-                    my_type = JCoup_modell_data.type_dict[JCoup_type]
+                    my_type      = JCoup_modell_data.type_dict[JCoup_type]
                     averageJCoup = averageJCoup_on(pdb_sel, my_type)
-
-
-
                     my_JCoup     = Jcoup_dict[JCoup_type]
 
                     if measure == "correlation":
@@ -270,6 +303,30 @@ def selection_on(priority, measure, pdb_models, RDC_lists, user_sel,
                         model_scores[num] = calced * JCoup_weight
 
                     divide_by += JCoup_weight
+
+                elif sel_data[0] == "ChemShift":
+                    ChemShift_type   = sel_data[1]
+                    ChemShift_weight = sel_data[2]
+
+                    my_ChemShifts    = ChemShifts[0][ChemShift_type]
+                    my_type          = ChemShift_modell_data.get_type_data(ChemShift_type)
+
+                    averageChemShift = averageChemShift_on(pdb_sel, my_type)
+
+                    if measure == "correlation":
+                        calced = csx_func.calcCorrel(averageChemShift, my_ChemShifts)
+                    elif measure == "q-value":
+                        calced = csx_func.calcQValue(averageChemShift, my_ChemShifts)
+                    elif measure == "rmsd":
+                        calced = csx_func.calcRMSD(averageChemShift, my_ChemShifts)
+
+                    if num in model_scores.keys():
+                        model_scores[num] += calced * ChemShift_weight
+                    else:
+                        model_scores[num] = calced * ChemShift_weight
+
+                    divide_by += ChemShift_weight
+
 
 
         best_num = -1

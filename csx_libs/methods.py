@@ -513,7 +513,7 @@ def parseChemShift_STR(parsed_value):
     """Returns ChemShift lists as dictonaries containing ChemShift_Record
     objects, grouped by Atom_name (keys())"""
     list_number = 1
-    ChemShift_lists   = []
+    ChemShift_lists = []
 
     while True:
         saveShiftName = 'chem_shift_list_' + str(list_number)

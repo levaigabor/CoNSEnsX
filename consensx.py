@@ -129,9 +129,12 @@ if Jcoup_dict:
 ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 
 if ChemShift_lists:
+    # for record in ChemShift_lists:
+    #     print(record.atom_name)
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
 csx_obj.CSV_buffer.writeCSV()
+csx_out.close_HTML(my_path)
 
 te = time.time()
 print("total runtime", te-ts)
@@ -142,10 +145,12 @@ user_sel = [
     #["RDC", 1, "0_C_CA", 0.5],
     ["RDC", 1, "0_N_H", 0.5],
     #["S2", "N", 0.25],
-    ["JCoup", "3JHNHA", 0.5]
+    ["JCoup", "3JHNHA", 0.5],
+    ["ChemShift", "CA", 0.9]
 ]
 
 csx_sel.selection_on("RDC", "correlation", pdb_models, RDC_lists, user_sel,
                      args=args, S2_dict=S2_dict, Jcoup_dict=Jcoup_dict,
+                     ChemShifts=ChemShift_lists,
                      S2_type="N", overdrive=2)
 
