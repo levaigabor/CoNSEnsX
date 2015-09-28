@@ -8,6 +8,7 @@ import string
 import random
 import prody
 import time
+import hashlib
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -123,9 +124,22 @@ def get_PDB(args):
 
 
 @timeit
-def get_model_list(PDB_file):
+def get_model_list(PDB_file, PDB_file_name=None):
     """Parsing PDB file into models in the PDB_model object"""
     model_num = 1
+
+    my_PDB_hash = hashlib.md5(open(PDB_file_name,'rb').read()).hexdigest()
+    print("PDB HASH:", my_PDB_hash)
+
+    try:
+        prev_PDB_hash = open(".prevPDBhash").read().strip()
+        if my_PDB_hash == prev_PDB_hash:
+            print("HASHES are the same, you can use the pickled data")
+    except FileNotFoundError:
+        pass
+
+    with open(".prevPDBhash", "w") as prev_HASH:
+        prev_HASH.write(my_PDB_hash)
 
     while True:
         try:

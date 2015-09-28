@@ -1,5 +1,6 @@
 csx_gui/csx_gtk.glade~
 .config
+.prevPDBhash
 HHDB
 *.pdb
 *.str
