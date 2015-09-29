@@ -2,17 +2,23 @@ table {
   color: #000;
 }
 
+textarea:focus, input:focus, input:active {
+  border:none;
+}
+
 .results {
   /*width: 993px;*/
   padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
   margin-right: auto;
   margin-left : auto;
   background-color: #FFF;
   border-radius: 10px;
 
-  -webkit-box-shadow: inset 5px 50px 7px 0px rgba(222,94,96,1);
-  -moz-box-shadow   : inset 5px 50px 7px 0px rgba(222,94,96,1);
-  box-shadow        : inset 5px 50px 7px 0px rgba(222,94,96,1);
+  -webkit-box-shadow: inset 5px 50px 7px 0px #e57373;
+  -moz-box-shadow   : inset 5px 50px 7px 0px #e57373;
+  box-shadow        : inset 5px 50px 7px 0px #e57373;
 }
 
 .NOE_PRIME_table {
@@ -43,7 +49,7 @@ table {
 }
 
 .files_table .head-td {
-  background-color: #DE5E60;
+  background-color: #e57373;
   color: #FFF;
   font-weight: 600;
 }
@@ -71,12 +77,12 @@ table {
 input[type="text"]:hover,
 input[type="text"]:active,
 input[type="text"]:focus {
-    border: 1px solid #DE5E60;
+    border: 1px solid #e57373;
     box-shadow: 0px 0px 0px #000;
 }
 
 input[type="reset"] {
-    border: 1px solid #DE5E60;
+    border: 1px solid #e57373;
     background-color: #C5C5C5;
     font-weight: 600;
     font-size: 15px;
@@ -85,7 +91,7 @@ input[type="reset"] {
 input[type="reset"]:hover,
 input[type="reset"]:active,
 input[type="reset"]:focus {
-    background-color: #DE5E60;
+    background-color: #e57373;
     color:#FFFFFF;
     text-decoration:none;
     -webkit-transition: all 0.1s linear 0s;
@@ -96,7 +102,7 @@ input[type="reset"]:focus {
 }
 
 input[type="submit"] {
-    border: 1px solid #DE5E60;
+    border: 1px solid #e57373;
     background-color: #C5C5C5;
     font-weight: 600;
     font-size: 15px;
@@ -105,7 +111,7 @@ input[type="submit"] {
 input[type="submit"]:hover,
 input[type="submit"]:active,
 input[type="submit"]:focus{
-    background-color: #DE5E60;
+    background-color: #e57373;
     color:#FFFFFF;
     text-decoration:none;
     -webkit-transition: all 0.1s linear 0s;
@@ -142,7 +148,7 @@ body{
 
 
 a{
-	color:#DE5E60;
+	color:#e57373;
 	text-decoration: none;
 	cursor: pointer;
 
@@ -212,7 +218,7 @@ hr {
 }
 
 .color-text {
-    color: #DE5E60;
+    color: #e57373;
 }
 
 .through{
@@ -336,7 +342,7 @@ h3.spec {
 	font-size: 24px;
 	font-weight: 230;
 	margin: 0;
-	color: #DE5E60;
+	color: #e57373;
 }
 
 /* ==================================================
@@ -383,12 +389,12 @@ h3.spec {
 
 .accordion-heading:hover .accordion-toggle,
 .accordion-heading:hover .accordion-toggle.inactive {
-	background:#DE5E60;
+	background:#e57373;
 	color:#FFFFFF;
 }
 
 .accordion-heading .accordion-toggle.active {
-	background:#DE5E60;
+	background:#e57373;
 	color:#FFFFFF;
 }
 
