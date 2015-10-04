@@ -129,8 +129,6 @@ if Jcoup_dict:
 ChemShift_lists = csx_func.parseChemShift_STR(parsed.value)
 
 if ChemShift_lists:
-    # for record in ChemShift_lists:
-    #     print(record.atom_name)
     csx_calc.calcChemShifts(ChemShift_lists, pdb_models, my_path)
 
 csx_obj.CSV_buffer.writeCSV()

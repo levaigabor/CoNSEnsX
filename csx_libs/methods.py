@@ -9,6 +9,7 @@ import random
 import prody
 import time
 import hashlib
+import pickle
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -101,11 +102,11 @@ def check_3rd_party():
         ThirdParty.get_thirdparty(".config")
     else:
         init_conf = (
-                        "# CoNSEnsX config file\n" +
-                        "# Please provide full paths\n" +
-                        "pales=''\n" + "shiftx=''\n" +
-                        "prideDB=''\n" + "prideNMR=''"
-                    )
+            "# CoNSEnsX config file\n" +
+            "# Please provide full paths\n" +
+            "pales=''\n" + "shiftx=''\n" +
+            "prideDB=''\n" + "prideNMR=''"
+        )
 
         init_conf_file = open(".config", "w")
         init_conf_file.write(init_conf)
@@ -124,17 +125,20 @@ def get_PDB(args):
 
 
 @timeit
-def get_model_list(PDB_file, PDB_file_name=None):
+def get_model_list(PDB_file, PDB_file_name=None, ):
     """Parsing PDB file into models in the PDB_model object"""
     model_num = 1
 
-    my_PDB_hash = hashlib.md5(open(PDB_file_name,'rb').read()).hexdigest()
-    print("PDB HASH:", my_PDB_hash)
+    my_PDB_hash = hashlib.md5(open(PDB_file_name, 'rb').read()).hexdigest()
 
     try:
         prev_PDB_hash = open(".prevPDBhash").read().strip()
         if my_PDB_hash == prev_PDB_hash:
-            print("HASHES are the same, you can use the pickled data")
+            print("PDB file is the same as in the previous run")
+            print("Skip parsing PDB...")
+            pickled_models = pickle.load(open("PDB_model.pickle", 'rb'))
+            PDB_model.model_list = pickled_models
+            return
     except FileNotFoundError:
         pass
 
@@ -147,6 +151,8 @@ def get_model_list(PDB_file, PDB_file_name=None):
             model_num += 1
         except prody.proteins.pdbfile.PDBParseError:
             break
+        finally:
+            pickle.dump( PDB_model.model_list, open("PDB_model.pickle", "wb"))
 
 
 @timeit
@@ -339,6 +345,24 @@ def getNOE(NOE_file):
 @timeit
 def parseSTR(STR_file):
     """Parse BMRB file into a python object"""
+
+    my_STR_hash = hashlib.md5(open(STR_file, 'rb').read()).hexdigest()
+
+    try:
+        prev_STR_hash = open(".prevSTRhash").read().strip()
+
+        if my_STR_hash == prev_STR_hash:
+            print("STR file is the same as in the previous run")
+            print("Skip parsing STR...")
+            parsed = pickle.load(open(".prevSTR.pickle", 'rb'))
+            return parsed
+
+    except FileNotFoundError:
+        pass
+
+    with open(".prevSTRhash", "w") as prev_HASH:
+        prev_HASH.write(my_STR_hash)
+
     star_file = open(STR_file)         # open STR file
     myString = ""
 
@@ -352,6 +376,7 @@ def parseSTR(STR_file):
         print('Error during STR parsing: ', parsed)
         raise SystemExit
     else:
+        pickle.dump( parsed, open(".prevSTR.pickle", "wb"))
         return parsed
 
 
