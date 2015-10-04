@@ -29,8 +29,6 @@ def writeHeaderHTML(path, version):
   <meta name="description" content="COmpliance of NMR Structural
                                     ENSembles with eXperimental data" />
   <link href="../../public/_include/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../public/_include/css/supersized.css" rel="stylesheet">
-  <link href="../../public/_include/css/responsive.css" rel="stylesheet">
   <link href="../../public/_include/css/style.css" rel="stylesheet">
   <link href="../../public/_include/css/main.css" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
