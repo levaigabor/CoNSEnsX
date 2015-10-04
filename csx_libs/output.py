@@ -264,51 +264,6 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
     html.close()
 
 
-# def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
-#                      corr_graph_name, graph_name, mod_corr_graph_name=None):
-#     html = path + "result_sheet.html"
-#     html = open(html, 'a')
-
-#     if mod_corr_graph_name:
-#       html.write("""
-#             <tr>
-#             <td><table class="values_table">
-#             <tr><td><strong>{0}</strong></td><td></td></tr>
-#             <tr><td>Values:</td><td>{1}</td></tr>
-#             <tr><td>Correlation:</td><td>{2}</td></tr>
-#             <tr><td>Q-factor:</td><td>{3} %</td></tr>
-#             <tr><td>RMSD:</td><td>{4}</td></tr>
-#             </table></td>
-#             <td><img width="270" src="{5}"></td>
-#             <td><img width="450" src="{6}"></td>
-#             <td><img width="270" src="{7}"></td>
-#             </tr>\n""".format(data_type, used_values,
-#                               '{0:.3f}'.format(correl),
-#                               '{0:.3f}'.format(q_value),
-#                               '{0:.3f}'.format(rmsd),
-#                                corr_graph_name, graph_name,
-#                                mod_corr_graph_name))
-#     else:
-#         html.write("""
-#             <tr>
-#             <td><table class="values_table">
-#             <tr><td><strong>{0}</strong></td><td></td></tr>
-#             <tr><td>Values:</td><td>{1}</td></tr>
-#             <tr><td>Correlation:</td><td>{2}</td></tr>
-#             <tr><td>Q-factor:</td><td>{3} %</td></tr>
-#             <tr><td>RMSD:</td><td>{4}</td></tr>
-#             </table></td>
-#             <td><img width="270" src="{5}"></td>
-#             <td><img width="450" src="{6}"></td>
-#             </tr>\n""".format(data_type, used_values,
-#                               '{0:.3f}'.format(correl),
-#                               '{0:.3f}'.format(q_value),
-#                               '{0:.3f}'.format(rmsd),
-#                                corr_graph_name, graph_name))
-
-#     html.close()
-
-
 def write_bottom_table(path, NOE_violations, PRIDE_data):
     html = path + "result_sheet.html"
     html = open(html, 'a')
