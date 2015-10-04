@@ -29,10 +29,10 @@ def writeHeaderHTML(path, version):
   <meta name="description" content="COmpliance of NMR Structural
                                     ENSembles with eXperimental data" />
   <link href="../../public/_include/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../public/_include/css/main.css" rel="stylesheet">
   <link href="../../public/_include/css/supersized.css" rel="stylesheet">
-  <link href="../../public/_include/css/bootstrap-responsive.min.css" rel="stylesheet">
   <link href="../../public/_include/css/responsive.css" rel="stylesheet">
+  <link href="../../public/_include/css/style.css" rel="stylesheet">
+  <link href="../../public/_include/css/main.css" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
 </head>""")
 
@@ -75,7 +75,35 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
         <td><i>{5}</i></td>
         <td></td>
       </tr>
-    </table>""".format(my_id, my_PDB, PDP_model_num,
+    </table>
+    <div class="container">
+
+    <button class="btn btn-primary" id="selection" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    Toggle selection options
+    </button>
+    <div class="collapse" id="collapseExample">
+      <div>
+        <h2 class="selection-heading">Compliance Measure</h2>
+        <div class="btn-group group1" data-toggle="buttons">
+
+          <label class="btn btn-primary">
+            <input type="radio" name="options" id="option1" autocomplete="off"> correlation
+          </label>
+
+          <label class="btn btn-primary">
+            <input type="radio" name="options" id="option2" autocomplete="off"> Q-value
+          </label>
+
+          <label class="btn btn-primary">
+            <input type="radio" name="options" id="option3" autocomplete="off"> RMSD
+          </label>
+        </div>
+        <button class="btn btn-primary" id="startsel" type="button">
+          Start selection
+        </button>
+      </div>
+    </div>
+  </div>""".format(my_id, my_PDB, PDP_model_num,
                        my_NOE, NOE_restraint_count, args.STR_file))
 
     html.close()
@@ -87,9 +115,7 @@ def writeRDC_table_open(path, name, RDC_list_num):
 
     html.write("""
     <div class="results">
-      <h4 class="table-source">{0} {1}</h4>
-      <table class="result_table">\n""".format(name, RDC_list_num))
-
+      <h4 class="table-source">{0} {1}</h4>""".format(name, RDC_list_num))
     html.close()
 
 
@@ -97,16 +123,19 @@ def writeRDC_table_close(path):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
-    html.write("      </table>\n    </div>\n")
+    html.write("    </div>\n")
     html.close()
 
 
 def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
-                  corr_graph_name, graph_name, mod_corr_graph_name):
+                  corr_graph_name, graph_name, mod_corr_graph_name,
+                  input_id):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
     html.write("""
+      <table class="result_table">
+        <tbody>
           <tr>
           <td><table class="values_table">
           <tr><td><strong>{0}</strong></td><td></td></tr>
@@ -118,11 +147,25 @@ def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
           <td><img width="270" src="{5}"></td>
           <td><img width="450" src="{6}"></td>
           <td><img width="270" src="{7}"></td>
-          </tr>\n""".format(RDC_type, used_values,
+          </tr>
+        </tbody>
+      </table>\n
+      <div class="involve involve-result">
+      <form oninput="x.value=parseInt({8}.value)">
+        <table class="selection-table">
+          <tr>
+            <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+            <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
+            <td class="involve-table"><input type="range" id="{8}" value="0" min="0" max="10"></td>
+          </tr>
+        </table>
+      </form>
+      </div>\n""".format(RDC_type, used_values,
                             '{0:.3f}'.format(correl),
                             '{0:.3f}'.format(q_value),
                             '{0:.3f}'.format(rmsd),
-                             corr_graph_name, graph_name, mod_corr_graph_name))
+                             corr_graph_name, graph_name, mod_corr_graph_name,
+                             input_id))
 
     html.close()
 
@@ -133,8 +176,7 @@ def write_table_open(path, table_name):
 
     html.write("""
     <div class="results">
-      <h4 class="table-source">{0}</h4>
-      <table class="result_table">\n""".format(table_name))
+      <h4 class="table-source">{0}</h4>""".format(table_name))
     html.close()
 
 
@@ -142,17 +184,20 @@ def write_table_close(path):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
-    html.write("      </table>\n    </div>\n")
+    html.write("    </div>\n")
     html.close()
 
 
 def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
-                     corr_graph_name, graph_name, mod_corr_graph_name=None):
+                     corr_graph_name, graph_name, input_id,
+                     mod_corr_graph_name=None):
     html = path + "result_sheet.html"
     html = open(html, 'a')
 
     if mod_corr_graph_name:
       html.write("""
+        <table class="result_table">
+          <tbody>
             <tr>
             <td><table class="values_table">
             <tr><td><strong>{0}</strong></td><td></td></tr>
@@ -164,14 +209,29 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
             <td><img width="270" src="{5}"></td>
             <td><img width="450" src="{6}"></td>
             <td><img width="270" src="{7}"></td>
-            </tr>\n""".format(data_type, used_values,
+            </tr>
+          </tbody>
+        </table>\n
+        <div class="involve involve-result">
+        <form oninput="x.value=parseInt({8}.value)">
+          <table class="selection-table">
+            <tr>
+              <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+              <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
+              <td class="involve-table"><input type="range" id="{8}" value="0" min="0" max="10"></td>
+            </tr>
+          </table>
+        </form>
+        </div>\n""".format(data_type, used_values,
                               '{0:.3f}'.format(correl),
                               '{0:.3f}'.format(q_value),
                               '{0:.3f}'.format(rmsd),
                                corr_graph_name, graph_name,
-                               mod_corr_graph_name))
+                               mod_corr_graph_name, input_id))
     else:
         html.write("""
+        <table class="result_table">
+          <tbody>
             <tr>
             <td><table class="values_table">
             <tr><td><strong>{0}</strong></td><td></td></tr>
@@ -182,58 +242,71 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
             </table></td>
             <td><img width="270" src="{5}"></td>
             <td><img width="450" src="{6}"></td>
-            </tr>\n""".format(data_type, used_values,
+            </tr>
+          </tbody>
+        </table>\n
+        <div class="involve involve-result">
+        <form oninput="x.value=parseInt({7}.value)">
+          <table class="selection-table">
+            <tr>
+              <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+              <td class="involve-table" style="width: 48px;"><output name="x" for="{7}">0</output></td>
+              <td class="involve-table"><input type="range" id="{7}" value="0" min="0" max="10"></td>
+            </tr>
+          </table>
+        </form>
+        </div>\n""".format(data_type, used_values,
                               '{0:.3f}'.format(correl),
                               '{0:.3f}'.format(q_value),
                               '{0:.3f}'.format(rmsd),
-                               corr_graph_name, graph_name))
+                               corr_graph_name, graph_name, input_id))
 
     html.close()
 
 
-def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
-                     corr_graph_name, graph_name, mod_corr_graph_name=None):
-    html = path + "result_sheet.html"
-    html = open(html, 'a')
+# def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
+#                      corr_graph_name, graph_name, mod_corr_graph_name=None):
+#     html = path + "result_sheet.html"
+#     html = open(html, 'a')
 
-    if mod_corr_graph_name:
-      html.write("""
-            <tr>
-            <td><table class="values_table">
-            <tr><td><strong>{0}</strong></td><td></td></tr>
-            <tr><td>Values:</td><td>{1}</td></tr>
-            <tr><td>Correlation:</td><td>{2}</td></tr>
-            <tr><td>Q-factor:</td><td>{3} %</td></tr>
-            <tr><td>RMSD:</td><td>{4}</td></tr>
-            </table></td>
-            <td><img width="270" src="{5}"></td>
-            <td><img width="450" src="{6}"></td>
-            <td><img width="270" src="{7}"></td>
-            </tr>\n""".format(data_type, used_values,
-                              '{0:.3f}'.format(correl),
-                              '{0:.3f}'.format(q_value),
-                              '{0:.3f}'.format(rmsd),
-                               corr_graph_name, graph_name,
-                               mod_corr_graph_name))
-    else:
-        html.write("""
-            <tr>
-            <td><table class="values_table">
-            <tr><td><strong>{0}</strong></td><td></td></tr>
-            <tr><td>Values:</td><td>{1}</td></tr>
-            <tr><td>Correlation:</td><td>{2}</td></tr>
-            <tr><td>Q-factor:</td><td>{3} %</td></tr>
-            <tr><td>RMSD:</td><td>{4}</td></tr>
-            </table></td>
-            <td><img width="270" src="{5}"></td>
-            <td><img width="450" src="{6}"></td>
-            </tr>\n""".format(data_type, used_values,
-                              '{0:.3f}'.format(correl),
-                              '{0:.3f}'.format(q_value),
-                              '{0:.3f}'.format(rmsd),
-                               corr_graph_name, graph_name))
+#     if mod_corr_graph_name:
+#       html.write("""
+#             <tr>
+#             <td><table class="values_table">
+#             <tr><td><strong>{0}</strong></td><td></td></tr>
+#             <tr><td>Values:</td><td>{1}</td></tr>
+#             <tr><td>Correlation:</td><td>{2}</td></tr>
+#             <tr><td>Q-factor:</td><td>{3} %</td></tr>
+#             <tr><td>RMSD:</td><td>{4}</td></tr>
+#             </table></td>
+#             <td><img width="270" src="{5}"></td>
+#             <td><img width="450" src="{6}"></td>
+#             <td><img width="270" src="{7}"></td>
+#             </tr>\n""".format(data_type, used_values,
+#                               '{0:.3f}'.format(correl),
+#                               '{0:.3f}'.format(q_value),
+#                               '{0:.3f}'.format(rmsd),
+#                                corr_graph_name, graph_name,
+#                                mod_corr_graph_name))
+#     else:
+#         html.write("""
+#             <tr>
+#             <td><table class="values_table">
+#             <tr><td><strong>{0}</strong></td><td></td></tr>
+#             <tr><td>Values:</td><td>{1}</td></tr>
+#             <tr><td>Correlation:</td><td>{2}</td></tr>
+#             <tr><td>Q-factor:</td><td>{3} %</td></tr>
+#             <tr><td>RMSD:</td><td>{4}</td></tr>
+#             </table></td>
+#             <td><img width="270" src="{5}"></td>
+#             <td><img width="450" src="{6}"></td>
+#             </tr>\n""".format(data_type, used_values,
+#                               '{0:.3f}'.format(correl),
+#                               '{0:.3f}'.format(q_value),
+#                               '{0:.3f}'.format(rmsd),
+#                                corr_graph_name, graph_name))
 
-    html.close()
+#     html.close()
 
 
 def write_bottom_table(path, NOE_violations, PRIDE_data):
@@ -281,6 +354,9 @@ def close_HTML(path):
     html.write("""
   </div>
 </div>
+<script src="../../public/_include/js/jquery.js"></script>
+<script src="../../public/_include/js/bootstrap.js"></script>
+<script src="../../public/_include/js/involve.js"></script>
 </body>
 </html>""")
 

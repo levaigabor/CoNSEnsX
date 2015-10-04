@@ -70,7 +70,9 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
 
             csx_out.writeRDC_data(my_path, RDC_type, len(RDC_dict[RDC_type]),
                                   correl, q_value, rmsd,
-                                  corr_graph_name, graph_name, mod_corr_graph_name)
+                                  corr_graph_name, graph_name,
+                                  mod_corr_graph_name,
+                                  "RDC_" + str(list_num + 1) + "_" + RDC_type)
 
         os.remove(pales_out)
         csx_out.writeRDC_table_close(my_path)
@@ -110,7 +112,7 @@ def calcS2(S2_dict, my_path, args):
         csx_out.write_table_data(my_path, S2_type,
                                  len(S2_dict[S2_type]),
                                  correl, q_value, rmsd,
-                                 corr_graph_name, graph_name)
+                                 corr_graph_name, graph_name, "S2_" + S2_type)
 
     csx_out.write_table_close(my_path)
 
@@ -311,7 +313,9 @@ def calcJCouplings(param_set, Jcoup_dict, my_PDB, my_path):
         csx_out.write_table_data(my_path, Jcoup_type,
                                  len(Jcoup_dict[Jcoup_type]),
                                  correl, q_value, rmsd,
-                                 corr_graph_name, graph_name, mod_corr_graph_name)
+                                 corr_graph_name, graph_name,
+                                 "JC_" + Jcoup_type,
+                                 mod_corr_graph_name)
 
     csx_out.write_table_close(my_path)
 
@@ -375,7 +379,7 @@ def calcChemShifts(ChemShift_lists, pdb_models, my_path):
             csx_out.writeRDC_data(my_path, CS_type, len(CS_list[CS_type]),
                                   correl, q_value, rmsd,
                                   corr_graph_name, graph_name,
-                                  mod_corr_graph_name)
+                                  mod_corr_graph_name, "CS_" + CS_type)
 
     csx_out.writeRDC_table_close(my_path)
 
