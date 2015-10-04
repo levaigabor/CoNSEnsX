@@ -2,6 +2,7 @@ csx_gui/csx_gtk.glade~
 *.pickle
 .config
 .prevPDBhash
+.prevSTRhash
 HHDB
 *.pdb
 *.str
