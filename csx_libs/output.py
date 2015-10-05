@@ -309,7 +309,7 @@ def close_HTML(path):
   </div>
 </div>
 <script src="../../public/_include/js/jquery.js"></script>
-<script src="../../public/_include/js/bootstrap.js"></script>
+<script src="../../public/_include/js/bootstrap.min.js"></script>
 <script src="../../public/_include/js/involve.js"></script>
 </body>
 </html>""")
