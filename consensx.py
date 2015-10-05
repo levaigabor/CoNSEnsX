@@ -139,16 +139,16 @@ print("total runtime", te-ts)
 print("Your ID was: \033[0;35m" + my_id + "\033[0m")
 
 
-user_sel = [
-    #["RDC", 1, "0_C_CA", 0.5],
-    ["RDC", 1, "0_N_H", 0.5],
-    #["S2", "N", 0.25],
-    ["JCoup", "3JHNHA", 0.5],
-    ["ChemShift", "CA", 0.9]
-]
+# user_sel = [
+#     #["RDC", 1, "0_C_CA", 0.5],
+#     ["RDC", 1, "0_N_H", 0.5],
+#     #["S2", "N", 0.25],
+#     ["JCoup", "3JHNHA", 0.5],
+#     ["ChemShift", "CA", 0.9]
+# ]
 
-csx_sel.selection_on("RDC", "correlation", pdb_models, RDC_lists, user_sel,
-                     args=args, S2_dict=S2_dict, Jcoup_dict=Jcoup_dict,
-                     ChemShifts=ChemShift_lists,
-                     S2_type="N", overdrive=2)
+# csx_sel.selection_on("RDC", "correlation", pdb_models, RDC_lists, user_sel,
+#                      args=args, S2_dict=S2_dict, Jcoup_dict=Jcoup_dict,
+#                      ChemShifts=ChemShift_lists,
+#                      S2_type="N", overdrive=2)
 

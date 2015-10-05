@@ -153,7 +153,7 @@ def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
       <form oninput="x.value=parseInt({8}.value)">
         <table class="selection-table">
           <tr>
-            <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+            <td class="involve-table"><label>Involve with weight:</label></td>
             <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
             <td class="involve-table"><input type="range" class="inputrange" id="{8}" value="0" min="0" max="10"></td>
           </tr>
@@ -215,7 +215,7 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
         <form oninput="x.value=parseInt({8}.value)">
           <table class="selection-table">
             <tr>
-              <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+              <td class="involve-table"><label>Involve with weight:</label></td>
               <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
               <td class="involve-table"><input type="range" class="inputrange" id="{8}" value="0" min="0" max="10"></td>
             </tr>
@@ -248,7 +248,7 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
         <form oninput="x.value=parseInt({7}.value)">
           <table class="selection-table">
             <tr>
-              <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
+              <td class="involve-table"><label>Involve with weight:</label></td>
               <td class="involve-table" style="width: 48px;"><output name="x" for="{7}">0</output></td>
               <td class="involve-table"><input type="range" class="inputrange" id="{7}" value="0" min="0" max="10"></td>
             </tr>
