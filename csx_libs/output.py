@@ -85,15 +85,15 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
         <div class="btn-group group1" data-toggle="buttons">
 
           <label class="btn btn-primary">
-            <input type="radio" class="options" value="correlation" > correlation
+            <input type="radio" name="measures" class="options" value="correlation" > correlation
           </label>
 
           <label class="btn btn-primary">
-            <input type="radio" class="options" value="q-value" > Q-value
+            <input type="radio" name="measures" class="options" value="q-value" > Q-value
           </label>
 
           <label class="btn btn-primary">
-            <input type="radio" class="options" value="rmsd" > RMSD
+            <input type="radio" name="measures" class="options" value="rmsd" > RMSD
           </label>
 
         </div>
