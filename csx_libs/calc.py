@@ -72,7 +72,10 @@ def calcRDC(RDC_lists, pdb_models, my_path, args):
                                   correl, q_value, rmsd,
                                   corr_graph_name, graph_name,
                                   mod_corr_graph_name,
-                                  "RDC_" + str(list_num + 1) + "_" + RDC_type)
+                                  "RDC_" + str(list_num + 1) + "_" +
+                                  # remove underscores from identifier!
+                                  "".join(RDC_type.split('_'))
+                                  )
 
         os.remove(pales_out)
         csx_out.writeRDC_table_close(my_path)

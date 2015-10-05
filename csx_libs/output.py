@@ -85,18 +85,19 @@ def writeFileTable(path, args, my_PDB, my_id, PDP_model_num,
         <div class="btn-group group1" data-toggle="buttons">
 
           <label class="btn btn-primary">
-            <input type="radio" name="options" id="option1" autocomplete="off"> correlation
+            <input type="radio" class="options" value="correlation" > correlation
           </label>
 
           <label class="btn btn-primary">
-            <input type="radio" name="options" id="option2" autocomplete="off"> Q-value
+            <input type="radio" class="options" value="q-value" > Q-value
           </label>
 
           <label class="btn btn-primary">
-            <input type="radio" name="options" id="option3" autocomplete="off"> RMSD
+            <input type="radio" class="options" value="rmsd" > RMSD
           </label>
+
         </div>
-        <button class="btn btn-primary" id="startsel" type="button">
+        <button class="btn btn-primary" id="startsel" type="button" onclick="myFunction()">
           Start selection
         </button>
       </div>
@@ -154,7 +155,7 @@ def writeRDC_data(path, RDC_type, used_values, correl, q_value, rmsd,
           <tr>
             <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
             <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
-            <td class="involve-table"><input type="range" id="{8}" value="0" min="0" max="10"></td>
+            <td class="involve-table"><input type="range" class="inputrange" id="{8}" value="0" min="0" max="10"></td>
           </tr>
         </table>
       </form>
@@ -216,7 +217,7 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
             <tr>
               <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
               <td class="involve-table" style="width: 48px;"><output name="x" for="{8}">0</output></td>
-              <td class="involve-table"><input type="range" id="{8}" value="0" min="0" max="10"></td>
+              <td class="involve-table"><input type="range" class="inputrange" id="{8}" value="0" min="0" max="10"></td>
             </tr>
           </table>
         </form>
@@ -249,7 +250,7 @@ def write_table_data(path, data_type, used_values, correl, q_value, rmsd,
             <tr>
               <td class="involve-table"><label for="myslider">Involve with weight:</label></td>
               <td class="involve-table" style="width: 48px;"><output name="x" for="{7}">0</output></td>
-              <td class="involve-table"><input type="range" id="{7}" value="0" min="0" max="10"></td>
+              <td class="involve-table"><input type="range" class="inputrange" id="{7}" value="0" min="0" max="10"></td>
             </tr>
           </table>
         </form>
