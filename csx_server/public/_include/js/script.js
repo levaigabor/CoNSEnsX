@@ -15,9 +15,15 @@ $(document).ready(function() {
         var hasBothPDB = ($('#pdb_file').val() != "" ) && ($('#pdb_id').val() != "" );
 
         if (hasBothPDB) {
-            alert("Please deselect one of the PDF inputs");
+            alert("Please deselect one of the PDB inputs");
+            return false;
         }
 
+        $("#collapseOne").collapse('hide');
+        $("#collapseTwo").collapse('hide');
+        $("#collapseThird").collapse('hide');
+        $(".loader").toggleClass('hidden');
+        $(".loader_text").toggleClass('hidden');
     });
 
     $('#fit_box').change(function() {

@@ -49,7 +49,7 @@
             	<h3 class="spec">Start calculation</h3>
 
         		<div class="accordion" id="accordionArea">
-                    <form name="myform" action="/" method="post" enctype="multipart/form-data">
+                    <form name="myform" action="csx_form.php" method="post" enctype="multipart/form-data">
                     <table  border="0">
                         <tr class="form_param"><td>PDB file: &nbsp;</td>
                             <td><input id="pdb_file" name="pdb_upload" size="20" type="file"></td>
@@ -97,7 +97,7 @@
 
                     <div class="accordion-group">
                         <div class="accordion-heading togglize">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseOne">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#toggleArea" href="#collapseOne">
                                 Usage
                                 <span class="font-icon-plus"></span>
                                 <span class="font-icon-minus"></span>
@@ -118,7 +118,7 @@
 
                     <div class="accordion-group">
                         <div class="accordion-heading togglize">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseTwo">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#toggleArea" href="#collapseTwo">
                             Citing
                             <span class="font-icon-plus"></span>
                             <span class="font-icon-minus"></span>
@@ -143,7 +143,7 @@
 
                     <div class="accordion-group">
                         <div class="accordion-heading togglize">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#" href="#collapseThird">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#toggleArea" href="#collapseThird">
                             Contact
                             <span class="font-icon-plus"></span>
                             <span class="font-icon-minus"></span>
@@ -156,6 +156,16 @@
                                 (szpari at chem.elte.hu)
                             </div>
                         </div>
+                    </div>
+                    <div class="loader hidden">
+                      <div class="box"></div>
+                      <div class="box"></div>
+                      <div class="box"></div>
+                      <div class="box"></div>
+                    </div>
+                    <div class="loader_text hidden">
+                        <h3 class="spec">Calculation in progress</h3>
+                        <p>You will be redirected automatically</p>
                     </div>
 
                 </div>
