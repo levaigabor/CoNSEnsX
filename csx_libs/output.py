@@ -1,20 +1,13 @@
-import time
 import os
 
-date = time.strftime("%a %d. %b %X %Z %Y")
+abspath = os.path.abspath(__file__)
+dirname = os.path.dirname(abspath)
 
+csx_server_path = os.path.abspath(
+    os.path.join(os.path.dirname( __file__ ), '..', 'csx_server')
+)
 
-def writeHeaderTXT(path, args, version):
-    txt = path +"result_sheet.txt"
-    txt = open(txt, 'w')
-
-    txt.write("CoNSEnsX version " + version + " started on " + date + "\n")
-    txt.write("========================================================\n")
-    txt.write("Input files specified:" +
-                   "\n\tPDB file: "                 + args.PDB_file +
-                   "\n\tX-PLOR restraint file: "    + args.XPLOR_file +
-                   "\n\tBMRB file: "                + args.STR_file + "\n\n")
-
+csx_server_path += '/'
 
 def writeHeaderHTML(path, version):
     html = path + "result_sheet.html"
@@ -28,11 +21,11 @@ def writeHeaderHTML(path, version):
   <title>CoNSENsX result sheet</title>
   <meta name="description" content="COmpliance of NMR Structural
                                     ENSembles with eXperimental data" />
-  <link href="../../public/_include/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../public/_include/css/style.css" rel="stylesheet">
-  <link href="../../public/_include/css/main.css" rel="stylesheet">
+  <link href="{0}public/_include/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{0}public/_include/css/style.css" rel="stylesheet">
+  <link href="{0}public/_include/css/main.css" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
-</head>""")
+</head>""".format(csx_server_path))
 
     html.close()
 
@@ -308,10 +301,10 @@ def close_HTML(path):
     html.write("""
   </div>
 </div>
-<script src="../../public/_include/js/jquery.js"></script>
-<script src="../../public/_include/js/bootstrap.min.js"></script>
-<script src="../../public/_include/js/involve.js"></script>
+<script src="{0}public/_include/js/jquery.js"></script>
+<script src="{0}public/_include/js/bootstrap.min.js"></script>
+<script src="{0}public/_include/js/involve.js"></script>
 </body>
-</html>""")
+</html>""".format(csx_server_path))
 
     html.close()
