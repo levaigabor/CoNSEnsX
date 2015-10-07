@@ -7,6 +7,9 @@ You find the current working (Perl) version [here](http://himalia.chem.elte.hu/c
 
 #### I/O modifications:
 
+#### Server side
+* New PHP server side
+
 ##### Client side
 * Completely rewritten HTML5 client side
 * JavaScript form checking in client side
