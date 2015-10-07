@@ -97,9 +97,10 @@ def getID(args):
     return my_id, my_path
 
 
-def check_3rd_party():
-    if os.path.isfile(".config"):
-        ThirdParty.get_thirdparty(".config")
+def check_3rd_party(install_dir):
+    config_file_name = install_dir + "/.config"
+    if os.path.isfile(config_file_name):
+        ThirdParty.get_thirdparty(config_file_name)
     else:
         init_conf = (
             "# CoNSEnsX config file\n" +

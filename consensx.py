@@ -31,7 +31,10 @@ version = 0.4
 
 ts = time.time()
 
-csx_func.check_3rd_party()
+abspath = os.path.abspath(__file__)
+dirname = os.path.dirname(abspath)
+
+csx_func.check_3rd_party(dirname)
 
 #------------------  Setting up parser and parse CLI arguments  ---------------#
 parser = csx_parser.createParser()            # get parser from module
