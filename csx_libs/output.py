@@ -1,11 +1,4 @@
-import os
-
-abspath = os.path.abspath(__file__)
-dirname = os.path.dirname(abspath)
-
-csx_server_path = os.path.abspath(
-    os.path.join(os.path.dirname( __file__ ), '..', 'csx_server')
-)
+csx_server_path = "http://consensx.itk.ppke.hu/public/_include/"
 
 csx_server_path += '/'
 
@@ -21,11 +14,11 @@ def writeHeaderHTML(path, version):
   <title>CoNSENsX result sheet</title>
   <meta name="description" content="COmpliance of NMR Structural
                                     ENSembles with eXperimental data" />
-  <link href="{0}public/_include/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{0}public/_include/css/style.css" rel="stylesheet">
-  <link href="{0}public/_include/css/main.css" rel="stylesheet">
+  <link href="http://consensx.itk.ppke.hu/public/_include/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://consensx.itk.ppke.hu/public/_include/css/style.css" rel="stylesheet">
+  <link href="http://consensx.itk.ppke.hu/public/_include/css/main.css" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,200italic,300,300italic,400italic,600,600italic,700,700italic,900' rel='stylesheet' type='text/css'>
-</head>""".format(csx_server_path))
+</head>""")
 
     html.close()
 
@@ -301,10 +294,10 @@ def close_HTML(path):
     html.write("""
   </div>
 </div>
-<script src="{0}public/_include/js/jquery.js"></script>
-<script src="{0}public/_include/js/bootstrap.min.js"></script>
-<script src="{0}public/_include/js/involve.js"></script>
+<script src="http://consensx.itk.ppke.hu/public/_include/js/jquery.js"></script>
+<script src="http://consensx.itk.ppke.hu/public/_include/js/bootstrap.min.js"></script>
+<script src="http://consensx.itk.ppke.hu/public/_include/js/involve.js"></script>
 </body>
-</html>""".format(csx_server_path))
+</html>""")
 
     html.close()
